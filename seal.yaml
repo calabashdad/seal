@@ -1,0 +1,4 @@
+---
+rtmp:
+  listen: 1935
+  timeout: 30
