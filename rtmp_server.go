@@ -8,13 +8,13 @@ import (
 
 type RtmpSession struct {
 	net.Conn
-	chunks map[uint32]ChunkStruct
+	chunks map[uint32]*ChunkStruct
 }
 
 func NewRtmpSession(c net.Conn) *RtmpSession {
 	return &RtmpSession{
 		Conn:   c,
-		chunks: make(map[uint32]ChunkStruct),
+		chunks: make(map[uint32]*ChunkStruct),
 	}
 }
 
