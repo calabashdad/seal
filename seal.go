@@ -46,7 +46,11 @@ func main() {
 	err := g_conf_info.Loads(*conf_file)
 	if err != nil {
 		log.Println("conf loads failed.err=", err)
-		return
+
+		//load conf file failed. use default config.
+		g_conf_info.Default()
+	} else {
+		log.Println("load conf file success, conf=", g_conf_info)
 	}
 
 	g_wg.Add(1)

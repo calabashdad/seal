@@ -36,7 +36,7 @@ var (
 	handshakeServerPartialKey = handshakeServerFullKey[:36]
 )
 
-func (rtmp *RtmpConn) HandShake() (err error) {
+func (rtmp *RtmpSession) HandShake() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
@@ -49,15 +49,9 @@ func (rtmp *RtmpConn) HandShake() (err error) {
 	c1 := handshakeData[1:1537]
 	c2 := handshakeData[1537:3073]
 
-	_ = c2 //todo.
-
 	s0 := handshakeData[3073:3074]
 	s1 := handshakeData[3074:4610]
 	s2 := handshakeData[4610:6146]
-
-	_ = s0
-	_ = s1
-	_ = s2 //todo.
 
 	c0c1 := handshakeData[0:1537]
 	s0s1s2 := handshakeData[3073:6146]
@@ -105,6 +99,8 @@ func (rtmp *RtmpConn) HandShake() (err error) {
 		return
 	}
 
+	//c2 do not need verify.
+
 	return
 }
 
@@ -136,7 +132,7 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 
 	//create s1
 	serverTime := clientTime
-	serverVer := uint32(0x0d0e0a0d)
+	serverVer := uint32(0x0a0b0c0d)
 	binary.BigEndian.PutUint32(s1[0:4], serverTime)
 	binary.BigEndian.PutUint32(s1[4:8], serverVer)
 	for {

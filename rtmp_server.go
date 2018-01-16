@@ -6,12 +6,16 @@ import (
 	"net"
 )
 
-type RtmpConn struct {
+type RtmpSession struct {
 	net.Conn
+	chunks map[uint32]ChunkStruct
 }
 
-func NewRtmpConn(c net.Conn) *RtmpConn {
-	return &RtmpConn{c}
+func NewRtmpSession(c net.Conn) *RtmpSession {
+	return &RtmpSession{
+		Conn:   c,
+		chunks: make(map[uint32]ChunkStruct),
+	}
 }
 
 func StartRtmpServer() {
@@ -38,8 +42,8 @@ func StartRtmpServer() {
 			break
 		}
 
-		rtmpConn := NewRtmpConn(netconn)
+		rtmpConn := NewRtmpSession(netconn)
 
-		go HandleRtmpConn(rtmpConn)
+		go HandleRtmpSession(rtmpConn)
 	}
 }

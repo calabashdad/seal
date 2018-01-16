@@ -21,6 +21,7 @@ func (t *ConfInfo) Loads(c string) (err error) {
 		if err := recover(); err != nil {
 			log.Println(err)
 		}
+
 	}()
 
 	var f *os.File
@@ -43,4 +44,9 @@ func (t *ConfInfo) Loads(c string) (err error) {
 	}
 
 	return nil
+}
+
+func (t *ConfInfo) Default() {
+	t.Rtmp.Listen = "1935"
+	t.Rtmp.TimeOut = 30
 }
