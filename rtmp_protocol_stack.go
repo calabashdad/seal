@@ -84,3 +84,7 @@ const (
 const (
 	RTMP_EXTENDED_TIMESTAMP = 0xFFFFFF
 )
+
+const (
+	RTMP_DEFAULT_CHUNK_SIZE = 128
+)

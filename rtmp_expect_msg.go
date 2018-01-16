@@ -1,6 +1,7 @@
 package main
 
 import (
+	"UtilsTools/identify_panic"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -10,21 +11,29 @@ type ChunkStruct struct {
 	chunkFmt uint8
 	csId     uint32
 	//msg count of this chunk
-	msgCount      uint32
+	msgCount      uint64
 	msgHeaderSize uint32
 	msgHeader     struct {
 		timestampDelta uint32
-		timestamp      uint32
+		timestamp      uint64
 		msgLength      uint32
 		msgTypeid      uint8
 		msgStreamId    uint32
 	}
 	hasExtendTimestamp bool
+	extendTimeStamp    uint32
 	msgPayload         []uint8
 	msgPayloadSize     uint32
+
+	chunkSize uint32 //default is RTMP_DEFAULT_CHUNK_SIZE.
 }
 
 func (rtmp *RtmpSession) ExpectMsg() (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, "-", identify_panic.IdentifyPanic())
+		}
+	}()
 
 	for {
 
@@ -56,10 +65,14 @@ func (rtmp *RtmpSession) ExpectMsg() (err error) {
 
 		chunk, ok := rtmp.chunks[csid]
 		if !ok {
-			chunk = ChunkStruct{}
-			chunk.chunkFmt = chunk_fmt
+			chunk = ChunkStruct{
+				chunkSize: RTMP_DEFAULT_CHUNK_SIZE,
+			}
 		}
+
+		chunk.chunkFmt = chunk_fmt
 		chunk.csId = csid
+
 		rtmp.chunks[csid] = chunk
 
 		//read message header
@@ -114,7 +127,7 @@ func (rtmp *RtmpSession) ExpectMsg() (err error) {
 			} else {
 				chunk.hasExtendTimestamp = false
 				// For a type-0 chunk, the absolute timestamp of the message is sent here.
-				chunk.msgHeader.timestamp = chunk.msgHeader.timestampDelta
+				chunk.msgHeader.timestamp = uint64(chunk.msgHeader.timestampDelta)
 			}
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
@@ -134,7 +147,7 @@ func (rtmp *RtmpSession) ExpectMsg() (err error) {
 				chunk.hasExtendTimestamp = true
 			} else {
 				chunk.hasExtendTimestamp = false
-				chunk.msgHeader.timestamp += chunk.msgHeader.timestampDelta
+				chunk.msgHeader.timestamp += uint64(chunk.msgHeader.timestampDelta)
 			}
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
@@ -152,17 +165,54 @@ func (rtmp *RtmpSession) ExpectMsg() (err error) {
 				chunk.hasExtendTimestamp = true
 			} else {
 				chunk.hasExtendTimestamp = false
-				chunk.msgHeader.timestamp += chunk.msgHeader.timestampDelta
+				chunk.msgHeader.timestamp += uint64(chunk.msgHeader.timestampDelta)
 			}
 		case RTMP_FMT_TYPE3:
-			// update the timestamp even fmt=3 for first chunk packet.
+			// update the timestamp even fmt=3 for first chunk packet. the same with previous.
 			if 0 == chunk.msgPayloadSize && !chunk.hasExtendTimestamp {
-				chunk.msgHeader.timestamp += chunk.msgHeader.timestampDelta
+				chunk.msgHeader.timestamp += uint64(chunk.msgHeader.timestampDelta)
 			}
 		}
 
 		if err != nil {
 			break
+		}
+
+		//read extend timestamp
+		if chunk.hasExtendTimestamp {
+			var buf [4]uint8
+			err = rtmp.ExpectBytes(4, buf[:])
+			if err != nil {
+				break
+			}
+
+			extendTimeStamp := binary.BigEndian.Uint32(buf[0:4])
+
+			// always use 31bits timestamp, for some server may use 32bits extended timestamp.
+			extendTimeStamp &= 0x7fffffff
+
+			chunkTimeStamp := chunk.msgHeader.timestamp
+			if 0 == chunk.msgPayloadSize || 0 == chunkTimeStamp {
+				chunk.msgHeader.timestamp = uint64(extendTimeStamp)
+			}
+
+			//because of the flv file format is lower 24bits, and higher 8bit is SI32, so timestamp is
+			//31bit.
+			chunk.msgHeader.timestamp &= 0x7fffffff
+
+		}
+
+		chunk.msgCount++
+
+		//make cache of msg
+		if 0 == len(chunk.msgPayload) {
+			chunk.msgPayload = make([]uint8, chunk.msgHeader.msgLength)
+		}
+
+		//read chunk data
+		remainPayloadSize := chunk.msgHeader.msgLength - chunk.msgPayloadSize
+		if remainPayloadSize > RTMP_DEFAULT_CHUNK_SIZE {
+			remainPayloadSize = RTMP_DEFAULT_CHUNK_SIZE
 		}
 
 	}
