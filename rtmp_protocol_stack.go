@@ -88,3 +88,143 @@ const (
 const (
 	RTMP_DEFAULT_CHUNK_SIZE = 128
 )
+
+const (
+	/**
+	3. Types of messages
+	The server and the client send messages over the network to
+	communicate with each other. The messages can be of any type which
+	includes audio messages, video messages, command messages, shared
+	object messages, data messages, and user control messages.
+	3.1. Command message
+	Command messages carry the AMF-encoded commands between the client
+	and the server. These messages have been assigned message type value
+	of 20 for AMF0 encoding and message type value of 17 for AMF3
+	encoding. These messages are sent to perform some operations like
+	connect, createStream, publish, play, pause on the peer. Command
+	messages like onstatus, result etc. are used to inform the sender
+	about the status of the requested commands. A command message
+	consists of command name, transaction ID, and command object that
+	contains related parameters. A client or a server can request Remote
+	Procedure Calls (RPC) over streams that are communicated using the
+	command messages to the peer.
+	*/
+
+	RTMP_MSG_AMF3CommandMessage = 17 // 0x11
+	RTMP_MSG_AMF0CommandMessage = 20 // 0x14
+
+	/**
+	3.2. Data message
+	The client or the server sends this message to send Metadata or any
+	user data to the peer. Metadata includes details about the
+	data(audio, video etc.) like creation time, duration, theme and so
+	on. These messages have been assigned message type value of 18 for
+	AMF0 and message type value of 15 for AMF3.
+	*/
+
+	RTMP_MSG_AMF0DataMessage = 18 // 0x12
+	RTMP_MSG_AMF3DataMessage = 15 // 0x0F
+)
+
+const (
+	/**
+	5. Protocol Control Messages
+	RTMP reserves message type IDs 1-7 for protocol control messages.
+	These messages contain information needed by the RTM Chunk Stream
+	protocol or RTMP itself. Protocol messages with IDs 1 & 2 are
+	reserved for usage with RTM Chunk Stream protocol. Protocol messages
+	with IDs 3-6 are reserved for usage of RTMP. Protocol message with ID
+	7 is used between edge server and origin server.
+	*/
+	RTMP_MSG_SetChunkSize               = 0x01
+	RTMP_MSG_AbortMessage               = 0x02
+	RTMP_MSG_Acknowledgement            = 0x03
+	RTMP_MSG_UserControlMessage         = 0x04
+	RTMP_MSG_WindowAcknowledgementSize  = 0x05
+	RTMP_MSG_SetPeerBandwidth           = 0x06
+	RTMP_MSG_EdgeAndOriginServerCommand = 0x07
+)
+
+const (
+	// AMF0 marker
+	RTMP_AMF0_Number      = 0x00
+	RTMP_AMF0_Boolean     = 0x01
+	RTMP_AMF0_String      = 0x02
+	RTMP_AMF0_Object      = 0x03
+	RTMP_AMF0_MovieClip   = 0x04 // reserved, not supported
+	RTMP_AMF0_Null        = 0x05
+	RTMP_AMF0_Undefined   = 0x06
+	RTMP_AMF0_Reference   = 0x07
+	RTMP_AMF0_EcmaArray   = 0x08
+	RTMP_AMF0_ObjectEnd   = 0x09
+	RTMP_AMF0_StrictArray = 0x0A
+	RTMP_AMF0_Date        = 0x0B
+	RTMP_AMF0_LongString  = 0x0C
+	RTMP_AMF0_UnSupported = 0x0D
+	RTMP_AMF0_RecordSet   = 0x0E // reserved, not supported
+	RTMP_AMF0_XmlDocument = 0x0F
+	RTMP_AMF0_TypedObject = 0x10
+	// AVM+ object is the AMF3 object.
+	RTMP_AMF0_AVMplusObject = 0x11
+	// origin array whos data takes the same form as LengthValueBytes
+	RTMP_AMF0_OriginStrictArray = 0x20
+
+	// User defined
+	RTMP_AMF0_Invalid = 0x3F
+)
+
+const (
+	/**
+	 * amf0 command message, command name macros
+	 */
+	RTMP_AMF0_COMMAND_CONNECT          = "connect"
+	RTMP_AMF0_COMMAND_CREATE_STREAM    = "createStream"
+	RTMP_AMF0_COMMAND_CLOSE_STREAM     = "closeStream"
+	RTMP_AMF0_COMMAND_PLAY             = "play"
+	RTMP_AMF0_COMMAND_PAUSE            = "pause"
+	RTMP_AMF0_COMMAND_ON_BW_DONE       = "onBWDone"
+	RTMP_AMF0_COMMAND_ON_STATUS        = "onStatus"
+	RTMP_AMF0_COMMAND_RESULT           = "_result"
+	RTMP_AMF0_COMMAND_ERROR            = "_error"
+	RTMP_AMF0_COMMAND_RELEASE_STREAM   = "releaseStream"
+	RTMP_AMF0_COMMAND_FC_PUBLISH       = "FCPublish"
+	RTMP_AMF0_COMMAND_UNPUBLISH        = "FCUnpublish"
+	RTMP_AMF0_COMMAND_PUBLISH          = "publish"
+	RTMP_AMF0_COMMAND_KEEPLIVE         = "JMS.KeepAlive"
+	RTMP_AMF0_COMMAND_ENABLEVIDEO      = "JMS.EnableVideo"
+	RTMP_AMF0_COMMAND_INSERT_KEYFREAME = "JMS.InsertKeyframe"
+	RTMP_AMF0_DATA_SAMPLE_ACCESS       = "|RtmpSampleAccess"
+	RTMP_AMF0_DATA_SET_DATAFRAME       = "@setDataFrame"
+	RTMP_AMF0_DATA_ON_METADATA         = "onMetaData"
+	RTMP_AMF0_DATA_ON_CUSTOMDATA       = "onCustomData"
+)
+
+const (
+	/**
+	 * band width check method name, which will be invoked by client.
+	 * band width check mothods use SrsBandwidthPacket as its internal packet type,
+	 * so ensure you set command name when you use it.
+	 */
+	// server play control
+	SRS_BW_CHECK_START_PLAY    = "onSrsBandCheckStartPlayBytes"
+	SRS_BW_CHECK_STARTING_PLAY = "onSrsBandCheckStartingPlayBytes"
+	SRS_BW_CHECK_STOP_PLAY     = "onSrsBandCheckStopPlayBytes"
+	SRS_BW_CHECK_STOPPED_PLAY  = "onSrsBandCheckStoppedPlayBytes"
+
+	// server publish control
+	SRS_BW_CHECK_START_PUBLISH    = "onSrsBandCheckStartPublishBytes"
+	SRS_BW_CHECK_STARTING_PUBLISH = "onSrsBandCheckStartingPublishBytes"
+	SRS_BW_CHECK_STOP_PUBLISH     = "onSrsBandCheckStopPublishBytes"
+	// @remark, flash never send out this packet, for its queue is full.
+	SRS_BW_CHECK_STOPPED_PUBLISH = "onSrsBandCheckStoppedPublishBytes"
+
+	// EOF control.
+	// the report packet when check finished.
+	SRS_BW_CHECK_FINISHED = "onSrsBandCheckFinished"
+	// @remark, flash never send out this packet, for its queue is full.
+	SRS_BW_CHECK_FINAL = "finalClientPacket"
+
+	// data packets
+	SRS_BW_CHECK_PLAYING    = "onSrsBandCheckPlaying"
+	SRS_BW_CHECK_PUBLISHING = "onSrsBandCheckPublishing"
+)
