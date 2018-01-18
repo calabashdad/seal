@@ -116,8 +116,8 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 	var serverDigestForS2 []uint8
 	if ok, digest := IsDigestKeyScheme(c1, c1Digest764); !ok {
 		//failed try key-digest scheme
-		c1Digest764 := c1[8+764 : 8+764+764]
-		if ok, digest := IsDigestKeyScheme(c1, c1Digest764); !ok {
+		c1Digest764_2 := c1[8+764 : 8+764+764]
+		if ok, digest := IsDigestKeyScheme(c1, c1Digest764_2); !ok {
 			log.Println("ComplexHandShake verify both digest-key scheme and key-digest failed.")
 			return false
 		} else {

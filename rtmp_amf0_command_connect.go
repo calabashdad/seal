@@ -6,10 +6,10 @@ import (
 )
 
 type Amf0CommandConnectPkg struct {
-	command       string
-	transactionId float64
-	amf0objects   []Amf0Object
-	amfOptional   Amf0Object
+	command        string
+	transactionId  float64
+	commandObjects []Amf0Object
+	amfOptional    Amf0Object
 }
 
 func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error) {
@@ -38,7 +38,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
 	}
 
-	err, connectPkg.amf0objects = Amf0ReadObjects(chunk.msgPayload, &offset)
+	err, connectPkg.commandObjects = Amf0ReadObjects(chunk.msgPayload, &offset)
 	if err != nil {
 		return
 	}
@@ -57,6 +57,17 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 	}
 
 	chunk.decodeResult = connectPkg
+
+	return
+}
+
+func (pkg *Amf0CommandConnectPkg) Amf0ObjectsGetProperty(key string) (value interface{}) {
+
+	for _, v := range pkg.commandObjects {
+		if v.propertyName == key {
+			return v.value
+		}
+	}
 
 	return
 }
