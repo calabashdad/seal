@@ -54,10 +54,6 @@ type RtmpUrlData struct {
 }
 
 //format: rtmp://127.0.0.1:1935/live/test?token=abc123
-//            pos1       pos2 pos3  pos4 pos5
-//format: rtmp://127.0.0.1/live/test?token=abc123
-//            pos1       pos3  pos4 pos5
-
 func (urlData *RtmpUrlData) ParseUrl(url string) (err error) {
 
 	//url is not contain the stream with token.

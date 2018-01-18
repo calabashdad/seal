@@ -75,8 +75,16 @@ func (rtmp *RtmpSession) HandShake() (err error) {
 
 	//use complex handshake, if complex handshake failed, try use simple handshake
 	//parse c1
-	if !ComplexHandShake(c1, s0, s1, s2) {
+	clientVer := binary.BigEndian.Uint32(c1[4:8])
+	if 0 != clientVer {
+		if !ComplexHandShake(c1, s0, s1, s2) {
+			err = fmt.Errorf("0 != clientVer, complex handshake failed.")
+			return
+		}
+	} else {
 		//use simple handshake
+		log.Println("0 == clientVer, client use simple handshake.")
+		s1[0] = 3
 		copy(s1, c2)
 		copy(s2, c1)
 	}
@@ -117,11 +125,11 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 	if ok, digest := IsDigestKeyScheme(c1, c1Digest764); !ok {
 		//failed try key-digest scheme
 		c1Digest764_2 := c1[8+764 : 8+764+764]
-		if ok, digest := IsDigestKeyScheme(c1, c1Digest764_2); !ok {
+		if ok2, digest2 := IsKeyDigestScheme(c1, c1Digest764_2); !ok2 {
 			log.Println("ComplexHandShake verify both digest-key scheme and key-digest failed.")
 			return false
 		} else {
-			serverDigestForS2 = digest
+			serverDigestForS2 = digest2
 		}
 	} else {
 		serverDigestForS2 = digest
@@ -195,6 +203,53 @@ func IsDigestKeyScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint
 	//part1 and part2 is divided by digest data of c1 or s1.
 	part1 := buf[:8+digestLoc]
 	part2 := buf[8+digestLoc+32:]
+
+	h := hmac.New(sha256.New, handshakeClientPartialKey)
+	h.Write(part1)
+	h.Write(part2)
+	calcDigestData := h.Sum(nil)
+
+	if 0 == bytes.Compare(digestData, calcDigestData) {
+		ok = true
+		h := hmac.New(sha256.New, handshakeServerFullKey)
+		h.Write(digestData)
+		digest = h.Sum(nil)
+	} else {
+		ok = false
+	}
+
+	return
+}
+
+func IsKeyDigestScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint8) {
+	// 764bytes key
+	//random-data: (offset)bytes
+	//key-data: 128bytes
+	//random-data: (764-offset-128-4)bytes
+	//offset: 4bytes
+
+	// 764bytes digest
+	//offset: 4bytes (u[0] + u[1] + u[2] + u[3])
+	//random-data: (offset)bytes
+	//digest-data: 32bytes
+	//random-data: (764-4-offset-32)bytes
+
+	var digestOffset uint32
+	for i := 0; i < 4; i++ {
+		digestOffset += uint32(c1Digest764[i])
+	}
+
+	if digestOffset > (764 - 32) {
+		ok = false
+		return
+	}
+
+	digestLoc := 4 + digestOffset
+	digestData := c1Digest764[digestLoc : digestLoc+32]
+
+	//part1 and part2 is divided by digest data of c1 or s1.
+	part1 := buf[:8+764+digestLoc]
+	part2 := buf[8+764+digestLoc+32:]
 
 	h := hmac.New(sha256.New, handshakeClientPartialKey)
 	h.Write(part1)
