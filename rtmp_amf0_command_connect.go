@@ -62,6 +62,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 		}
 	}
 
+	chunk.decodeResultType = "Amf0CommandConnectPkg"
 	chunk.decodeResult = connectPkg
 
 	return

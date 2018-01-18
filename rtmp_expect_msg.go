@@ -31,10 +31,16 @@ type ChunkStruct struct {
 
 	chunkSize uint32 //default is RTMP_DEFAULT_CHUNK_SIZE.
 
-	decodeResult interface{}
+	decodeResultType string
+	decodeResult     interface{}
+
+	ackWindowSize struct {
+		ackWindowSize uint32 //
+		ackedSize     uint64 //size has acked to peer
+	}
 }
 
-func (rtmp *RtmpSession) ExpectMsg() (err error, chunk *ChunkStruct) {
+func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStruct) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())

@@ -11,14 +11,22 @@ import (
 func (rtmp *RtmpSession) Connect() (err error) {
 
 	var chunk *ChunkStruct
-	err, chunk = rtmp.ExpectMsg()
-	if err != nil {
-		return
-	}
+	//todo. should expect what kind msg. if recv not a expected one ,maybe shoule
+	//response it first
+	for {
+		err, chunk = rtmp.RecvMsg()
+		if err != nil {
+			return
+		}
 
-	err = rtmp.DecodeMsg(chunk)
-	if err != nil {
-		return
+		err = rtmp.DecodeMsg(chunk)
+		if err != nil {
+			return
+		}
+
+		if "Amf0CommandConnectPkg" == chunk.decodeResultType {
+			break
+		}
 	}
 
 	connectPkg := chunk.decodeResult.(Amf0CommandConnectPkg)
