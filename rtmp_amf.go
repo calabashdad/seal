@@ -39,20 +39,19 @@ func Amf0ObjectEof(data []uint8, offset *uint32) (res bool) {
 
 func Amf0ReadUtf8(data []uint8, offset *uint32) (err error, value string) {
 	if (uint32(len(data)) - *offset) < 2 {
-		err = fmt.Errorf("Amf0ReadString: 1, data len is not enough")
+		err = fmt.Errorf("Amf0ReadUtf8: 1, data len is not enough")
 		return
 	}
 
 	dataLen := binary.BigEndian.Uint16(data[*offset : *offset+2])
 	*offset += 2
 
-	if dataLen <= 0 {
-		err = fmt.Errorf("Amf0ReadString: dataLen <= 0 ")
+	if (uint32(len(data)) - *offset) < uint32(dataLen) {
+		err = fmt.Errorf("Amf0ReadUtf8: 2, data len is not enough")
 		return
 	}
 
-	if (uint32(len(data)) - *offset) < uint32(dataLen) {
-		err = fmt.Errorf("Amf0ReadString: 2, data len is not enough")
+	if 0 == dataLen {
 		return
 	}
 
@@ -399,7 +398,6 @@ func Amf0Discovery(data []uint8, offset *uint32) (err error, value interface{}, 
 	}
 
 	marker = data[*offset]
-	*offset += 1
 
 	switch marker {
 	case RTMP_AMF0_String:

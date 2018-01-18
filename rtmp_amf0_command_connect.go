@@ -1,6 +1,7 @@
 package main
 
 import (
+	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
 )
@@ -9,10 +10,15 @@ type Amf0CommandConnectPkg struct {
 	command        string
 	transactionId  float64
 	commandObjects []Amf0Object
-	amfOptional    Amf0Object
+	amfOptional    interface{}
 }
 
 func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, "-", identify_panic.IdentifyPanic())
+		}
+	}()
 
 	var connectPkg Amf0CommandConnectPkg
 
@@ -52,7 +58,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 		}
 
 		if RTMP_AMF0_Object == marker {
-			connectPkg.amfOptional = v.(Amf0Object)
+			connectPkg.amfOptional = v
 		}
 	}
 

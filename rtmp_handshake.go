@@ -84,7 +84,7 @@ func (rtmp *RtmpSession) HandShake() (err error) {
 	} else {
 		//use simple handshake
 		log.Println("0 == clientVer, client use simple handshake.")
-		s1[0] = 3
+		s0[0] = 3
 		copy(s1, c2)
 		copy(s2, c1)
 	}
@@ -113,6 +113,11 @@ func (rtmp *RtmpSession) HandShake() (err error) {
 }
 
 func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, "-", identify_panic.IdentifyPanic())
+		}
+	}()
 
 	clientTime := binary.BigEndian.Uint32(c1[0:4])
 	clientVer := binary.BigEndian.Uint32(c1[4:8])

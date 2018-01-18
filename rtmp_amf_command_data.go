@@ -1,8 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"UtilsTools/identify_panic"
+	"fmt"
+	"log"
+)
 
 func (rtmp *RtmpSession) handleAMFCommandAndDataMessage(chunk *ChunkStruct) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, "-", identify_panic.IdentifyPanic())
+		}
+	}()
 
 	var offset uint32
 

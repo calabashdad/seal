@@ -1,6 +1,7 @@
 package main
 
 import (
+	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
 	"strconv"
@@ -55,6 +56,11 @@ type RtmpUrlData struct {
 
 //format: rtmp://127.0.0.1:1935/live/test?token=abc123
 func (urlData *RtmpUrlData) ParseUrl(url string) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, "-", identify_panic.IdentifyPanic())
+		}
+	}()
 
 	//url is not contain the stream with token.
 	var urlTmp string
