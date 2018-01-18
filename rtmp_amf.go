@@ -11,16 +11,27 @@ type Amf0Object struct {
 	value        interface{}
 }
 
+type Amf0EcmaArray struct {
+	count     uint32
+	anyObject []Amf0Object
+}
+
+type Amf0StrictArray struct {
+	count     uint32
+	anyObject []interface{}
+}
+
 //this function do not affect the offset parsed in data.
-func Amf0ObjectEof(data []uint8) (res bool) {
+func Amf0ObjectEof(data []uint8, offset *uint32) (res bool) {
 	if len(data) < 3 {
 		res = false
 		return
 	}
 
-	objectEofFlag := uint32(data[0])<<16 + uint32(data[1])<<8 + uint32(data[2])
-	if 0x09 == objectEofFlag {
+	objectEofFlag := uint32(data[*offset])<<16 + uint32(data[*offset+1])<<8 + uint32(data[*offset+2])
+	if RTMP_AMF0_ObjectEnd == objectEofFlag {
 		res = true
+		*offset += 3
 	}
 
 	return
@@ -53,7 +64,7 @@ func Amf0ReadUtf8(data []uint8, offset *uint32) (err error, value string) {
 
 func Amf0ReadAny(data []uint8, offset *uint32) (err error, value interface{}) {
 
-	if Amf0ObjectEof(data[*offset : *offset+3]) {
+	if Amf0ObjectEof(data, offset) {
 		return
 	}
 
@@ -76,14 +87,13 @@ func Amf0ReadAny(data []uint8, offset *uint32) (err error, value interface{}) {
 	case RTMP_AMF0_Undefined:
 		err = Amf0ReadUndefined(data, offset)
 	case RTMP_AMF0_Object:
-		err, value = Amf0ReadObject(data, offset)
+		err, value = Amf0ReadObjects(data, offset)
 	case RTMP_AMF0_LongString:
 		err, value = Amf0ReadLongString(data, offset)
 	case RTMP_AMF0_EcmaArray:
-		//todo.
+		err, value = Amf0ReadEcmaArray(data, offset)
 	case RTMP_AMF0_StrictArray:
-		//todo.
-
+		err, value = Amf0ReadStrictArray(data, offset)
 	default:
 		err = fmt.Errorf("Amf0ReadAny: unknown marker value, marker=", marker)
 	}
@@ -143,10 +153,10 @@ func Amf0ReadNumber(data []uint8, offset *uint32) (err error, value float64) {
 	return
 }
 
-func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0Object) {
+func Amf0ReadObjects(data []uint8, offset *uint32) (err error, amf0objects []Amf0Object) {
 
 	if (uint32(len(data)) - *offset) < 1 {
-		err = fmt.Errorf("Amf0ReadObject: 0, data len is not enough")
+		err = fmt.Errorf("Amf0ReadObjects: 0, data len is not enough")
 		return
 	}
 
@@ -154,7 +164,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 	*offset += 1
 
 	if RTMP_AMF0_Object != marker {
-		err = fmt.Errorf("error: Amf0ReadObject:RTMP_AMF0_Object != marker")
+		err = fmt.Errorf("error: Amf0ReadObjects:RTMP_AMF0_Object != marker")
 		return
 	}
 
@@ -163,7 +173,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 			break
 		}
 
-		if Amf0ObjectEof(data[*offset : *offset+3]) {
+		if Amf0ObjectEof(data, offset) {
 			break
 		}
 
@@ -285,6 +295,138 @@ func Amf0ReadLongString(data []uint8, offset *uint32) (err error, value string) 
 
 	value = string(data[*offset : *offset+dataLen])
 	*offset += dataLen
+
+	return
+}
+
+func Amf0ReadEcmaArray(data []uint8, offset *uint32) (err error, value Amf0EcmaArray) {
+	if (uint32(len(data)) - *offset) < 1 {
+		err = fmt.Errorf("Amf0ReadEcmaArray: 0, data len is not enough")
+		return
+	}
+
+	marker := data[*offset]
+	*offset += 1
+
+	if RTMP_AMF0_EcmaArray != marker {
+		err = fmt.Errorf("error: Amf0ReadEcmaArray: RTMP_AMF0_EcmaArray != marker")
+		return
+	}
+
+	if (uint32(len(data)) - *offset) < 4 {
+		err = fmt.Errorf("Amf0ReadEcmaArray: 1, data len is not enough")
+		return
+	}
+
+	value.count = binary.BigEndian.Uint32(data[*offset : *offset+4])
+	*offset += 4
+
+	for {
+		if *offset >= uint32(len(data)) {
+			break
+		}
+
+		if Amf0ObjectEof(data, offset) {
+			break
+		}
+
+		var amf Amf0Object
+		err, amf.propertyName = Amf0ReadUtf8(data, offset)
+		if err != nil {
+			break
+		}
+
+		err, amf.value = Amf0ReadAny(data, offset)
+		if err != nil {
+			break
+		}
+
+		value.anyObject = append(value.anyObject, amf)
+	}
+
+	return
+}
+
+func Amf0ReadStrictArray(data []uint8, offset *uint32) (err error, value Amf0StrictArray) {
+	if (uint32(len(data)) - *offset) < 1 {
+		err = fmt.Errorf("Amf0ReadStrictArray: 0, data len is not enough")
+		return
+	}
+
+	marker := data[*offset]
+	*offset += 1
+
+	if RTMP_AMF0_StrictArray != marker {
+		err = fmt.Errorf("Amf0ReadStrictArray: error: RTMP_AMF0_StrictArray != marker")
+		return
+	}
+
+	if (uint32(len(data)) - *offset) < 4 {
+		err = fmt.Errorf("Amf0ReadStrictArray: 1, data len is not enough")
+		return
+	}
+
+	value.count = binary.BigEndian.Uint32(data[*offset : *offset+4])
+	*offset += 4
+
+	for i := 0; uint32(i) < value.count; i++ {
+		if *offset >= uint32(len(data)) {
+			break
+		}
+
+		var obj interface{}
+
+		err, obj = Amf0ReadAny(data, offset)
+		if err != nil {
+			break
+		}
+
+		value.anyObject = append(value.anyObject, obj)
+	}
+
+	return
+}
+
+func Amf0Discovery(data []uint8, offset *uint32) (err error, value interface{}, marker uint8) {
+
+	if Amf0ObjectEof(data, offset) {
+		return
+	}
+
+	if (uint32(len(data)) - *offset) < 1 {
+		err = fmt.Errorf("Amf0Discovery: 0, data len is not enough")
+		return
+	}
+
+	marker = data[*offset]
+	*offset += 1
+
+	switch marker {
+	case RTMP_AMF0_String:
+		err, value = Amf0ReadString(data, offset)
+	case RTMP_AMF0_Boolean:
+		err, value = Amf0ReadBool(data, offset)
+	case RTMP_AMF0_Number:
+		err, value = Amf0ReadNumber(data, offset)
+	case RTMP_AMF0_Null:
+		err = Amf0ReadNull(data, offset)
+	case RTMP_AMF0_Undefined:
+		err = Amf0ReadUndefined(data, offset)
+	case RTMP_AMF0_Object:
+		err, value = Amf0ReadObjects(data, offset)
+	case RTMP_AMF0_LongString:
+		err, value = Amf0ReadLongString(data, offset)
+	case RTMP_AMF0_EcmaArray:
+		err, value = Amf0ReadEcmaArray(data, offset)
+	case RTMP_AMF0_StrictArray:
+		err, value = Amf0ReadStrictArray(data, offset)
+	default:
+		err = fmt.Errorf("Amf0Discovery: unknown marker type, marker=", marker)
+	}
+
+	if err != nil {
+		return
+	}
 
 	return
 }

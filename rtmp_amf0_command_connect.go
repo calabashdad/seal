@@ -9,6 +9,7 @@ type Amf0CommandConnectPkg struct {
 	command       string
 	transactionId float64
 	amf0objects   []Amf0Object
+	amfOptional   Amf0Object
 }
 
 func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error) {
@@ -37,10 +38,25 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
 	}
 
-	err, connectPkg.amf0objects = Amf0ReadObject(chunk.msgPayload, &offset)
+	err, connectPkg.amf0objects = Amf0ReadObjects(chunk.msgPayload, &offset)
 	if err != nil {
 		return
 	}
+
+	if offset < uint32(len(chunk.msgPayload)) {
+		var v interface{}
+		var marker uint8
+		err, v, marker = Amf0Discovery(chunk.msgPayload, &offset)
+		if err != nil {
+			return
+		}
+
+		if RTMP_AMF0_Object == marker {
+			connectPkg.amfOptional = v.(Amf0Object)
+		}
+	}
+
+	chunk.decodeResult = connectPkg
 
 	return
 }

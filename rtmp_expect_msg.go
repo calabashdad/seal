@@ -30,16 +30,16 @@ type ChunkStruct struct {
 	msgPayloadSize uint32
 
 	chunkSize uint32 //default is RTMP_DEFAULT_CHUNK_SIZE.
+
+	decodeResult interface{}
 }
 
-func (rtmp *RtmpSession) ExpectMsg() (err error) {
+func (rtmp *RtmpSession) ExpectMsg() (err error, chunk *ChunkStruct) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
 		}
 	}()
-
-	var chunk *ChunkStruct
 
 	//expect msg.
 	for {
@@ -238,26 +238,6 @@ func (rtmp *RtmpSession) ExpectMsg() (err error) {
 			}
 		}
 
-	}
-
-	//todo. if recv size > window acknowlegement, send a ack message.
-	//todo. handle ctrol messge first.
-
-	//do decode msg.
-	switch chunk.msgHeader.msgTypeid {
-	case RTMP_MSG_AMF3CommandMessage, RTMP_MSG_AMF0CommandMessage, RTMP_MSG_AMF0DataMessage, RTMP_MSG_AMF3DataMessage:
-		err = rtmp.handleAMFCommandAndDataMessage(chunk)
-	case RTMP_MSG_UserControlMessage:
-	case RTMP_MSG_WindowAcknowledgementSize:
-	case RTMP_MSG_SetChunkSize:
-	case RTMP_MSG_SetPeerBandwidth:
-	case RTMP_MSG_Acknowledgement:
-	default:
-		err = fmt.Errorf("unknown chunk.msgHeader.msgTypeid=", chunk.msgHeader.msgTypeid)
-	}
-
-	if err != nil {
-		return
 	}
 
 	return
