@@ -12,9 +12,12 @@ func (rtmp *RtmpSession) ExpectBytes(size uint32, buf []uint8) (err error) {
 		return
 	}
 
-	if _, err = io.ReadFull(rtmp.Conn, buf[:size]); err != nil {
+	var recvSize int
+	if recvSize, err = io.ReadFull(rtmp.Conn, buf[:size]); err != nil {
 		return
 	}
+
+	rtmp.recvBytesSum += uint64(recvSize)
 
 	return
 }

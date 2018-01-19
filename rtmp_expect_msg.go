@@ -33,11 +33,6 @@ type ChunkStruct struct {
 
 	decodeResultType string
 	decodeResult     interface{}
-
-	ackWindowSize struct {
-		ackWindowSize uint32 //
-		ackedSize     uint64 //size has acked to peer
-	}
 }
 
 func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStruct) {

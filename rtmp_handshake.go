@@ -8,9 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"io"
 	"log"
-	"time"
 )
 
 var (
@@ -56,13 +54,8 @@ func (rtmp *RtmpSession) HandShake() (err error) {
 	c0c1 := handshakeData[0:1537]
 	s0s1s2 := handshakeData[3073:6146]
 
-	err = rtmp.Conn.SetDeadline(time.Now().Add(time.Duration(g_conf_info.Rtmp.TimeOut) * time.Second))
-	if err != nil {
-		return
-	}
-
 	//recv c0c1
-	_, err = io.ReadFull(rtmp.Conn, c0c1)
+	err = rtmp.ExpectBytes(1537, c0c1)
 	if err != nil {
 		return
 	}
@@ -90,20 +83,14 @@ func (rtmp *RtmpSession) HandShake() (err error) {
 	}
 
 	//send s0s1s2
-	err = rtmp.Conn.SetDeadline(time.Now().Add(time.Duration(g_conf_info.Rtmp.TimeOut) * time.Second))
+	err = rtmp.SendBytes(s0s1s2)
 	if err != nil {
-		return
-	}
-	if _, err = rtmp.Conn.Write(s0s1s2); err != nil {
 		return
 	}
 
 	//recv c2
-	err = rtmp.Conn.SetDeadline(time.Now().Add(time.Duration(g_conf_info.Rtmp.TimeOut) * time.Second))
+	err = rtmp.ExpectBytes(1536, c2)
 	if err != nil {
-		return
-	}
-	if _, err = io.ReadFull(rtmp.Conn, c2); err != nil {
 		return
 	}
 

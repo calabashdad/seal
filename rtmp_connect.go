@@ -11,8 +11,7 @@ import (
 func (rtmp *RtmpSession) Connect() (err error) {
 
 	var chunk *ChunkStruct
-	//todo. should expect what kind msg. if recv not a expected one ,maybe shoule
-	//response it first
+	//should expect what kind msg. if recv not a expected one, response it first
 	for {
 		err, chunk = rtmp.RecvMsg()
 		if err != nil {
