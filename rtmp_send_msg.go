@@ -106,5 +106,23 @@ func (rtmp *RtmpSession) SendMsg(msg *MessageStream) (err error) {
 		return
 	}
 
+	// only process the callback event when with packet
+	err = rtmp.AfterSendMsg(msg)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (rtmp *RtmpSession) AfterSendMsg(msg *MessageStream) (err error) {
+
+	switch msg.header.typeId {
+	case RTMP_MSG_SetChunkSize:
+	case RTMP_MSG_AMF0CommandMessage:
+	case RTMP_MSG_AMF3CommandMessage:
+	default:
+	}
+
 	return
 }

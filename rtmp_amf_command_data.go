@@ -31,11 +31,9 @@ func (rtmp *RtmpSession) handleAMFCommandAndDataMessage(chunk *ChunkStream) (err
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_RESULT == command || RTMP_AMF0_COMMAND_ERROR == command {
-		//todo.
-	}
-
 	switch command {
+	case RTMP_AMF0_COMMAND_RESULT, RTMP_AMF0_COMMAND_ERROR:
+		err = rtmp.handleAMF0CommandResultError(chunk)
 	case RTMP_AMF0_COMMAND_CONNECT:
 		err = rtmp.handleAMF0CommandConnect(chunk)
 	case RTMP_AMF0_COMMAND_CREATE_STREAM:

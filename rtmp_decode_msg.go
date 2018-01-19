@@ -32,6 +32,7 @@ func (rtmp *RtmpSession) DecodeMsg(chunk *ChunkStream) (err error) {
 	case RTMP_MSG_SetChunkSize:
 	case RTMP_MSG_SetPeerBandwidth:
 	case RTMP_MSG_Acknowledgement:
+
 	default:
 		err = fmt.Errorf("unknown chunk.header.typeId=", chunk.msg.header.typeId)
 	}
