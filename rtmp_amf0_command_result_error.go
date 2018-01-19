@@ -10,7 +10,7 @@ func (rtmp *RtmpSession) handleAMF0CommandResultError(chunk *ChunkStream) (err e
 		return
 	}
 
-	_ = transactionId //todo
+	_ = transactionId //todo. check if there is a request pair.
 
 	return
 }

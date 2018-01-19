@@ -80,11 +80,11 @@ func (rtmp *RtmpSession) SendMsg(msg *MessageStream) (err error) {
 			}
 		}
 
-		var paylaodSizeSendThisTime uint32
+		var payloadSizeSendThisTime uint32
 		if msg.header.length-payloadOffset > rtmp.chunkSize {
-			paylaodSizeSendThisTime = rtmp.chunkSize
+			payloadSizeSendThisTime = rtmp.chunkSize
 		} else {
-			paylaodSizeSendThisTime = msg.header.length - payloadOffset
+			payloadSizeSendThisTime = msg.header.length - payloadOffset
 		}
 
 		//send header
@@ -94,34 +94,16 @@ func (rtmp *RtmpSession) SendMsg(msg *MessageStream) (err error) {
 		}
 
 		//send payload
-		err = rtmp.SendBytes(msg.payload[payloadOffset : payloadOffset+paylaodSizeSendThisTime])
+		err = rtmp.SendBytes(msg.payload[payloadOffset : payloadOffset+payloadSizeSendThisTime])
 		if err != nil {
 			break
 		}
 
-		payloadOffset += paylaodSizeSendThisTime
+		payloadOffset += payloadSizeSendThisTime
 	}
 
 	if err != nil {
 		return
-	}
-
-	// only process the callback event when with packet
-	err = rtmp.AfterSendMsg(msg)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func (rtmp *RtmpSession) AfterSendMsg(msg *MessageStream) (err error) {
-
-	switch msg.header.typeId {
-	case RTMP_MSG_SetChunkSize:
-	case RTMP_MSG_AMF0CommandMessage:
-	case RTMP_MSG_AMF3CommandMessage:
-	default:
 	}
 
 	return

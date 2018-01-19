@@ -11,41 +11,30 @@ import (
 func (rtmp *RtmpSession) Connect() (err error) {
 
 	var chunk *ChunkStream
-	//should expect what kind msg. if recv not a expected one, response it first
-	for {
-		err, chunk = rtmp.RecvMsg()
-		if err != nil {
-			return
-		}
 
-		err = rtmp.DecodeMsg(chunk)
-		if err != nil {
-			return
-		}
+	//expect connect msg.
+	err, chunk = rtmp.RecvMsg()
+	if err != nil {
+		return
+	}
 
-		if "Amf0CommandConnectPkg" == chunk.decodeResultType {
-			break
-		}
+	//decode connect msg
+	err = rtmp.DecodeMsg(chunk)
+	if err != nil {
+		return
+	}
+
+	if "Amf0CommandConnectPkg" != chunk.decodeResultType {
+		err = fmt.Errorf("can not expect connect message.")
+		return
 	}
 
 	connectPkg := chunk.decodeResult.(Amf0CommandConnectPkg)
-
 	log.Println("rtmp connect result: ", connectPkg)
 
-	tcUrlValue := connectPkg.Amf0ObjectsGetProperty("tcUrl")
-	if nil == tcUrlValue {
-		err = fmt.Errorf("tcUrl is nil.")
-		return
-	}
-
-	var rtmpUrlData RtmpUrlData
-	err = rtmpUrlData.ParseUrl(tcUrlValue.(string))
+	err = connectPkg.Parse()
 	if err != nil {
-		return
-	}
-
-	err = rtmpUrlData.Discover()
-	if err != nil {
+		log.Println("parse connect pkg error.", err)
 		return
 	}
 
@@ -78,13 +67,7 @@ func (urlData *RtmpUrlData) ParseUrl(url string) (err error) {
 
 	urlSplit := strings.Split(urlTmp, " ")
 
-	if 3 == len(urlSplit) {
-		//no port, use the default 1935
-		urlData.schema = urlSplit[0]
-		urlData.host = urlSplit[1]
-		urlData.port = 1935
-		urlData.app = urlSplit[2]
-	} else if 4 == len(urlSplit) {
+	if 4 == len(urlSplit) {
 		urlData.schema = urlSplit[0]
 		urlData.host = urlSplit[1]
 		port, ok := strconv.Atoi(urlSplit[2])

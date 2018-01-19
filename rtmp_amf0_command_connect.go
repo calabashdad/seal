@@ -78,3 +78,24 @@ func (pkg *Amf0CommandConnectPkg) Amf0ObjectsGetProperty(key string) (value inte
 
 	return
 }
+
+func (pkg *Amf0CommandConnectPkg) Parse() (err error) {
+	tcUrlValue := pkg.Amf0ObjectsGetProperty("tcUrl")
+	if nil == tcUrlValue {
+		err = fmt.Errorf("tcUrl is nil.")
+		return
+	}
+
+	var rtmpUrlData RtmpUrlData
+	err = rtmpUrlData.ParseUrl(tcUrlValue.(string))
+	if err != nil {
+		return
+	}
+
+	err = rtmpUrlData.Discover()
+	if err != nil {
+		return
+	}
+
+	return
+}

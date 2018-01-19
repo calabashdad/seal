@@ -11,8 +11,9 @@ var g_conf_info ConfInfo
 
 type ConfInfo struct {
 	Rtmp struct {
-		Listen  string `yaml:"listen"`
-		TimeOut int    `yaml:"timeout"`
+		Listen    string `yaml:"listen"`
+		TimeOut   int    `yaml:"timeout"`
+		ChunkSize uint32 `yaml:"chunk_size"`
 	} `yaml:"rtmp"`
 }
 

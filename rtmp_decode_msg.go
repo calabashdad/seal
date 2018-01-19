@@ -13,16 +13,6 @@ func (rtmp *RtmpSession) DecodeMsg(chunk *ChunkStream) (err error) {
 		}
 	}()
 
-	if (rtmp.ackWindow.ackWindowSize > 0) && (rtmp.recvBytesSum-rtmp.ackWindow.hasAckedSize > uint64(rtmp.ackWindow.ackWindowSize)) {
-
-		err = rtmp.AcknowledgementResponse(chunk)
-		if err != nil {
-			return
-		}
-
-		rtmp.ackWindow.hasAckedSize = rtmp.recvBytesSum
-	}
-
 	//do decode msg.
 	switch chunk.msg.header.typeId {
 	case RTMP_MSG_AMF3CommandMessage, RTMP_MSG_AMF0CommandMessage, RTMP_MSG_AMF0DataMessage, RTMP_MSG_AMF3DataMessage:
