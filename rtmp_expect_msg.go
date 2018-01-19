@@ -14,6 +14,7 @@ type MessageStream struct {
 		length         uint32
 		typeId         uint8
 		streamId       uint32
+		preferCsId     uint32
 	}
 
 	payload []uint8
@@ -32,9 +33,7 @@ type ChunkStream struct {
 	extendTimeStamp    uint32
 
 	//decode message this time. when finished, will be reset to 0.
-	msgPayloadSize uint32
-
-	chunkSize uint32 //default is RTMP_DEFAULT_CHUNK_SIZE.
+	payloadSizeTmp uint32
 
 	decodeResultType string
 	decodeResult     interface{}
@@ -78,15 +77,14 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 
 		_, ok := rtmp.chunks[csid]
 		if !ok {
-			chunk = &ChunkStream{
-				chunkSize: RTMP_DEFAULT_CHUNK_SIZE,
-			}
+			chunk = &ChunkStream{}
 
 			rtmp.chunks[csid] = chunk
 		}
 
 		chunk.chunkFmt = chunk_fmt
 		chunk.csId = csid
+		chunk.msg.header.preferCsId = csid
 
 		//read message header
 		if 0 == chunk.msgCount && chunk.chunkFmt != RTMP_FMT_TYPE0 {
@@ -105,7 +103,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			}
 		}
 
-		if chunk.msgPayloadSize > 0 && RTMP_FMT_TYPE0 == chunk.chunkFmt {
+		if chunk.payloadSizeTmp > 0 && RTMP_FMT_TYPE0 == chunk.chunkFmt {
 			err = fmt.Errorf("when msg count > 0, chunk fmt is not allowed to be RTMP_FMT_TYPE0.")
 			break
 		}
@@ -144,7 +142,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			}
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
-			if chunk.msgPayloadSize > 0 && payloadLength != chunk.msg.header.length {
+			if chunk.payloadSizeTmp > 0 && payloadLength != chunk.msg.header.length {
 				err = fmt.Errorf("RTMP_FMT_TYPE0: msg has in chunk, msg size can not change.")
 			}
 
@@ -152,7 +150,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 
 			chunk.msg.header.typeId = msgHeader[6]
 
-			chunk.msg.header.streamId = binary.BigEndian.Uint32(msgHeader[7:11])
+			chunk.msg.header.streamId = binary.LittleEndian.Uint32(msgHeader[7:11])
 
 		case RTMP_FMT_TYPE1:
 			chunk.msg.header.timestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
@@ -164,7 +162,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			}
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
-			if chunk.msgPayloadSize > 0 && payloadLength != chunk.msg.header.length {
+			if chunk.payloadSizeTmp > 0 && payloadLength != chunk.msg.header.length {
 				err = fmt.Errorf("RTMP_FMT_TYPE1: msg has in chunk, msg size can not change.")
 			}
 
@@ -182,7 +180,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			}
 		case RTMP_FMT_TYPE3:
 			// update the timestamp even fmt=3 for first chunk packet. the same with previous.
-			if 0 == chunk.msgPayloadSize && !chunk.hasExtendTimestamp {
+			if 0 == chunk.payloadSizeTmp && !chunk.hasExtendTimestamp {
 				chunk.msg.header.timestamp += uint64(chunk.msg.header.timestampDelta)
 			}
 		}
@@ -205,7 +203,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			extendTimeStamp &= 0x7fffffff
 
 			chunkTimeStamp := chunk.msg.header.timestamp
-			if 0 == chunk.msgPayloadSize || 0 == chunkTimeStamp {
+			if 0 == chunk.payloadSizeTmp || 0 == chunkTimeStamp {
 				chunk.msg.header.timestamp = uint64(extendTimeStamp)
 			}
 
@@ -223,22 +221,22 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 		}
 
 		//read chunk data
-		remainPayloadSize := chunk.msg.header.length - chunk.msgPayloadSize
+		remainPayloadSize := chunk.msg.header.length - chunk.payloadSizeTmp
 
-		if remainPayloadSize >= RTMP_DEFAULT_CHUNK_SIZE {
-			remainPayloadSize = RTMP_DEFAULT_CHUNK_SIZE
+		if remainPayloadSize >= rtmp.chunkSize {
+			remainPayloadSize = rtmp.chunkSize
 		}
 
-		err = rtmp.ExpectBytes(remainPayloadSize, chunk.msg.payload[chunk.msgPayloadSize:chunk.msgPayloadSize+remainPayloadSize])
+		err = rtmp.ExpectBytes(remainPayloadSize, chunk.msg.payload[chunk.payloadSizeTmp:chunk.payloadSizeTmp+remainPayloadSize])
 		if err != nil {
 			break
 		} else {
-			chunk.msgPayloadSize += remainPayloadSize
-			if chunk.msgPayloadSize == chunk.msg.header.length {
+			chunk.payloadSizeTmp += remainPayloadSize
+			if chunk.payloadSizeTmp == chunk.msg.header.length {
 
 				//has recv entire rtmp message.
 				//reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
-				chunk.msgPayloadSize = 0
+				chunk.payloadSizeTmp = 0
 
 				break
 			}

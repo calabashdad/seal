@@ -15,13 +15,7 @@ func (rtmp *RtmpSession) DecodeMsg(chunk *ChunkStream) (err error) {
 
 	if (rtmp.ackWindow.ackWindowSize > 0) && (rtmp.recvBytesSum-rtmp.ackWindow.hasAckedSize > uint64(rtmp.ackWindow.ackWindowSize)) {
 
-		var pkg []uint8
-		err, pkg = rtmp.AcknowledgementPkg()
-		if err != nil {
-			return
-		}
-
-		err = rtmp.SendBytes(pkg)
+		err = rtmp.AcknowledgementResponse(chunk)
 		if err != nil {
 			return
 		}
