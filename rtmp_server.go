@@ -8,10 +8,10 @@ import (
 
 type RtmpSession struct {
 	net.Conn
-	chunks        map[uint32]*ChunkStruct
-	ackWindowSize struct {
+	chunks    map[uint32]*ChunkStream
+	ackWindow struct {
 		ackWindowSize uint32 //
-		ackedSize     uint64 //size has acked to peer
+		hasAckedSize  uint64 //size has acked to peer
 	}
 	recvBytesSum uint64
 }
@@ -19,7 +19,7 @@ type RtmpSession struct {
 func NewRtmpSession(c net.Conn) *RtmpSession {
 	return &RtmpSession{
 		Conn:   c,
-		chunks: make(map[uint32]*ChunkStruct),
+		chunks: make(map[uint32]*ChunkStream),
 	}
 }
 

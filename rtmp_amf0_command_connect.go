@@ -13,7 +13,7 @@ type Amf0CommandConnectPkg struct {
 	amfOptional    interface{}
 }
 
-func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error) {
+func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
@@ -24,7 +24,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 
 	var offset uint32
 
-	err, connectPkg.command = Amf0ReadString(chunk.msgPayload, &offset)
+	err, connectPkg.command = Amf0ReadString(chunk.msg.payload, &offset)
 	if err != nil {
 		return
 	}
@@ -34,7 +34,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 		return
 	}
 
-	err, connectPkg.transactionId = Amf0ReadNumber(chunk.msgPayload, &offset)
+	err, connectPkg.transactionId = Amf0ReadNumber(chunk.msg.payload, &offset)
 	if err != nil {
 		return
 	}
@@ -44,15 +44,15 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStruct) (err error
 		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
 	}
 
-	err, connectPkg.commandObjects = Amf0ReadObjects(chunk.msgPayload, &offset)
+	err, connectPkg.commandObjects = Amf0ReadObjects(chunk.msg.payload, &offset)
 	if err != nil {
 		return
 	}
 
-	if offset < uint32(len(chunk.msgPayload)) {
+	if offset < uint32(len(chunk.msg.payload)) {
 		var v interface{}
 		var marker uint8
-		err, v, marker = Amf0Discovery(chunk.msgPayload, &offset)
+		err, v, marker = Amf0Discovery(chunk.msg.payload, &offset)
 		if err != nil {
 			return
 		}

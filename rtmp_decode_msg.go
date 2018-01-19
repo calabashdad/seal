@@ -6,17 +6,31 @@ import (
 	"log"
 )
 
-func (rtmp *RtmpSession) DecodeMsg(chunk *ChunkStruct) (err error) {
+func (rtmp *RtmpSession) DecodeMsg(chunk *ChunkStream) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
 		}
 	}()
 
-	//todo. if recv size > window acknowlegement, send a ack message first.
+	if (rtmp.ackWindow.ackWindowSize > 0) && (rtmp.recvBytesSum-rtmp.ackWindow.hasAckedSize > uint64(rtmp.ackWindow.ackWindowSize)) {
+
+		var pkg []uint8
+		err, pkg = rtmp.AcknowledgementPkg()
+		if err != nil {
+			return
+		}
+
+		err = rtmp.SendBytes(pkg)
+		if err != nil {
+			return
+		}
+
+		rtmp.ackWindow.hasAckedSize = rtmp.recvBytesSum
+	}
 
 	//do decode msg.
-	switch chunk.msgHeader.msgTypeid {
+	switch chunk.msg.header.typeId {
 	case RTMP_MSG_AMF3CommandMessage, RTMP_MSG_AMF0CommandMessage, RTMP_MSG_AMF0DataMessage, RTMP_MSG_AMF3DataMessage:
 		err = rtmp.handleAMFCommandAndDataMessage(chunk)
 	case RTMP_MSG_UserControlMessage:
@@ -25,7 +39,7 @@ func (rtmp *RtmpSession) DecodeMsg(chunk *ChunkStruct) (err error) {
 	case RTMP_MSG_SetPeerBandwidth:
 	case RTMP_MSG_Acknowledgement:
 	default:
-		err = fmt.Errorf("unknown chunk.msgHeader.msgTypeid=", chunk.msgHeader.msgTypeid)
+		err = fmt.Errorf("unknown chunk.header.typeId=", chunk.msg.header.typeId)
 	}
 
 	if err != nil {

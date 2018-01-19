@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (rtmp *RtmpSession) handleAMFCommandAndDataMessage(chunk *ChunkStruct) (err error) {
+func (rtmp *RtmpSession) handleAMFCommandAndDataMessage(chunk *ChunkStream) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
@@ -16,12 +16,12 @@ func (rtmp *RtmpSession) handleAMFCommandAndDataMessage(chunk *ChunkStruct) (err
 	var offset uint32
 
 	// skip 1bytes to decode the amf3 command.
-	if RTMP_MSG_AMF3CommandMessage == chunk.msgHeader.msgTypeid && chunk.msgHeader.msgLength >= 1 {
+	if RTMP_MSG_AMF3CommandMessage == chunk.msg.header.typeId && chunk.msg.header.length >= 1 {
 		offset += 1
 	}
 
 	//read the command name.
-	err, command := Amf0ReadString(chunk.msgPayload, &offset)
+	err, command := Amf0ReadString(chunk.msg.payload, &offset)
 	if err != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func (rtmp *RtmpSession) handleAMFCommandAndDataMessage(chunk *ChunkStruct) (err
 	case RTMP_AMF0_COMMAND_CLOSE_STREAM:
 		//todo.
 	default:
-		if RTMP_MSG_AMF0CommandMessage == chunk.msgHeader.msgTypeid || RTMP_MSG_AMF3CommandMessage == chunk.msgHeader.msgTypeid {
+		if RTMP_MSG_AMF0CommandMessage == chunk.msg.header.typeId || RTMP_MSG_AMF3CommandMessage == chunk.msg.header.typeId {
 			//todo.
 		} else {
 			err = fmt.Errorf("unknown command type, command=", command)

@@ -2,7 +2,7 @@ package main
 
 const (
 	/**
-	 * 6.1.2. Chunk Message Header
+	 * 6.1.2. Chunk MessageStream Header
 	 * There are four different formats for the chunk message header,
 	 * selected by the "chunkFmt" field in the chunk basic header.
 	 */
