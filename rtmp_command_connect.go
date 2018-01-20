@@ -44,7 +44,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error
 		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
 	}
 
-	err, connectPkg.commandObjects = Amf0ReadObjects(chunk.msg.payload, &offset)
+	err, connectPkg.commandObjects = Amf0ReadObject(chunk.msg.payload, &offset)
 	if err != nil {
 		return
 	}

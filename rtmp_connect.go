@@ -38,6 +38,21 @@ func (rtmp *RtmpSession) Connect() (err error) {
 		return
 	}
 
+	err = rtmp.CommonMsgSetWindowAcknowledgementSize(chunk, 2500000)
+	if err != nil {
+		return
+	}
+
+	err = rtmp.CommonMsgSetPeerBandwidth(chunk, 2500000, 2)
+	if err != nil {
+		return
+	}
+
+	err = rtmp.ResponseConnectApp(chunk)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
