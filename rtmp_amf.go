@@ -10,7 +10,7 @@ import (
 type Amf0Object struct {
 	propertyName string
 	value        interface{}
-	valyeType    uint32
+	valyeType    uint32 //just for help known type.
 }
 
 type Amf0EcmaArray struct {
@@ -244,7 +244,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 
 		var amf0object Amf0Object
 
-		err, amf0object.propertyName = Amf0ReadUtf8(data, offset)
+		err, amf0object.propertyName = Amf0ReadString(data, offset)
 		if err != nil {
 			break
 		}
@@ -265,33 +265,10 @@ func Amf0WriteObject(amf0objects []Amf0Object) (data []uint8) {
 	data = append(data, RTMP_AMF0_Object)
 
 	for _, v := range amf0objects {
-		//property
-		data = append(data, Amf0WriteString(v.propertyName)...)
-
-		//value
-		switch v.valyeType {
-		case RTMP_AMF0_String:
-			data = append(data, Amf0WriteString(v.value.(string))...)
-		case RTMP_AMF0_Boolean:
-			data = append(data, Amf0WriteBool(v.value.(bool))...)
-		case RTMP_AMF0_Number:
-			data = append(data, Amf0WriteNumber(v.value.(float64))...)
-		case RTMP_AMF0_Null:
-			//do nothing
-		case RTMP_AMF0_Undefined:
-			//do nothing
-		case RTMP_AMF0_Object:
-			data = append(data, Amf0WriteObject(v.value.([]Amf0Object))...)
-		case RTMP_AMF0_LongString:
-			data = append(data, Amf0WriteLongString(v.value.(string))...)
-		case RTMP_AMF0_EcmaArray:
-			data = append(data, Amf0WriteEcmaArray(v.value.([]Amf0Object))...)
-		case RTMP_AMF0_StrictArray:
-			data = append(data, Amf0WriteStrictArray(v.value.([]Amf0Object))...)
-		default:
-			log.Println("Amf0WriteObject: unknow property type.", v.valyeType)
-		}
+		data = append(data, Amf0WriteAny(v)...)
 	}
+
+	data = append(data, 0x00, 0x00, 0x09)
 
 	return
 }
@@ -475,7 +452,7 @@ func Amf0ReadEcmaArray(data []uint8, offset *uint32) (err error, value Amf0EcmaA
 		}
 
 		var amf Amf0Object
-		err, amf.propertyName = Amf0ReadUtf8(data, offset)
+		err, amf.propertyName = Amf0ReadString(data, offset)
 		if err != nil {
 			break
 		}
@@ -501,9 +478,10 @@ func Amf0WriteEcmaArray(objs []Amf0Object) (data []uint8) {
 
 	count := len(objs)
 	binary.BigEndian.PutUint32(data[offset:offset+4], uint32(count))
+	offset += 4
 
 	for _, v := range objs {
-		data = append(data, Amf0WriteUtf8(v.value.(string))...)
+		data = append(data, Amf0WriteString(v.propertyName)...)
 		data = append(data, Amf0WriteAny(v)...)
 	}
 
@@ -563,6 +541,7 @@ func Amf0WriteStrictArray(objs []Amf0Object) (data []uint8) {
 
 	count := len(objs)
 	binary.BigEndian.PutUint32(data[offset:offset+4], uint32(count))
+	offset += 4
 
 	for _, v := range objs {
 		data = append(data, Amf0WriteAny(v)...)
