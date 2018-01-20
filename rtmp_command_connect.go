@@ -79,11 +79,16 @@ func (pkg *Amf0CommandConnectPkg) Amf0ObjectsGetProperty(key string) (value inte
 	return
 }
 
-func (pkg *Amf0CommandConnectPkg) Parse() (err error) {
+func (rtmp *RtmpSession) ParseConnectPkg(pkg *Amf0CommandConnectPkg) (err error) {
 	tcUrlValue := pkg.Amf0ObjectsGetProperty("tcUrl")
 	if nil == tcUrlValue {
 		err = fmt.Errorf("tcUrl is nil.")
 		return
+	}
+
+	objectEncodingValue := pkg.Amf0ObjectsGetProperty("objectEncoding")
+	if objectEncodingValue != nil {
+		rtmp.objectEncoding = objectEncodingValue.(float64)
 	}
 
 	var rtmpUrlData RtmpUrlData

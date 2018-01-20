@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const SEAL_VERSION = "seal version: 1.0.0"
+const SEAL_VERSION = "seal: 1.0.0"
 
 var (
 	conf_file    = flag.String("c", "./seal.yaml", "configure filename")

@@ -1,6 +1,8 @@
 package main
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 func (rtmp *RtmpSession) CommonMsgSetWindowAcknowledgementSize(chunk *ChunkStream, WindowAcknowledgementSize uint32) (err error) {
 
@@ -92,8 +94,91 @@ func (rtmp *RtmpSession) ResponseConnectApp(chunk *ChunkStream) (err error) {
 		msg.payload = append(msg.payload, Amf0WriteString(RTMP_AMF0_COMMAND_RESULT)...)
 		msg.payload = append(msg.payload, Amf0WriteNumber(1.0)...)
 
-		//var obj1 Amf0Object
-		//obj1.propertyName =
+		var objs []Amf0Object
+
+		objs = append(objs, Amf0Object{
+			propertyName: "fmsVer",
+			value:        "FMS/" + SEAL_VERSION,
+			valueType:    RTMP_AMF0_String,
+		})
+
+		objs = append(objs, Amf0Object{
+			propertyName: "capabilities",
+			value:        127.0,
+			valueType:    RTMP_AMF0_Number,
+		})
+
+		objs = append(objs, Amf0Object{
+			propertyName: "mode",
+			value:        1.0,
+			valueType:    RTMP_AMF0_Number,
+		})
+
+		objs = append(objs, Amf0Object{
+			propertyName: StatusLevel,
+			value:        StatusLevelStatus,
+			valueType:    RTMP_AMF0_String,
+		})
+
+		objs = append(objs, Amf0Object{
+			propertyName: StatusCode,
+			value:        StatusCodeConnectSuccess,
+			valueType:    RTMP_AMF0_String,
+		})
+
+		objs = append(objs, Amf0Object{
+			propertyName: StatusDescription,
+			value:        "Connection succeeded",
+			valueType:    RTMP_AMF0_String,
+		})
+
+		objs = append(objs, Amf0Object{
+			propertyName: "objectEncoding",
+			value:        rtmp.objectEncoding,
+			valueType:    RTMP_AMF0_Number,
+		})
+
+		msg.payload = append(msg.payload, Amf0WriteObject(objs)...)
+
+		var ecma []Amf0Object
+
+		ecma = append(ecma, Amf0Object{
+			propertyName: "version",
+			value:        SEAL_VERSION,
+			valueType:    RTMP_AMF0_String,
+		})
+
+		ecma = append(ecma, Amf0Object{
+			propertyName: "seal_license",
+			value:        "The MIT License (MIT)",
+			valueType:    RTMP_AMF0_String,
+		})
+
+		ecma = append(ecma, Amf0Object{
+			propertyName: "seal_authors",
+			value:        "YangKai",
+			valueType:    RTMP_AMF0_String,
+		})
+
+		ecma = append(ecma, Amf0Object{
+			propertyName: "seal_email",
+			value:        "beyondyangkai@gmail.com",
+			valueType:    RTMP_AMF0_String,
+		})
+
+		ecma = append(ecma, Amf0Object{
+			propertyName: "seal_copyright",
+			value:        "Copyright (c) 2018 YangKai",
+			valueType:    RTMP_AMF0_String,
+		})
+
+		ecma = append(ecma, Amf0Object{
+			propertyName: "seal_sig",
+			value:        "seal",
+			valueType:    RTMP_AMF0_String,
+		})
+
+		msg.payload = append(msg.payload, Amf0WriteObject(ecma)...)
 	}
 
 	//msg header

@@ -228,3 +228,43 @@ const (
 	SRS_BW_CHECK_PLAYING    = "onSrsBandCheckPlaying"
 	SRS_BW_CHECK_PUBLISHING = "onSrsBandCheckPublishing"
 )
+
+const (
+	/**
+	 * onStatus consts.
+	 */
+	StatusLevel       = "level"
+	StatusCode        = "code"
+	StatusDescription = "description"
+	StatusDetails     = "details"
+	StatusClientId    = "clientid"
+
+	// status value
+	StatusLevelStatus = "status"
+
+	// status error
+	StatusLevelError = "error"
+
+	// code value
+	StatusCodeConnectSuccess   = "NetConnection.Connect.Success"
+	StatusCodeConnectRejected  = "NetConnection.Connect.Rejected"
+	StatusCodeStreamReset      = "NetStream.Play.Reset"
+	StatusCodeStreamStart      = "NetStream.Play.Start"
+	StatusCodeStreamPause      = "NetStream.Pause.Notify"
+	StatusCodeStreamUnpause    = "NetStream.Unpause.Notify"
+	StatusCodePublishStart     = "NetStream.Publish.Start"
+	StatusCodeDataStart        = "NetStream.Data.Start"
+	StatusCodeUnpublishSuccess = "NetStream.Unpublish.Success"
+
+	// FMLE
+	RTMP_AMF0_COMMAND_ON_FC_PUBLISH   = "onFCPublish"
+	RTMP_AMF0_COMMAND_ON_FC_UNPUBLISH = "onFCUnpublish"
+
+	// default stream id for response the createStream request.
+	SRS_DEFAULT_SID = 1
+)
+
+const (
+	//objectEncoding default value.
+	RTMP_SIG_AMF0_VER = 0.0
+)

@@ -32,7 +32,7 @@ func (rtmp *RtmpSession) Connect() (err error) {
 	connectPkg := chunk.decodeResult.(Amf0CommandConnectPkg)
 	log.Println("rtmp connect result: ", connectPkg)
 
-	err = connectPkg.Parse()
+	err = rtmp.ParseConnectPkg(&connectPkg)
 	if err != nil {
 		log.Println("parse connect pkg error.", err)
 		return

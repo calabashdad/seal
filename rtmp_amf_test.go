@@ -21,7 +21,7 @@ func TestAmf0WriteAny(t *testing.T) {
 
 	a.propertyName = "test"
 	a.value = float64(123)
-	a.valyeType = RTMP_AMF0_Number
+	a.valueType = RTMP_AMF0_Number
 
 	data := Amf0WriteAny(a)
 	_ = data
@@ -68,14 +68,14 @@ func TestAmf0WriteObject(t *testing.T) {
 	var obj1 Amf0Object
 	obj1.propertyName = "o1"
 	obj1.value = "obj1 value"
-	obj1.valyeType = RTMP_AMF0_String
+	obj1.valueType = RTMP_AMF0_String
 
 	objs = append(objs, obj1)
 
 	var obj2 Amf0Object
 	obj2.propertyName = "o2"
 	obj2.value = 123.0
-	obj2.valyeType = RTMP_AMF0_Number
+	obj2.valueType = RTMP_AMF0_Number
 
 	objs = append(objs, obj2)
 
@@ -141,14 +141,14 @@ func TestAmf0WriteEcmaArray(t *testing.T) {
 	var obj1 Amf0Object
 	obj1.propertyName = "o1"
 	obj1.value = "obj1 value"
-	obj1.valyeType = RTMP_AMF0_String
+	obj1.valueType = RTMP_AMF0_String
 
 	objs = append(objs, obj1)
 
 	var obj2 Amf0Object
 	obj2.propertyName = "o2"
 	obj2.value = 123.0
-	obj2.valyeType = RTMP_AMF0_Number
+	obj2.valueType = RTMP_AMF0_Number
 
 	objs = append(objs, obj2)
 
@@ -167,14 +167,14 @@ func TestAmf0WriteStrictArray(t *testing.T) {
 	var obj1 Amf0Object
 	obj1.propertyName = "o1"
 	obj1.value = "obj1 value"
-	obj1.valyeType = RTMP_AMF0_String
+	obj1.valueType = RTMP_AMF0_String
 
 	objs = append(objs, obj1)
 
 	var obj2 Amf0Object
 	obj2.propertyName = "o2"
 	obj2.value = 123.0
-	obj2.valyeType = RTMP_AMF0_Number
+	obj2.valueType = RTMP_AMF0_Number
 
 	objs = append(objs, obj2)
 

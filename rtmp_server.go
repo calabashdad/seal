@@ -13,15 +13,17 @@ type RtmpSession struct {
 		ackWindowSize uint32 //
 		hasAckedSize  uint64 //size has acked to peer
 	}
-	recvBytesSum uint64
-	chunkSize    uint32 //default is RTMP_DEFAULT_CHUNK_SIZE. can set by peer.
+	recvBytesSum   uint64
+	chunkSize      uint32 //default is RTMP_DEFAULT_CHUNK_SIZE. can set by peer.
+	objectEncoding float64
 }
 
 func NewRtmpSession(c net.Conn) *RtmpSession {
 	return &RtmpSession{
-		Conn:      c,
-		chunks:    make(map[uint32]*ChunkStream),
-		chunkSize: RTMP_DEFAULT_CHUNK_SIZE,
+		Conn:           c,
+		chunks:         make(map[uint32]*ChunkStream),
+		chunkSize:      RTMP_DEFAULT_CHUNK_SIZE,
+		objectEncoding: RTMP_SIG_AMF0_VER,
 	}
 }
 

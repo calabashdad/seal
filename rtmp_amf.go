@@ -10,7 +10,7 @@ import (
 type Amf0Object struct {
 	propertyName string
 	value        interface{}
-	valyeType    uint32 //just for help known type.
+	valueType    uint32 //just for help known type.
 }
 
 type Amf0EcmaArray struct {
@@ -122,7 +122,7 @@ func Amf0ReadAny(data []uint8, offset *uint32) (err error, value interface{}) {
 }
 
 func Amf0WriteAny(any Amf0Object) (data []uint8) {
-	switch any.valyeType {
+	switch any.valueType {
 	case RTMP_AMF0_String:
 		data = Amf0WriteString(any.value.(string))
 	case RTMP_AMF0_Boolean:
@@ -142,7 +142,7 @@ func Amf0WriteAny(any Amf0Object) (data []uint8) {
 	case RTMP_AMF0_StrictArray:
 		data = Amf0WriteStrictArray(any.value.([]Amf0Object))
 	default:
-		log.Println("Amf0WriteAny: unknown type.", any.valyeType)
+		log.Println("Amf0WriteAny: unknown type.", any.valueType)
 	}
 	return
 }
@@ -244,7 +244,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 
 		var amf0object Amf0Object
 
-		err, amf0object.propertyName = Amf0ReadString(data, offset)
+		err, amf0object.propertyName = Amf0ReadUtf8(data, offset)
 		if err != nil {
 			break
 		}
@@ -265,6 +265,7 @@ func Amf0WriteObject(amf0objects []Amf0Object) (data []uint8) {
 	data = append(data, RTMP_AMF0_Object)
 
 	for _, v := range amf0objects {
+		data = append(data, Amf0WriteUtf8(v.propertyName)...)
 		data = append(data, Amf0WriteAny(v)...)
 	}
 
