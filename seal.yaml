@@ -2,5 +2,5 @@
 rtmp:
   listen: 1935
   timeout: 30
-  #chunk stream size. [128, 65535].
-  chunk_size: 1024
+  #chunk stream size. [128, 65535]. default is 60000.
+  chunk_size: 10240

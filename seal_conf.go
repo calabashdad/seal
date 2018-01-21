@@ -50,4 +50,5 @@ func (t *ConfInfo) Loads(c string) (err error) {
 func (t *ConfInfo) Default() {
 	t.Rtmp.Listen = "1935"
 	t.Rtmp.TimeOut = 30
+	t.Rtmp.ChunkSize = 60000
 }

@@ -23,13 +23,26 @@ func HandleRtmpSession(rtmpSession *RtmpSession) {
 		return
 	}
 
-	log.Println("rtmp handshake success.remote=", rtmpSession.RemoteAddr())
+	log.Println("rtmp handshake success.remote=", rtmpSession.Conn.RemoteAddr())
 
 	err = rtmpSession.Connect()
 	if err != nil {
 		log.Println("rtmp connect failed, err=", err)
 		return
 	}
-
 	log.Println("rtmp connect success. remote=", rtmpSession.RemoteAddr())
+
+	//todo. bandwidth check. or reject the connect request.
+
+	err = rtmpSession.CommonMsgSetChunkSize(g_conf_info.Rtmp.ChunkSize)
+	if err != nil {
+		return
+	}
+	log.Println("set chunk size success.remote=", rtmpSession.RemoteAddr())
+
+	err = rtmpSession.IdendifyClient()
+	if err != nil {
+		return
+	}
+
 }

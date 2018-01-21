@@ -87,6 +87,9 @@ const (
 
 const (
 	RTMP_DEFAULT_CHUNK_SIZE = 128
+
+	RTMP_CHUNKSIZE_MIN = 128
+	RTMP_CHUNKSIZE_MAX = 65536
 )
 
 const (

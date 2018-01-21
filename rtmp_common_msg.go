@@ -86,6 +86,27 @@ func (rtmp *RtmpSession) CommonMsgSetPeerBandwidth(chunk *ChunkStream, bandWidth
 	return
 }
 
+func (rtmp *RtmpSession) CommonMsgSetChunkSize(chunkSize uint32) (err error) {
+	var msg MessageStream
+
+	//msg payload
+	msg.payload = make([]uint8, 4)
+	binary.BigEndian.PutUint32(msg.payload[:], chunkSize)
+
+	//msg header
+	msg.header.length = 4
+	msg.header.typeId = RTMP_MSG_SetChunkSize
+	msg.header.streamId = 0
+	msg.header.preferCsId = RTMP_CID_ProtocolControl
+
+	err = rtmp.SendMsg(&msg)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 func (rtmp *RtmpSession) ResponseConnectApp(chunk *ChunkStream) (err error) {
 	var msg MessageStream
 
