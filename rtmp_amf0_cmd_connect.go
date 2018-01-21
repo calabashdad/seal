@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (rtmp *RtmpConn) handleAMF0CommandConnect(msg *MessageStream) (err error) {
+func (rtmp *RtmpConn) handleAMF0CmdConnect(msg *MessageStream) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
@@ -26,7 +26,7 @@ func (rtmp *RtmpConn) handleAMF0CommandConnect(msg *MessageStream) (err error) {
 	}
 
 	if connectPkg.command != RTMP_AMF0_COMMAND_CONNECT {
-		err = fmt.Errorf("handleAMF0CommandConnect command is error. command=", connectPkg.command)
+		err = fmt.Errorf("handleAMF0CmdConnect command is error. command=", connectPkg.command)
 		return
 	}
 
@@ -37,7 +37,7 @@ func (rtmp *RtmpConn) handleAMF0CommandConnect(msg *MessageStream) (err error) {
 
 	//this method is not strict for float type. just a warn.
 	if 1 != connectPkg.transactionId {
-		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
+		log.Println("warn:handleAMF0CmdConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
 	}
 
 	err, connectPkg.commandObjects = Amf0ReadObject(msg.payload, &offset)
@@ -79,7 +79,7 @@ func (rtmp *RtmpConn) handleAMF0CommandConnect(msg *MessageStream) (err error) {
 		return
 	}
 
-	log.Println("handle connect success.")
+	log.Println("handle amf0 cmd connect success.")
 
 	return
 }
@@ -103,6 +103,12 @@ func (pkg *Amf0CommandConnectPkg) GetProperty(key string) (value interface{}) {
 }
 
 func (rtmp *RtmpConn) ResponseConnectApp(chunkStreamId uint32) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
 	var msg MessageStream
 
 	//msg payload

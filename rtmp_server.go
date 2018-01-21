@@ -6,6 +6,13 @@ import (
 	"net"
 )
 
+const (
+	RTMP_ROLE_UNKNOWN = 0
+
+	RTMP_ROLE_PUBLISH = 1
+	RTMP_ROLE_PALY    = 2
+)
+
 type RtmpConn struct {
 	net.Conn
 	chunks         map[uint32]*ChunkStream //key csid.
@@ -17,6 +24,7 @@ type RtmpConn struct {
 	recvBytesSum   uint64
 	chunkSize      uint32 //default is RTMP_DEFAULT_CHUNK_SIZE. can set by peer.
 	objectEncoding float64
+	role           uint8
 }
 
 func NewRtmpSession(c net.Conn) *RtmpConn {
@@ -25,6 +33,7 @@ func NewRtmpSession(c net.Conn) *RtmpConn {
 		chunks:         make(map[uint32]*ChunkStream),
 		chunkSize:      RTMP_DEFAULT_CHUNK_SIZE,
 		objectEncoding: RTMP_SIG_AMF0_VER,
+		role:           RTMP_ROLE_UNKNOWN,
 	}
 }
 

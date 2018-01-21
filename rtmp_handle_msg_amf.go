@@ -37,19 +37,19 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 
 	switch command {
 	case RTMP_AMF0_COMMAND_RESULT, RTMP_AMF0_COMMAND_ERROR:
-		err = rtmp.handleAMF0CommandResultError(msg)
+		err = rtmp.handleAMF0CmdResultError(msg)
 	case RTMP_AMF0_COMMAND_CONNECT:
-		err = rtmp.handleAMF0CommandConnect(msg)
+		err = rtmp.handleAMF0CmdConnect(msg)
 	case RTMP_AMF0_COMMAND_CREATE_STREAM:
-		//todo.
+		err = rtmp.handleAmf0CmdCreateStream(msg)
 	case RTMP_AMF0_COMMAND_PLAY:
 		//todo.
 	case RTMP_AMF0_COMMAND_PAUSE:
 		//todo.
 	case RTMP_AMF0_COMMAND_RELEASE_STREAM:
-		//todo.
+		err = rtmp.handleAmf0CmdReleaseStream(msg)
 	case RTMP_AMF0_COMMAND_FC_PUBLISH:
-		//todo.
+		err = rtmp.handleAmf0CmdFcPublish(msg)
 	case RTMP_AMF0_COMMAND_PUBLISH:
 		//todo.
 	case RTMP_AMF0_COMMAND_UNPUBLISH:

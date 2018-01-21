@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (rtmp *RtmpConn) handleAMF0CommandResultError(msg *MessageStream) (err error) {
+func (rtmp *RtmpConn) handleAMF0CmdResultError(msg *MessageStream) (err error) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -24,7 +24,7 @@ func (rtmp *RtmpConn) handleAMF0CommandResultError(msg *MessageStream) (err erro
 
 	requestCommand, ok := rtmp.transactionIds[transactionId]
 	if !ok {
-		err = fmt.Errorf("handleAMF0CommandResultError can not find the transaction id.")
+		err = fmt.Errorf("handleAMF0CmdResultError can not find the transaction id.")
 		return
 	}
 
@@ -40,7 +40,7 @@ func (rtmp *RtmpConn) handleAMF0CommandResultError(msg *MessageStream) (err erro
 	case RTMP_AMF0_COMMAND_INSERT_KEYFREAME:
 		//todo
 	default:
-		err = fmt.Errorf("handleAMF0CommandResultError, unknown request command name,", requestCommand)
+		err = fmt.Errorf("handleAMF0CmdResultError, unknown request command name,", requestCommand)
 	}
 
 	if err != nil {

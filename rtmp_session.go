@@ -25,7 +25,7 @@ func HandleRtmpSession(rtmpSession *RtmpConn) {
 
 	log.Println("rtmp handshake success.remote=", rtmpSession.Conn.RemoteAddr())
 
-	rtmpSession.RtmpMsgLoop()
+	err = rtmpSession.RtmpMsgLoop()
 
-	log.Println("rtmp msg loop quit. err=", err, ",remote=", rtmpSession.Conn.RemoteAddr())
+	log.Println("rtmp msg loop quit.err=", err, ",remote=", rtmpSession.Conn.RemoteAddr())
 }
