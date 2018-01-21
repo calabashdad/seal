@@ -35,7 +35,7 @@ type ChunkStream struct {
 	//decode message this time. when finished, will be reset to 0.
 	payloadSizeTmp uint32
 
-	decodeResultType string
+	decodeResultType uint32
 	decodeResult     interface{}
 }
 
@@ -74,9 +74,12 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			return
 		}
 
-		_, ok := rtmp.chunks[csid]
+		var ok bool
+		chunk, ok = rtmp.chunks[csid]
 		if !ok {
-			chunk = &ChunkStream{}
+			chunk = &ChunkStream{
+				decodeResultType: DECODE_MSG_TYPE_UNKNOWN,
+			}
 
 			rtmp.chunks[csid] = chunk
 		}

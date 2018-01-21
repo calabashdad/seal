@@ -24,7 +24,7 @@ func (rtmp *RtmpSession) Connect() (err error) {
 		return
 	}
 
-	if "Amf0CommandConnectPkg" != chunk.decodeResultType {
+	if DECODE_MSG_TYPE_Amf0CommandConnectPkg != chunk.decodeResultType {
 		err = fmt.Errorf("can not expect connect message.")
 		return
 	}

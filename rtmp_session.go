@@ -36,13 +36,16 @@ func HandleRtmpSession(rtmpSession *RtmpSession) {
 
 	err = rtmpSession.CommonMsgSetChunkSize(g_conf_info.Rtmp.ChunkSize)
 	if err != nil {
+		log.Println("server set chunk size failed.err=", err)
 		return
 	}
-	log.Println("set chunk size success.remote=", rtmpSession.RemoteAddr())
+	log.Println("server set chunk size success.")
 
 	err = rtmpSession.IdendifyClient()
 	if err != nil {
+		log.Println("identify client failed. err=", err)
 		return
 	}
+	log.Println("identify client success.")
 
 }

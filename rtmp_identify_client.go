@@ -7,12 +7,21 @@ func (rtmp *RtmpSession) IdendifyClient() (err error) {
 
 		err, chunk = rtmp.RecvMsg()
 		if err != nil {
-			return
+			break
 		}
 		err = rtmp.DecodeMsg(chunk)
 		if err != nil {
-			return
+			break
 		}
+
+		err = rtmp.HandleMsg(chunk)
+		if err != nil {
+			break
+		}
+	}
+
+	if err != nil {
+		return
 	}
 
 	return
