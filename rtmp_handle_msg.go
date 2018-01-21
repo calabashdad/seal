@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (rtmp *RtmpConn) DecodeAndHanleMsg(chunkStreamId uint32) (err error) {
+func (rtmp *RtmpConn) HanleMsg(chunkStreamId uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
@@ -18,11 +18,9 @@ func (rtmp *RtmpConn) DecodeAndHanleMsg(chunkStreamId uint32) (err error) {
 
 	chunk := rtmp.chunks[chunkStreamId]
 	if nil == chunk {
-		err = fmt.Errorf("DecodeAndHanleMsg:can not find the chunk strema id in chuns.")
+		err = fmt.Errorf("HanleMsg:can not find the chunk strema id in chuns.")
 		return
 	}
-
-	log.Println("msg typeid=", chunk.msg.header.typeId)
 
 	switch chunk.msg.header.typeId {
 	case RTMP_MSG_AMF3CommandMessage, RTMP_MSG_AMF0CommandMessage, RTMP_MSG_AMF0DataMessage, RTMP_MSG_AMF3DataMessage:
@@ -52,12 +50,58 @@ func (rtmp *RtmpConn) DecodeAndHanleMsg(chunkStreamId uint32) (err error) {
 	return
 }
 
+func (rtmp *RtmpConn) handleAMF0CommandResultError(msg *MessageStream) (err error) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	var offset uint32
+
+	var transactionId float64
+	err, transactionId = Amf0ReadNumber(msg.payload, &offset)
+	if err != nil {
+		return
+	}
+
+	requestCommand, ok := rtmp.transactionIds[transactionId]
+	if !ok {
+		err = fmt.Errorf("handleAMF0CommandResultError can not find the transaction id.")
+		return
+	}
+
+	switch requestCommand {
+	case RTMP_AMF0_COMMAND_CONNECT:
+		//todo
+	case RTMP_AMF0_COMMAND_CREATE_STREAM:
+		//todo
+	case RTMP_AMF0_COMMAND_RELEASE_STREAM, RTMP_AMF0_COMMAND_FC_PUBLISH, RTMP_AMF0_COMMAND_UNPUBLISH:
+		//todo
+	case RTMP_AMF0_COMMAND_ENABLEVIDEO:
+		//todo
+	case RTMP_AMF0_COMMAND_INSERT_KEYFREAME:
+		//todo
+	default:
+		err = fmt.Errorf("handleAMF0CommandResultError, unknown request command name,", requestCommand)
+	}
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
 		}
 	}()
+
+	log.Println("amf0/3 command or amf0/3 data")
 
 	var offset uint32
 
@@ -127,6 +171,123 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 	return
 }
 
+type Amf0CommandConnectPkg struct {
+	command        string
+	transactionId  float64
+	commandObjects []Amf0Object
+	amfOptional    interface{}
+}
+
+func (rtmp *RtmpConn) handleAMF0CommandConnect(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	var connectPkg Amf0CommandConnectPkg
+
+	var offset uint32
+
+	err, connectPkg.command = Amf0ReadString(msg.payload, &offset)
+	if err != nil {
+		return
+	}
+
+	if connectPkg.command != RTMP_AMF0_COMMAND_CONNECT {
+		err = fmt.Errorf("handleAMF0CommandConnect command is error. command=", connectPkg.command)
+		return
+	}
+
+	err, connectPkg.transactionId = Amf0ReadNumber(msg.payload, &offset)
+	if err != nil {
+		return
+	}
+
+	//this method is not strict for float type. just a warn.
+	if 1 != connectPkg.transactionId {
+		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
+	}
+
+	err, connectPkg.commandObjects = Amf0ReadObject(msg.payload, &offset)
+	if err != nil {
+		return
+	}
+
+	if offset < uint32(len(msg.payload)) {
+		var v interface{}
+		var marker uint8
+		err, v, marker = Amf0Discovery(msg.payload, &offset)
+		if err != nil {
+			return
+		}
+
+		if RTMP_AMF0_Object == marker {
+			connectPkg.amfOptional = v
+		}
+	}
+
+	err = rtmp.ParseConnectPkg(&connectPkg)
+	if err != nil {
+		log.Println("parse connect pkg error.", err)
+		return
+	}
+
+	err = rtmp.CommonMsgSetWindowAcknowledgementSize(msg.header.preferCsId, 2500000)
+	if err != nil {
+		return
+	}
+
+	err = rtmp.CommonMsgSetPeerBandwidth(msg.header.preferCsId, 2500000, 2)
+	if err != nil {
+		return
+	}
+
+	err = rtmp.ResponseConnectApp(msg.header.preferCsId)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (pkg *Amf0CommandConnectPkg) Amf0ObjectsGetProperty(key string) (value interface{}) {
+
+	for _, v := range pkg.commandObjects {
+		if v.propertyName == key {
+			return v.value
+		}
+	}
+
+	return
+}
+
+func (rtmp *RtmpConn) ParseConnectPkg(pkg *Amf0CommandConnectPkg) (err error) {
+	tcUrlValue := pkg.Amf0ObjectsGetProperty("tcUrl")
+	if nil == tcUrlValue {
+		err = fmt.Errorf("tcUrl is nil.")
+		return
+	}
+
+	objectEncodingValue := pkg.Amf0ObjectsGetProperty("objectEncoding")
+	if objectEncodingValue != nil {
+		rtmp.objectEncoding = objectEncodingValue.(float64)
+	}
+
+	var rtmpUrlData RtmpUrlData
+	err = rtmpUrlData.ParseUrl(tcUrlValue.(string))
+	if err != nil {
+		return
+	}
+
+	err = rtmpUrlData.Discover()
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 type RtmpUrlData struct {
 	schema string
 	host   string
@@ -189,6 +350,109 @@ func (urlData *RtmpUrlData) Discover() (err error) {
 	return
 }
 
+func (rtmp *RtmpConn) CommonMsgSetWindowAcknowledgementSize(chunkStreamId uint32, WindowAcknowledgementSize uint32) (err error) {
+
+	var msg MessageStream
+
+	//msg payload
+	msg.payload = make([]uint8, 4)
+	binary.BigEndian.PutUint32(msg.payload[:], WindowAcknowledgementSize)
+
+	//msg header
+	msg.header.length = 4
+	msg.header.typeId = RTMP_MSG_WindowAcknowledgementSize
+	msg.header.streamId = 0
+	msg.header.preferCsId = chunkStreamId
+
+	//begin to send.
+	if msg.header.preferCsId < 2 {
+		msg.header.preferCsId = RTMP_CID_ProtocolControl
+	}
+
+	err = rtmp.SendMsg(&msg)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (rtmp *RtmpConn) CommonMsgResponseWindowAcknowledgement(chunkStreamId uint32, ackedSize uint32) (err error) {
+
+	var msg MessageStream
+
+	//msg payload
+	msg.payload = make([]uint8, 4)
+	binary.BigEndian.PutUint32(msg.payload[:], ackedSize)
+
+	//msg header
+	msg.header.length = 4
+	msg.header.typeId = RTMP_MSG_Acknowledgement
+	msg.header.streamId = 0
+	msg.header.preferCsId = chunkStreamId
+
+	//begin to send.
+	if msg.header.preferCsId < 2 {
+		msg.header.preferCsId = RTMP_CID_ProtocolControl
+	}
+
+	err = rtmp.SendMsg(&msg)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (rtmp *RtmpConn) CommonMsgSetPeerBandwidth(chunkStreamId uint32, bandWidthValue uint32, limitType uint8) (err error) {
+
+	var msg MessageStream
+
+	//msg payload
+	msg.payload = make([]uint8, 5)
+	binary.BigEndian.PutUint32(msg.payload[:4], bandWidthValue)
+	msg.payload[4] = limitType
+
+	//msg header
+	msg.header.length = 4
+	msg.header.typeId = RTMP_MSG_SetPeerBandwidth
+	msg.header.streamId = 0
+	msg.header.preferCsId = chunkStreamId
+
+	//begin to send.
+	if msg.header.preferCsId < 2 {
+		msg.header.preferCsId = RTMP_CID_ProtocolControl
+	}
+
+	err = rtmp.SendMsg(&msg)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (rtmp *RtmpConn) CommonMsgSetChunkSize(chunkSize uint32) (err error) {
+	var msg MessageStream
+
+	//msg payload
+	msg.payload = make([]uint8, 4)
+	binary.BigEndian.PutUint32(msg.payload[:], chunkSize)
+
+	//msg header
+	msg.header.length = 4
+	msg.header.typeId = RTMP_MSG_SetChunkSize
+	msg.header.streamId = 0
+	msg.header.preferCsId = RTMP_CID_ProtocolControl
+
+	err = rtmp.SendMsg(&msg)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 /**
 * 5.4. User Control Message (4)
 *
@@ -217,6 +481,14 @@ type UserControlMsg struct {
 }
 
 func (rtmp *RtmpConn) handleUserControlMessage(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	log.Println("msg type usercontrol msg.")
+
 	var offset uint32
 
 	if uint32(len(msg.payload))-offset < (2 + 4) {
@@ -231,6 +503,8 @@ func (rtmp *RtmpConn) handleUserControlMessage(msg *MessageStream) (err error) {
 
 	userCtrlMsg.eventData = binary.BigEndian.Uint32(msg.payload[offset : offset+4])
 	offset += 4
+
+	log.Println("user control msg, type=", userCtrlMsg.eventType)
 
 	if SrcPCUCSetBufferLength == userCtrlMsg.eventType {
 		if uint32(len(msg.payload))-offset < 4 {
@@ -297,6 +571,13 @@ func (rtmp *RtmpConn) ResponsePingMessage(chunkStreamId uint32, userCtrl *UserCo
 }
 
 func (rtmp *RtmpConn) handleSetWindowAcknowledgementSize(msg *MessageStream) (err error) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
 	var windowAcknowlegementSize uint32
 	if len(msg.payload) >= 4 {
 		windowAcknowlegementSize = binary.BigEndian.Uint32(msg.payload[0:4])
@@ -307,6 +588,8 @@ func (rtmp *RtmpConn) handleSetWindowAcknowledgementSize(msg *MessageStream) (er
 
 	if windowAcknowlegementSize > 0 {
 		rtmp.ackWindow.ackWindowSize = windowAcknowlegementSize
+		log.Println("peer set window acknowlegement size.", windowAcknowlegementSize)
+
 	} else {
 		//ignored.
 		log.Println("HandleMsgSetWindowsAcknowlegementSize, ack size is invalied.", windowAcknowlegementSize)
@@ -316,6 +599,11 @@ func (rtmp *RtmpConn) handleSetWindowAcknowledgementSize(msg *MessageStream) (er
 }
 
 func (rtmp *RtmpConn) handleSetChunkSize(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
 
 	var chunkSize uint32
 
@@ -338,17 +626,49 @@ func (rtmp *RtmpConn) handleSetChunkSize(msg *MessageStream) (err error) {
 }
 
 func (rtmp *RtmpConn) handleSetPeerBandWidth(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	log.Println("set bandwidth")
+
 	return
 }
 
 func (rtmp *RtmpConn) handleAcknowlegement(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	log.Println("acknowlegement")
+
 	return
 }
 
 func (rtmp *RtmpConn) handleAbortMsg(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	log.Println("abort msg, remote=", rtmp.Conn.RemoteAddr())
+
 	return
 }
 
 func (rtmp *RtmpConn) handleEdgeAndOriginServerCommand(msg *MessageStream) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	log.Println("edge and origin server command, remote=", rtmp.Conn.RemoteAddr())
+
 	return
 }

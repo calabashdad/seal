@@ -8,8 +8,9 @@ import (
 
 type RtmpConn struct {
 	net.Conn
-	chunks    map[uint32]*ChunkStream //key csid.
-	ackWindow struct {
+	chunks         map[uint32]*ChunkStream //key csid.
+	transactionIds map[float64]string      //key transaction id. value: request command name
+	ackWindow      struct {
 		ackWindowSize uint32 //
 		hasAckedSize  uint64 //size has acked to peer
 	}

@@ -27,29 +27,5 @@ func HandleRtmpSession(rtmpSession *RtmpConn) {
 
 	rtmpSession.RtmpMsgLoop()
 
-	log.Println("rtmp msg loop quit. remote=", rtmpSession.Conn.RemoteAddr())
-
-	//err = rtmpSession.Connect()
-	//if err != nil {
-	//	log.Println("rtmp connect failed, err=", err)
-	//	return
-	//}
-	//log.Println("rtmp connect success. remote=", rtmpSession.RemoteAddr())
-	//
-	////todo. bandwidth check. or reject the connect request.
-	//
-	//err = rtmpSession.CommonMsgSetChunkSize(g_conf_info.Rtmp.ChunkSize)
-	//if err != nil {
-	//	log.Println("server set chunk size failed.err=", err)
-	//	return
-	//}
-	//log.Println("server set chunk size success.")
-	//
-	//err = rtmpSession.IdendifyClient()
-	//if err != nil {
-	//	log.Println("identify client failed. err=", err)
-	//	return
-	//}
-	//log.Println("identify client success.")
-
+	log.Println("rtmp msg loop quit. err=", err, ",remote=", rtmpSession.Conn.RemoteAddr())
 }

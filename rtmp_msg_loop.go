@@ -20,7 +20,7 @@ func (rtmpSession *RtmpConn) RtmpMsgLoop() (err error) {
 			break
 		}
 
-		err = rtmpSession.DecodeAndHanleMsg(chunkStreamId)
+		err = rtmpSession.HanleMsg(chunkStreamId)
 		if err != nil {
 			break
 		}

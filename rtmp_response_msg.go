@@ -5,7 +5,7 @@ func (rtmp *RtmpConn) ResponseConnectApp(chunkStreamId uint32) (err error) {
 
 	//msg payload
 	msg.payload = append(msg.payload, Amf0WriteString(RTMP_AMF0_COMMAND_RESULT)...)
-	msg.payload = append(msg.payload, Amf0WriteNumber(1.0)...)
+	msg.payload = append(msg.payload, Amf0WriteNumber(1.0)...) //transaction id
 
 	var objs []Amf0Object
 
