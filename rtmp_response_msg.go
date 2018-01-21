@@ -1,8 +1,6 @@
 package main
 
-import "encoding/binary"
-
-func (rtmp *RtmpSession) ResponseConnectApp(chunk *ChunkStream) (err error) {
+func (rtmp *RtmpConn) ResponseConnectApp(chunkStreamId uint32) (err error) {
 	var msg MessageStream
 
 	//msg payload
@@ -99,40 +97,10 @@ func (rtmp *RtmpSession) ResponseConnectApp(chunk *ChunkStream) (err error) {
 	msg.header.length = uint32(len(msg.payload))
 	msg.header.typeId = RTMP_MSG_AMF0CommandMessage
 	msg.header.streamId = 0
-	if chunk.msg.header.preferCsId < 2 {
+	if chunkStreamId < 2 {
 		msg.header.preferCsId = RTMP_CID_ProtocolControl
 	} else {
-		msg.header.preferCsId = chunk.msg.header.preferCsId
-	}
-
-	err = rtmp.SendMsg(&msg)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func (rtmp *RtmpSession) ResponsePingMessage(chunk *ChunkStream, userCtrl *UserControlMsg) (err error) {
-	var msg MessageStream
-
-	//msg payload
-	var offset uint32
-
-	msg.payload = make([]uint8, 2+4) // 2(type) + 4(data)
-	binary.BigEndian.PutUint16(msg.payload[offset:offset+2], SrcPCUCPingResponse)
-	offset += 2
-	binary.BigEndian.PutUint32(msg.payload[offset:offset+4], userCtrl.eventData)
-	offset += 4
-
-	//msg header
-	msg.header.length = uint32(len(msg.payload))
-	msg.header.typeId = RTMP_MSG_UserControlMessage
-	msg.header.streamId = 0
-	if chunk.msg.header.preferCsId < 2 {
-		msg.header.preferCsId = RTMP_CID_ProtocolControl
-	} else {
-		msg.header.preferCsId = chunk.msg.header.preferCsId
+		msg.header.preferCsId = chunkStreamId
 	}
 
 	err = rtmp.SendMsg(&msg)

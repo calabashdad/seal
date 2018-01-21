@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-func (rtmp *RtmpSession) SendBytes(buf []uint8) (err error) {
+func (rtmp *RtmpConn) SendBytes(buf []uint8) (err error) {
 
 	err = rtmp.Conn.SetDeadline(time.Now().Add(time.Duration(g_conf_info.Rtmp.TimeOut) * time.Second))
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (rtmp *RtmpSession) ExpectBytes(size uint32, buf []uint8) (err error) {
+func (rtmp *RtmpConn) ExpectBytes(size uint32, buf []uint8) (err error) {
 
 	err = rtmp.Conn.SetDeadline(time.Now().Add(time.Duration(g_conf_info.Rtmp.TimeOut) * time.Second))
 	if err != nil {

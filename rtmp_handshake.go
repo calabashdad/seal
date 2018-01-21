@@ -34,7 +34,7 @@ var (
 	handshakeServerPartialKey = handshakeServerFullKey[:36]
 )
 
-func (rtmp *RtmpSession) HandShake() (err error) {
+func (rtmp *RtmpConn) HandShake() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())

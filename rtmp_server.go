@@ -6,7 +6,7 @@ import (
 	"net"
 )
 
-type RtmpSession struct {
+type RtmpConn struct {
 	net.Conn
 	chunks    map[uint32]*ChunkStream //key csid.
 	ackWindow struct {
@@ -18,8 +18,8 @@ type RtmpSession struct {
 	objectEncoding float64
 }
 
-func NewRtmpSession(c net.Conn) *RtmpSession {
-	return &RtmpSession{
+func NewRtmpSession(c net.Conn) *RtmpConn {
+	return &RtmpConn{
 		Conn:           c,
 		chunks:         make(map[uint32]*ChunkStream),
 		chunkSize:      RTMP_DEFAULT_CHUNK_SIZE,

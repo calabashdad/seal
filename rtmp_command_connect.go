@@ -13,10 +13,10 @@ type Amf0CommandConnectPkg struct {
 	amfOptional    interface{}
 }
 
-func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error) {
+func (rtmp *RtmpConn) handleAMF0CommandConnect(msg *MessageStream) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, "-", identify_panic.IdentifyPanic())
+			log.Println(err, ",panic at,", identify_panic.IdentifyPanic())
 		}
 	}()
 
@@ -24,7 +24,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error
 
 	var offset uint32
 
-	err, connectPkg.command = Amf0ReadString(chunk.msg.payload, &offset)
+	err, connectPkg.command = Amf0ReadString(msg.payload, &offset)
 	if err != nil {
 		return
 	}
@@ -34,7 +34,7 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error
 		return
 	}
 
-	err, connectPkg.transactionId = Amf0ReadNumber(chunk.msg.payload, &offset)
+	err, connectPkg.transactionId = Amf0ReadNumber(msg.payload, &offset)
 	if err != nil {
 		return
 	}
@@ -44,15 +44,15 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error
 		log.Println("warn:handleAMF0CommandConnect: transactionId is not 1. transactionId=", connectPkg.transactionId)
 	}
 
-	err, connectPkg.commandObjects = Amf0ReadObject(chunk.msg.payload, &offset)
+	err, connectPkg.commandObjects = Amf0ReadObject(msg.payload, &offset)
 	if err != nil {
 		return
 	}
 
-	if offset < uint32(len(chunk.msg.payload)) {
+	if offset < uint32(len(msg.payload)) {
 		var v interface{}
 		var marker uint8
-		err, v, marker = Amf0Discovery(chunk.msg.payload, &offset)
+		err, v, marker = Amf0Discovery(msg.payload, &offset)
 		if err != nil {
 			return
 		}
@@ -62,8 +62,26 @@ func (rtmp *RtmpSession) handleAMF0CommandConnect(chunk *ChunkStream) (err error
 		}
 	}
 
-	chunk.decodeResultType = DECODE_MSG_TYPE_Amf0CommandConnectPkg
-	chunk.decodeResult = connectPkg
+	err = rtmp.ParseConnectPkg(&connectPkg)
+	if err != nil {
+		log.Println("parse connect pkg error.", err)
+		return
+	}
+
+	err = rtmp.CommonMsgSetWindowAcknowledgementSize(msg.header.preferCsId, 2500000)
+	if err != nil {
+		return
+	}
+
+	err = rtmp.CommonMsgSetPeerBandwidth(msg.header.preferCsId, 2500000, 2)
+	if err != nil {
+		return
+	}
+
+	err = rtmp.ResponseConnectApp(msg.header.preferCsId)
+	if err != nil {
+		return
+	}
 
 	return
 }
@@ -79,7 +97,7 @@ func (pkg *Amf0CommandConnectPkg) Amf0ObjectsGetProperty(key string) (value inte
 	return
 }
 
-func (rtmp *RtmpSession) ParseConnectPkg(pkg *Amf0CommandConnectPkg) (err error) {
+func (rtmp *RtmpConn) ParseConnectPkg(pkg *Amf0CommandConnectPkg) (err error) {
 	tcUrlValue := pkg.Amf0ObjectsGetProperty("tcUrl")
 	if nil == tcUrlValue {
 		err = fmt.Errorf("tcUrl is nil.")

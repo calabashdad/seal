@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 )
 
-func (rtmp *RtmpSession) CommonMsgSetWindowAcknowledgementSize(chunk *ChunkStream, WindowAcknowledgementSize uint32) (err error) {
+func (rtmp *RtmpConn) CommonMsgSetWindowAcknowledgementSize(chunkStreamId uint32, WindowAcknowledgementSize uint32) (err error) {
 
 	var msg MessageStream
 
@@ -16,7 +16,7 @@ func (rtmp *RtmpSession) CommonMsgSetWindowAcknowledgementSize(chunk *ChunkStrea
 	msg.header.length = 4
 	msg.header.typeId = RTMP_MSG_WindowAcknowledgementSize
 	msg.header.streamId = 0
-	msg.header.preferCsId = chunk.msg.header.preferCsId
+	msg.header.preferCsId = chunkStreamId
 
 	//begin to send.
 	if msg.header.preferCsId < 2 {
@@ -31,7 +31,7 @@ func (rtmp *RtmpSession) CommonMsgSetWindowAcknowledgementSize(chunk *ChunkStrea
 	return
 }
 
-func (rtmp *RtmpSession) CommonMsgResponseWindowAcknowledgement(chunk *ChunkStream, ackedSize uint32) (err error) {
+func (rtmp *RtmpConn) CommonMsgResponseWindowAcknowledgement(chunkStreamId uint32, ackedSize uint32) (err error) {
 
 	var msg MessageStream
 
@@ -43,7 +43,7 @@ func (rtmp *RtmpSession) CommonMsgResponseWindowAcknowledgement(chunk *ChunkStre
 	msg.header.length = 4
 	msg.header.typeId = RTMP_MSG_Acknowledgement
 	msg.header.streamId = 0
-	msg.header.preferCsId = chunk.msg.header.preferCsId
+	msg.header.preferCsId = chunkStreamId
 
 	//begin to send.
 	if msg.header.preferCsId < 2 {
@@ -58,7 +58,7 @@ func (rtmp *RtmpSession) CommonMsgResponseWindowAcknowledgement(chunk *ChunkStre
 	return
 }
 
-func (rtmp *RtmpSession) CommonMsgSetPeerBandwidth(chunk *ChunkStream, bandWidthValue uint32, limitType uint8) (err error) {
+func (rtmp *RtmpConn) CommonMsgSetPeerBandwidth(chunkStreamId uint32, bandWidthValue uint32, limitType uint8) (err error) {
 
 	var msg MessageStream
 
@@ -71,7 +71,7 @@ func (rtmp *RtmpSession) CommonMsgSetPeerBandwidth(chunk *ChunkStream, bandWidth
 	msg.header.length = 4
 	msg.header.typeId = RTMP_MSG_SetPeerBandwidth
 	msg.header.streamId = 0
-	msg.header.preferCsId = chunk.msg.header.preferCsId
+	msg.header.preferCsId = chunkStreamId
 
 	//begin to send.
 	if msg.header.preferCsId < 2 {
@@ -86,7 +86,7 @@ func (rtmp *RtmpSession) CommonMsgSetPeerBandwidth(chunk *ChunkStream, bandWidth
 	return
 }
 
-func (rtmp *RtmpSession) CommonMsgSetChunkSize(chunkSize uint32) (err error) {
+func (rtmp *RtmpConn) CommonMsgSetChunkSize(chunkSize uint32) (err error) {
 	var msg MessageStream
 
 	//msg payload

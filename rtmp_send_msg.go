@@ -2,7 +2,7 @@ package main
 
 import "encoding/binary"
 
-func (rtmp *RtmpSession) SendMsg(msg *MessageStream) (err error) {
+func (rtmp *RtmpConn) SendMsg(msg *MessageStream) (err error) {
 
 	var payloadOffset uint32
 

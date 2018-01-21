@@ -34,12 +34,9 @@ type ChunkStream struct {
 
 	//decode message this time. when finished, will be reset to 0.
 	payloadSizeTmp uint32
-
-	decodeResultType uint32
-	decodeResult     interface{}
 }
 
-func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
+func (rtmp *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
@@ -74,12 +71,9 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			return
 		}
 
-		var ok bool
-		chunk, ok = rtmp.chunks[csid]
+		chunk, ok := rtmp.chunks[csid]
 		if !ok {
-			chunk = &ChunkStream{
-				decodeResultType: DECODE_MSG_TYPE_UNKNOWN,
-			}
+			chunk = &ChunkStream{}
 
 			rtmp.chunks[csid] = chunk
 		}
@@ -236,6 +230,7 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 			chunk.payloadSizeTmp += remainPayloadSize
 			if chunk.payloadSizeTmp == chunk.msg.header.length {
 
+				chunkStreamId = csid
 				//has recv entire rtmp message.
 				//reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
 				chunk.payloadSizeTmp = 0
@@ -250,17 +245,17 @@ func (rtmp *RtmpSession) RecvMsg() (err error, chunk *ChunkStream) {
 		return
 	}
 
-	err = rtmp.EstimateNeedSendAcknowlegement(chunk)
+	err = rtmp.EstimateNeedSendAcknowlegement(chunkStreamId)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (rtmp *RtmpSession) EstimateNeedSendAcknowlegement(chunk *ChunkStream) (err error) {
+func (rtmp *RtmpConn) EstimateNeedSendAcknowlegement(chunkStreamId uint32) (err error) {
 	if (rtmp.ackWindow.ackWindowSize > 0) && (rtmp.recvBytesSum-rtmp.ackWindow.hasAckedSize > uint64(rtmp.ackWindow.ackWindowSize)) {
 
-		err = rtmp.CommonMsgResponseWindowAcknowledgement(chunk, uint32(rtmp.recvBytesSum))
+		err = rtmp.CommonMsgResponseWindowAcknowledgement(chunkStreamId, uint32(rtmp.recvBytesSum))
 		if err != nil {
 			return
 		}
