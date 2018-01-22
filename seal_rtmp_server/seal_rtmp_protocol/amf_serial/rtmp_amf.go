@@ -31,10 +31,13 @@ func Amf0ObjectEof(data []uint8, offset *uint32) (res bool) {
 		return
 	}
 
-	objectEofFlag := uint32(data[*offset])<<16 + uint32(data[*offset+1])<<8 + uint32(data[*offset+2])
-	if protocol_stack.RTMP_AMF0_ObjectEnd == objectEofFlag {
+	if 0x00 == data[*offset] &&
+		0x00 == data[*offset+1] &&
+		protocol_stack.RTMP_AMF0_ObjectEnd == data[*offset+2] {
 		res = true
 		*offset += 3
+	} else {
+		res = false
 	}
 
 	return

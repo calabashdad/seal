@@ -8,9 +8,8 @@ import (
 )
 
 type ConfInfoRtmp struct {
-	Listen    string `yaml:"listen"`
-	TimeOut   uint32 `yaml:"timeout"`
-	ChunkSize uint32 `yaml:"chunk_size"`
+	Listen  string `yaml:"listen"`
+	TimeOut uint32 `yaml:"timeout"`
 }
 
 type ConfInfo struct {
@@ -50,5 +49,4 @@ func (t *ConfInfo) Loads(c string) (err error) {
 func (t *ConfInfo) Default() {
 	t.Rtmp.Listen = "1935"
 	t.Rtmp.TimeOut = 30
-	t.Rtmp.ChunkSize = 60000
 }

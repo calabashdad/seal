@@ -20,7 +20,7 @@ func (rtmpServer *RtmpServer) NewRtmpSession(c net.Conn) *seal_rtmp_conn.RtmpCon
 		Conn:           c,
 		TimeOut:        rtmpServer.Conf.TimeOut,
 		Chunks:         make(map[uint32]*seal_rtmp_conn.ChunkStream),
-		ChunkSize:      protocol_stack.RTMP_DEFAULT_CHUNK_SIZE,
+		ChunkSize:      protocol_stack.RTMP_CHUNKSIZE_MIN,
 		ObjectEncoding: protocol_stack.RTMP_SIG_AMF0_VER,
 		Role:           seal_rtmp_conn.RTMP_ROLE_UNKNOWN,
 	}
