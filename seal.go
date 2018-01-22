@@ -5,6 +5,8 @@ import (
 	"flag"
 	"log"
 	"os"
+	"seal/seal_conf"
+	"seal/seal_rtmp_server"
 	"sync"
 	"time"
 )
@@ -17,7 +19,8 @@ var (
 )
 
 var (
-	g_wg sync.WaitGroup
+	g_conf_info seal_conf.ConfInfo
+	g_wg        sync.WaitGroup
 )
 
 func init() {
@@ -54,7 +57,13 @@ func main() {
 	}
 
 	g_wg.Add(1)
-	StartRtmpServer()
+	if true {
+		rtmpServer := seal_rtmp_server.RtmpServer{
+			Conf: &g_conf_info.Rtmp,
+			Wg:   &g_wg,
+		}
+		rtmpServer.Start()
+	}
 
 	g_wg.Wait()
 	log.Println("seal quit gracefully.")
