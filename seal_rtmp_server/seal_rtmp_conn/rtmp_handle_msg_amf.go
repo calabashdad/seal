@@ -61,7 +61,7 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 	case protocol_stack.RTMP_AMF0_COMMAND_ENABLEVIDEO:
 		//todo.
 	case protocol_stack.RTMP_AMF0_DATA_SET_DATAFRAME, protocol_stack.RTMP_AMF0_DATA_ON_METADATA:
-		//todo.
+		err = rtmp.handleAmf0DataFrameOrMeta(msg)
 	case protocol_stack.RTMP_AMF0_DATA_ON_CUSTOMDATA:
 		//todo.
 	case protocol_stack.RTMP_AMF0_COMMAND_CLOSE_STREAM:
@@ -75,7 +75,7 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 	case protocol_stack.RTMP_AMF0_DATA_SAMPLE_ACCESS:
 		//todo.
 	default:
-		log.Println("handleAMFCommandAndDataMessage:unknown command name.", command)
+		err = fmt.Errorf("handleAMFCommandAndDataMessage:unknown command name.", command)
 	}
 
 	if err != nil {

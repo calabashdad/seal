@@ -79,7 +79,7 @@ func Amf0WriteUtf8(value string) (data []uint8) {
 	return
 }
 
-func Amf0ReadAny(data []uint8, offset *uint32) (err error, value interface{}) {
+func Amf0ReadAny(data []uint8, marker *uint8, offset *uint32) (err error, value interface{}) {
 
 	if Amf0ObjectEof(data, offset) {
 		return
@@ -90,9 +90,9 @@ func Amf0ReadAny(data []uint8, offset *uint32) (err error, value interface{}) {
 		return
 	}
 
-	marker := data[*offset]
+	*marker = data[*offset]
 
-	switch marker {
+	switch *marker {
 	case protocol_stack.RTMP_AMF0_String:
 		err, value = Amf0ReadString(data, offset)
 	case protocol_stack.RTMP_AMF0_Boolean:
@@ -250,7 +250,8 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 			break
 		}
 
-		err, amf0object.Value = Amf0ReadAny(data, offset)
+		var marker_local uint8
+		err, amf0object.Value = Amf0ReadAny(data, &marker_local, offset)
 		if err != nil {
 			break
 		}
@@ -454,12 +455,13 @@ func Amf0ReadEcmaArray(data []uint8, offset *uint32) (err error, value Amf0EcmaA
 		}
 
 		var amf Amf0Object
-		err, amf.PropertyName = Amf0ReadString(data, offset)
+		err, amf.PropertyName = Amf0ReadUtf8(data, offset)
 		if err != nil {
 			break
 		}
 
-		err, amf.Value = Amf0ReadAny(data, offset)
+		var marker_local uint8
+		err, amf.Value = Amf0ReadAny(data, &marker_local, offset)
 		if err != nil {
 			break
 		}
@@ -483,7 +485,7 @@ func Amf0WriteEcmaArray(objs []Amf0Object) (data []uint8) {
 	offset += 4
 
 	for _, v := range objs {
-		data = append(data, Amf0WriteString(v.PropertyName)...)
+		data = append(data, Amf0WriteUtf8(v.PropertyName)...)
 		data = append(data, Amf0WriteAny(v)...)
 	}
 
@@ -522,7 +524,8 @@ func Amf0ReadStrictArray(data []uint8, offset *uint32) (err error, value Amf0Str
 
 		var obj interface{}
 
-		err, obj = Amf0ReadAny(data, offset)
+		var marker_local uint8
+		err, obj = Amf0ReadAny(data, &marker_local, offset)
 		if err != nil {
 			break
 		}

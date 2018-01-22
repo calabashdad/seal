@@ -31,6 +31,10 @@ type RtmpConn struct {
 	ChunkSize      uint32 //default is RTMP_DEFAULT_CHUNK_SIZE. can set by peer.
 	ObjectEncoding float64
 	Role           uint8 //publish or play.
+	MetaData       struct {
+		marker uint8
+		value  interface{}
+	}
 }
 
 func (rtmpSession *RtmpConn) HandleRtmpSession() {
@@ -183,7 +187,7 @@ func (rtmp *RtmpConn) HanleMsg(chunkStreamId uint32) (err error) {
 	case protocol_stack.RTMP_MSG_EdgeAndOriginServerCommand:
 		err = rtmp.handleEdgeAndOriginServerCommand(&chunk.msg)
 	default:
-		err = fmt.Errorf("HanleMsg: unknown msg type. ", chunk.msg.header.typeId)
+		err = fmt.Errorf("HanleMsg: unknown msg type. typeid=", chunk.msg.header.typeId)
 	}
 
 	if err != nil {
