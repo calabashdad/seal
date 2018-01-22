@@ -186,6 +186,16 @@ func (rtmp *RtmpConn) HanleMsg(chunkStreamId uint32) (err error) {
 		err = rtmp.handleAbortMsg(&chunk.msg)
 	case protocol_stack.RTMP_MSG_EdgeAndOriginServerCommand:
 		err = rtmp.handleEdgeAndOriginServerCommand(&chunk.msg)
+	case protocol_stack.RTMP_MSG_AMF3SharedObject:
+		//todo
+	case protocol_stack.RTMP_MSG_AMF0SharedObject:
+		//todo
+	case protocol_stack.RTMP_MSG_AudioMessage:
+		err = rtmp.handleMsgAudio(&chunk.msg)
+	case protocol_stack.RTMP_MSG_VideoMessage:
+		err = rtmp.handleMsgVideo(&chunk.msg)
+	case protocol_stack.RTMP_MSG_AggregateMessage:
+		//todo.
 	default:
 		err = fmt.Errorf("HanleMsg: unknown msg type. typeid=", chunk.msg.header.typeId)
 	}

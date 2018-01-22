@@ -127,6 +127,40 @@ const (
 
 	RTMP_MSG_AMF0DataMessage = 18 // 0x12
 	RTMP_MSG_AMF3DataMessage = 15 // 0x0F
+
+	/**
+	3.3. Shared object message
+	A shared object is a Flash object (a collection of name value pairs)
+	that are in synchronization across multiple clients, instances, and
+	so on. The message types kMsgContainer=19 for AMF0 and
+	kMsgContainerEx=16 for AMF3 are reserved for shared object events.
+	Each message can contain multiple events.
+	*/
+	RTMP_MSG_AMF3SharedObject = 16 // 0x10
+	RTMP_MSG_AMF0SharedObject = 19 // 0x13
+	/**
+	  3.4. Audio message
+	  The client or the server sends this message to send audio data to the
+	  peer. The message type value of 8 is reserved for audio messages.
+	*/
+	RTMP_MSG_AudioMessage = 8 // 0x08
+	/* *
+	   3.5. Video message
+	   The client or the server sends this message to send video data to the
+	   peer. The message type value of 9 is reserved for video messages.
+	   These messages are large and can delay the sending of other type of
+	   messages. To avoid such a situation, the video message is assigned
+	   the lowest priority.
+	*/
+	RTMP_MSG_VideoMessage = 9 // 0x09
+	/**
+	  3.6. Aggregate message
+	  An aggregate message is a single message that contains a list of submessages.
+	  The message type value of 22 is reserved for aggregate
+	  messages.
+	*/
+	RTMP_MSG_AggregateMessage = 22 // 0x16
+
 )
 
 const (
