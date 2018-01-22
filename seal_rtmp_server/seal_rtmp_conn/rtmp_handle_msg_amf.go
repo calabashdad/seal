@@ -53,7 +53,7 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 	case protocol_stack.RTMP_AMF0_COMMAND_FC_PUBLISH:
 		err = rtmp.handleAmf0CmdFcPublish(msg)
 	case protocol_stack.RTMP_AMF0_COMMAND_PUBLISH:
-		//todo.
+		err = rtmp.handleAmf0CmdPublish(msg)
 	case protocol_stack.RTMP_AMF0_COMMAND_UNPUBLISH:
 		//todo.
 	case protocol_stack.RTMP_AMF0_COMMAND_KEEPLIVE:
