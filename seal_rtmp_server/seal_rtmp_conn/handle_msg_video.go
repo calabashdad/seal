@@ -13,7 +13,7 @@ func (rtmp *RtmpConn) handleMsgVideo(msg *MessageStream) (err error) {
 		}
 	}()
 
-	log.Println("recv video data, timestamp=", msg.header.timestamp)
+	//log.Println("recv video data, timestamp=", msg.header.timestamp)
 
 	return
 }

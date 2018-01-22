@@ -12,7 +12,7 @@ func (rtmp *RtmpConn) handleMsgAudio(msg *MessageStream) (err error) {
 		}
 	}()
 
-	log.Println("recv audio data, timestamp=", msg.header.timestamp)
+	//log.Println("recv audio data, timestamp=", msg.header.timestamp)
 
 	return
 }

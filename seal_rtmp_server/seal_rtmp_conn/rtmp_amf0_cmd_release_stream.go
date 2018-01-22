@@ -2,9 +2,11 @@ package seal_rtmp_conn
 
 import (
 	"UtilsTools/identify_panic"
+	"fmt"
 	"log"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/amf_serial"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
+	"strings"
 )
 
 func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error) {
@@ -30,8 +32,8 @@ func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error)
 		return
 	}
 
-	var streamName string
-	err, streamName = amf_serial.Amf0ReadString(msg.payload, &offset)
+	var streamNameWithToken string
+	err, streamNameWithToken = amf_serial.Amf0ReadString(msg.payload, &offset)
 	if err != nil {
 		return
 	}
@@ -43,8 +45,25 @@ func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error)
 
 	rtmp.Role = RTMP_ROLE_PUBLISH
 
+	streamWithoutToken, tokenStr := ParseStreamName(streamNameWithToken)
+
+	_, ok := MapPublishingStreams.Load(streamWithoutToken)
+	if ok {
+		err = fmt.Errorf("stream ", streamNameWithToken, " can not publish, becasue has publishing now.")
+		return
+	} else {
+		MapPublishingStreams.Store(streamWithoutToken, tokenStr)
+	}
+
+	if err != nil {
+		return
+	}
+
+	rtmp.StreamInfo.stream = streamWithoutToken
+	rtmp.StreamInfo.token = tokenStr
+
 	log.Println("handle amf0 cmd release stream success. publish role, comand=", commandName, ", transaction id=", transactionId,
-		"stream name=", streamName)
+		"stream name=", streamWithoutToken, ",token=", tokenStr)
 
 	return
 }
@@ -76,6 +95,21 @@ func (rtmp *RtmpConn) ResponseAmf0CmdReleaseStream(chunkStreamId uint32, transac
 	err = rtmp.SendMsg(&msg)
 	if err != nil {
 		return
+	}
+
+	return
+}
+
+func ParseStreamName(s string) (stream string, token string) {
+
+	const TOKEN_STR = "?token="
+
+	loc := strings.Index(s, TOKEN_STR)
+	if loc < 0 {
+		stream = s
+	} else {
+		stream = s[0:loc]
+		token = s[loc+len(TOKEN_STR):]
 	}
 
 	return

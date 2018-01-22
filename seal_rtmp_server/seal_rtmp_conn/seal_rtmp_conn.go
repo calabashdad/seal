@@ -8,6 +8,7 @@ import (
 	"net"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/handshake"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
+	"sync"
 )
 
 //rtmp conn role.
@@ -17,6 +18,8 @@ const (
 	RTMP_ROLE_PUBLISH = 1
 	RTMP_ROLE_PALY    = 2
 )
+
+var MapPublishingStreams sync.Map
 
 type RtmpConn struct {
 	net.Conn
@@ -35,6 +38,10 @@ type RtmpConn struct {
 		marker uint8
 		value  interface{}
 	}
+	StreamInfo struct {
+		stream string
+		token  string
+	}
 }
 
 func (rtmpSession *RtmpConn) HandleRtmpSession() {
@@ -44,6 +51,8 @@ func (rtmpSession *RtmpConn) HandleRtmpSession() {
 		}
 
 		rtmpSession.Conn.Close()
+		MapPublishingStreams.Delete(rtmpSession.StreamInfo.stream)
+
 		log.Println("One RtmpConn finished.remote=", rtmpSession.Conn.RemoteAddr())
 	}()
 
