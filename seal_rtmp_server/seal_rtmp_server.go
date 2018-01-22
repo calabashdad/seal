@@ -17,12 +17,11 @@ type RtmpServer struct {
 
 func (rtmpServer *RtmpServer) NewRtmpSession(c net.Conn) *seal_rtmp_conn.RtmpConn {
 	return &seal_rtmp_conn.RtmpConn{
-		Conn:           c,
-		TimeOut:        rtmpServer.Conf.TimeOut,
-		Chunks:         make(map[uint32]*seal_rtmp_conn.ChunkStream),
-		ChunkSize:      protocol_stack.RTMP_CHUNKSIZE_MIN,
-		ObjectEncoding: protocol_stack.RTMP_SIG_AMF0_VER,
-		Role:           seal_rtmp_conn.RTMP_ROLE_UNKNOWN,
+		Conn:      c,
+		TimeOut:   rtmpServer.Conf.TimeOut,
+		Chunks:    make(map[uint32]*seal_rtmp_conn.ChunkStream),
+		ChunkSize: protocol_stack.RTMP_CHUNKSIZE_MIN,
+		Role:      seal_rtmp_conn.RTMP_ROLE_UNKNOWN,
 	}
 }
 

@@ -32,8 +32,8 @@ type RtmpConn struct {
 	}
 	RecvBytesSum   uint64
 	ChunkSize      uint32 //default is RTMP_DEFAULT_CHUNK_SIZE. can set by peer.
+	Role           uint8  //publish or play.
 	ObjectEncoding float64
-	Role           uint8 //publish or play.
 	MetaData       struct {
 		marker uint8
 		value  interface{}
