@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"log"
+	"time"
 )
 
 var (
@@ -42,6 +43,7 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 
 	clientTime := binary.BigEndian.Uint32(c1[0:4])
 	clientVer := binary.BigEndian.Uint32(c1[4:8])
+	_ = clientTime
 
 	_ = clientVer
 
@@ -64,9 +66,20 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 	//create s0
 	s0[0] = 3
 
+	//create s1
+	CreateS1(s1, handshakeServerPartialKey)
+
+	//create s2.
+	CreateS2(s2, serverDigestForS2)
+
+	return true
+}
+
+func CreateS1(s1 []uint8, key []uint8) {
+
 	//create s1. time(4B) version(4B) [digest]{random} [key]{random}
-	serverTime := clientTime
-	serverVer := uint32(0x0d0e0a0d)
+	serverTime := uint32(time.Now().Unix())
+	serverVer := uint32(0x0a0b0c0d)
 	binary.BigEndian.PutUint32(s1[0:4], serverTime)
 	binary.BigEndian.PutUint32(s1[4:8], serverVer)
 	//use digest-key scheme.
@@ -88,17 +101,20 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 	digestData := h.Sum(nil)
 	copy(s1[digestLoc:], digestData)
 
-	//create s2.
+	return
+}
+
+func CreateS2(s2 []uint8, key []uint8) {
 	// 1536bytes c2s2. c2 and s2 has the same structure.
 	//random-data: 1504bytes
 	//digest-data: 32bytes
 	rand.Read(s2[:])
-	h = hmac.New(sha256.New, serverDigestForS2)
+	h := hmac.New(sha256.New, key)
 	h.Write(s2[:len(s2)-32])
 	digestS2 := h.Sum(nil)
 	copy(s2[len(s2)-32:], digestS2)
 
-	return true
+	return
 }
 
 //just for c1 or s1
