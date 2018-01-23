@@ -45,7 +45,7 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 	case protocol_stack.RTMP_AMF0_COMMAND_CREATE_STREAM:
 		err = rtmp.handleAmf0CmdCreateStream(msg)
 	case protocol_stack.RTMP_AMF0_COMMAND_PLAY:
-		//todo.
+		err = rtmp.handleAmf0CmdPlay(msg)
 	case protocol_stack.RTMP_AMF0_COMMAND_PAUSE:
 		//todo.
 	case protocol_stack.RTMP_AMF0_COMMAND_RELEASE_STREAM:
@@ -70,6 +70,8 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 		//todo
 	case protocol_stack.RTMP_AMF0_COMMAND_ON_STATUS:
 		//todo
+	case protocol_stack.RTMP_AMF0_COMMAND_GET_STREAM_LENGTH:
+		err = rtmp.handleAmf0CmdGetStreamLength(msg)
 	case protocol_stack.RTMP_AMF0_COMMAND_INSERT_KEYFREAME:
 		//todo
 	case protocol_stack.RTMP_AMF0_DATA_SAMPLE_ACCESS:

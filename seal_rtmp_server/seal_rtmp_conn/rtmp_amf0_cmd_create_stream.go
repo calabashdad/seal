@@ -1,6 +1,7 @@
 package seal_rtmp_conn
 
 import (
+	"fmt"
 	"UtilsTools/identify_panic"
 	"log"
 	"math"
@@ -20,6 +21,15 @@ func (rtmp *RtmpConn) handleAmf0CmdCreateStream(msg *MessageStream) (err error) 
 
 	var commandName string
 	err, commandName = amf_serial.Amf0ReadString(msg.payload, &offset)
+
+	if err != nil {
+		return
+	}
+
+	if commandName != protocol_stack.RTMP_AMF0_COMMAND_CREATE_STREAM {
+		fmt.Errorf("handleAmf0CmdCreateStream, command name is wrong, cmd=", commandName)
+		return
+	}
 
 	var transactionId float64
 	err, transactionId = amf_serial.Amf0ReadNumber(msg.payload, &offset)

@@ -39,7 +39,7 @@ type RtmpConn struct {
 		value  interface{}
 	}
 	StreamInfo struct {
-		stream string
+		stream string //withou token.
 		token  string
 	}
 }
