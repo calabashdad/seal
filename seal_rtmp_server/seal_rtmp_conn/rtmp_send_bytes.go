@@ -11,9 +11,11 @@ func (rtmp *RtmpConn) SendBytes(buf []uint8) (err error) {
 		return
 	}
 
-	if _, err = rtmp.Conn.Write(buf); err != nil {
+	var n int
+	if n, err = rtmp.Conn.Write(buf); err != nil {
 		return
 	}
+	_ = n
 
 	return
 }

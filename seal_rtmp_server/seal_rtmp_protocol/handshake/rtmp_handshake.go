@@ -66,18 +66,21 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 
 	//create s1
 	serverTime := clientTime
-	serverVer := uint32(0x0a0b0c0d)
+	serverVer := uint32(0x0d0e0a0d)
 	binary.BigEndian.PutUint32(s1[0:4], serverTime)
 	binary.BigEndian.PutUint32(s1[4:8], serverVer)
+	//use digest-key scheme.
+
+	var randomDataoffset uint32
 	for {
-		rand.Read(s1[8:])
-		if uint32(s1[8]+s1[9]+s1[10]+s1[11]) < (764 - 32) {
+		rand.Read(s1[8:]) //8 : time(4B)server version(4B)
+		randomDataoffset = uint32(s1[8] + s1[9] + s1[10] + s1[11])
+		if randomDataoffset > 0 && randomDataoffset < 728 {
 			break
 		}
 	}
 
-	//use digest-key scheme.
-	digestLoc := 8 + s1[8] + s1[9] + s1[10] + s1[11]
+	digestLoc := 8 + 4 + randomDataoffset
 
 	h := hmac.New(sha256.New, handshakeServerPartialKey)
 	h.Write(s1[:digestLoc])
