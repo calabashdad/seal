@@ -78,22 +78,29 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) bool {
 func CreateS1(s1 []uint8, key []uint8) {
 
 	//create s1. time(4B) version(4B) [digest]{random} [key]{random}
+	var offset uint32
+
 	serverTime := uint32(time.Now().Unix())
 	serverVer := uint32(0x0a0b0c0d)
-	binary.BigEndian.PutUint32(s1[0:4], serverTime)
-	binary.BigEndian.PutUint32(s1[4:8], serverVer)
+	binary.BigEndian.PutUint32(s1[offset:offset+4], serverTime)
+	offset += 4
+	binary.BigEndian.PutUint32(s1[offset:offset+4], serverVer)
+	offset += 4
 	//use digest-key scheme.
 
 	var randomDataoffset uint32
 	for {
-		rand.Read(s1[4+4:]) // time(4B)server version(4B)
-		randomDataoffset = uint32(s1[8] + s1[9] + s1[10] + s1[11])
+		rand.Read(s1[offset:]) // time(4B)server version(4B)
+		randomDataoffset = uint32(s1[offset]) + uint32(s1[offset+1]) + uint32(s1[offset+2]) + uint32(s1[offset+3])
 		if randomDataoffset > 0 && randomDataoffset < 728 {
+			offset += 4
 			break
+		} else {
+			randomDataoffset = 0
 		}
 	}
 
-	digestLoc := 4 + 4 + 4 + randomDataoffset //time(4B) version(4B) + digest[offset(4B) + random1(offset B) + digest + random2] + key[]
+	digestLoc := offset + randomDataoffset //time(4B) version(4B) + digest[offset(4B) + random1(offset B) + digest + random2] + key[]
 
 	h := hmac.New(sha256.New, handshakeServerPartialKey)
 	h.Write(s1[:digestLoc])
