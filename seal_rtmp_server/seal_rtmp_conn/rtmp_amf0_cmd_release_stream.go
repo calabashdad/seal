@@ -62,7 +62,7 @@ func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error)
 	rtmp.StreamInfo.stream = streamWithoutToken
 	rtmp.StreamInfo.token = tokenStr
 
-	log.Println("handle amf0 cmd release stream success. publish role, comand=", commandName, ", transaction id=", transactionId,
+	log.Println("handle amf0 cmd release stream success. new publish role, comand=", commandName, ", transaction id=", transactionId,
 		"stream name=", streamWithoutToken, ",token=", tokenStr)
 
 	return
