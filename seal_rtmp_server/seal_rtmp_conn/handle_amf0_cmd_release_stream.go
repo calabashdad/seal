@@ -53,7 +53,7 @@ func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error)
 
 	rtmp.Role = RTMP_ROLE_PUBLISH
 
-	streamWithoutToken, tokenStr := ParseStreamName(streamNameWithToken)
+	streamWithoutToken, tokenStr := handleParseStreamName(streamNameWithToken)
 
 	_, ok := MapPublishingStreams.Load(streamWithoutToken)
 	if ok {
@@ -107,4 +107,3 @@ func (rtmp *RtmpConn) ResponseAmf0CmdReleaseStream(chunkStreamId uint32, transac
 
 	return
 }
-

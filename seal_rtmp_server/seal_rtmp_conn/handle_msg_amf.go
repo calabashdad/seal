@@ -77,7 +77,7 @@ func (rtmp *RtmpConn) handleAMFCommandAndDataMessage(msg *MessageStream) (err er
 	case protocol_stack.RTMP_AMF0_DATA_SAMPLE_ACCESS:
 		//todo.
 	default:
-		err = fmt.Errorf("handleAMFCommandAndDataMessage:unknown command name.", command)
+		log.Println("handleAMFCommandAndDataMessage:unknown command name.", command)
 	}
 
 	if err != nil {

@@ -384,3 +384,7 @@ const (
 const (
 	FMS_VERSION = "1.0.0"
 )
+
+const (
+	RTMP_SIG_CLIENT_ID = "ASAICiss"
+)

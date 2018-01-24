@@ -2,7 +2,7 @@ package seal_rtmp_conn
 
 import "strings"
 
-func ParseStreamName(s string) (stream string, token string) {
+func handleParseStreamName(s string) (stream string, token string) {
 
 	const TOKEN_STR = "?token="
 

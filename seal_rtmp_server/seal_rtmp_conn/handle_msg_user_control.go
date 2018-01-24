@@ -80,13 +80,13 @@ func (rtmp *RtmpConn) handleUserControlMessage(msg *MessageStream) (err error) {
 	case protocol_stack.SrcPCUCStreamEOF:
 	case protocol_stack.SrcPCUCStreamDry:
 	case protocol_stack.SrcPCUCSetBufferLength:
-
+		err = rtmp.handleUserCtrlSetBufferLength(msg.header.preferCsId, &userCtrlMsg)
 	case protocol_stack.SrcPCUCStreamIsRecorded:
 	case protocol_stack.SrcPCUCPingRequest:
 		err = rtmp.handleUserCtrlResponsePingMessage(msg.header.preferCsId, &userCtrlMsg)
 	case protocol_stack.SrcPCUCPingResponse:
 	default:
-		err = fmt.Errorf("HandleMsgUserControl unknown event type.type=", userCtrlMsg.eventType)
+		log.Println("HandleMsgUserControl unknown event type.type=", userCtrlMsg.eventType)
 	}
 
 	if err != nil {

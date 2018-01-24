@@ -49,7 +49,7 @@ func (rtmp *RtmpConn) HandleMsg(chunkStreamId uint32) (err error) {
 	case protocol_stack.RTMP_MSG_AggregateMessage:
 		//todo.
 	default:
-		err = fmt.Errorf("HanleMsg: unknown msg type. typeid=", chunk.msg.header.typeId)
+		log.Println("HanleMsg: unknown msg type. typeid=", chunk.msg.header.typeId)
 	}
 
 	if err != nil {
