@@ -47,6 +47,11 @@ type RtmpConn struct {
 
 	//when role is player, this is significative
 	msgChan chan *MessageStream
+
+	//cache
+	cacheMsgH264SequenceKeyFrame *MessageStream
+	cacheMsgAACSequenceHeader    *MessageStream
+	cacheMsgMetaData             *MessageStream
 }
 
 func (rtmpSession *RtmpConn) RtmpMsgLoop() (err error) {

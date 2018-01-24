@@ -45,9 +45,22 @@ func (rtmp *RtmpConn) DestructWhenRtmpSessionDead() {
 func (rtmp *RtmpConn) PlayerRegistePublishStream() (res bool) {
 	v, ok := MapPublishingStreams.Load(rtmp.StreamInfo.stream)
 	if ok {
-		rtmp_local := v.(*RtmpConn)
-		rtmp_local.players.Store(rtmp.Conn.RemoteAddr(), rtmp.msgChan)
+		rtmpPub := v.(*RtmpConn)
+		rtmpPub.players.Store(rtmp.Conn.RemoteAddr(), rtmp.msgChan)
 		res = true
+
+		if nil != rtmpPub.cacheMsgMetaData {
+			rtmp.msgChan <- rtmpPub.cacheMsgMetaData
+		}
+
+		if nil != rtmpPub.cacheMsgH264SequenceKeyFrame {
+			rtmp.msgChan <- rtmpPub.cacheMsgH264SequenceKeyFrame
+		}
+
+		if nil != rtmpPub.cacheMsgAACSequenceHeader {
+			rtmp.msgChan <- rtmpPub.cacheMsgAACSequenceHeader
+		}
+
 	} else {
 		res = false
 	}
@@ -58,7 +71,9 @@ func (rtmp *RtmpConn) PlayerRegistePublishStream() (res bool) {
 func (rtmp *RtmpConn) PlayerUnRegistePublishStream() {
 	v, ok := MapPublishingStreams.Load(rtmp.StreamInfo.stream)
 	if ok {
-		rtmp_local := v.(*RtmpConn)
-		rtmp_local.players.Delete(rtmp.Conn.RemoteAddr())
+		rtmpPub := v.(*RtmpConn)
+		rtmpPub.players.Delete(rtmp.Conn.RemoteAddr())
+
+		log.Println("player dead, unregister from publisher.")
 	}
 }

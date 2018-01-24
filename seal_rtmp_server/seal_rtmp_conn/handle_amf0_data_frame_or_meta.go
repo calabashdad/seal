@@ -43,5 +43,9 @@ func (rtmp *RtmpConn) handleAmf0DataFrameOrMeta(msg *MessageStream) (err error) 
 		log.Println("handle amf0 meta data success, meta data name=", metaDataName, ",obj=", rtmp.MetaData.value.([]amf_serial.Amf0Object))
 	}
 
+	if RTMP_ROLE_PUBLISH == rtmp.Role {
+		rtmp.cacheMsgMetaData = msg
+	}
+
 	return
 }

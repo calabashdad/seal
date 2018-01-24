@@ -114,6 +114,7 @@ func (rtmp *RtmpConn) handleAmf0CmdPlay(msg *MessageStream) (err error) {
 
 	err = rtmp.handlePlayLoop()
 	if err != nil {
+		log.Println("player msg loop quit ,stream=", rtmp.StreamInfo.stream, ",err=", err)
 		return
 	}
 
