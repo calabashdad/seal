@@ -121,25 +121,25 @@ func (rtmp *RtmpConn) ResponseAmf0CmdPlay(msg *MessageStream) (err error) {
 		return
 	}
 
-	// err = rtmp.ResponseAmf0CmdPlayOnStatusNetStreamPlayReset(msg.header.preferCsId, msg.header.streamId)
-	// if err != nil {
-	// 	return
-	// }
+	err = rtmp.ResponseAmf0CmdPlayOnStatusNetStreamPlayReset(msg.header.preferCsId, msg.header.streamId)
+	if err != nil {
+		return
+	}
 
-	// err = rtmp.ResponseAmf0CmdPlayOnStatusNetStreamPlayStart(msg.header.preferCsId, msg.header.streamId)
-	// if err != nil {
-	// 	return
-	// }
+	err = rtmp.ResponseAmf0CmdPlayOnStatusNetStreamPlayStart(msg.header.preferCsId, msg.header.streamId)
+	if err != nil {
+		return
+	}
 
-	// err = rtmp.ResponseAmf0CmdPlayRtmpSampleAccess(msg.header.preferCsId, msg.header.streamId)
-	// if err != nil {
-	// 	return
-	// }
+	err = rtmp.ResponseAmf0CmdPlayRtmpSampleAccess(msg.header.preferCsId, msg.header.streamId)
+	if err != nil {
+		return
+	}
 
-	// err = rtmp.ResponseAmf0CmdPlayOnStatusNetStreamDataStart(msg.header.preferCsId, msg.header.streamId)
-	// if err != nil {
-	// 	return
-	// }
+	err = rtmp.ResponseAmf0CmdPlayOnStatusNetStreamDataStart(msg.header.preferCsId, msg.header.streamId)
+	if err != nil {
+		return
+	}
 
 	return
 }
@@ -356,12 +356,26 @@ func (rtmp *RtmpConn) ResponseAmf0CmdPlayOnStatusNetStreamDataStart(chunkStreamI
 
 	//payload
 	msg.payload = append(msg.payload, amf_serial.Amf0WriteString(protocol_stack.RTMP_AMF0_COMMAND_ON_STATUS)...)
+	msg.payload = append(msg.payload, amf_serial.Amf0WriteNumber(0.0)...) //transaction id, set to 0
+	msg.payload = append(msg.payload, amf_serial.Amf0WriteNull()...)
 
 	var objs []amf_serial.Amf0Object
 
 	objs = append(objs, amf_serial.Amf0Object{
+		PropertyName: protocol_stack.StatusLevel,
+		Value:        protocol_stack.StatusLevelStatus,
+		ValueType:    protocol_stack.RTMP_AMF0_String,
+	})
+
+	objs = append(objs, amf_serial.Amf0Object{
 		PropertyName: protocol_stack.StatusCode,
 		Value:        protocol_stack.StatusCodeDataStart,
+		ValueType:    protocol_stack.RTMP_AMF0_String,
+	})
+
+	objs = append(objs, amf_serial.Amf0Object{
+		PropertyName: protocol_stack.StatusDescription,
+		Value:        "Started playing stream data.",
 		ValueType:    protocol_stack.RTMP_AMF0_String,
 	})
 
