@@ -60,7 +60,7 @@ func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error)
 		err = fmt.Errorf("stream ", streamNameWithToken, " can not publish, becasue has publishing now.")
 		return
 	} else {
-		MapPublishingStreams.Store(streamWithoutToken, tokenStr)
+		MapPublishingStreams.Store(streamWithoutToken, rtmp)
 	}
 
 	if err != nil {

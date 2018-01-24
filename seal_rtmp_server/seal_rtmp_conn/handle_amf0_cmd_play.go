@@ -66,6 +66,12 @@ func (rtmp *RtmpConn) handleAmf0CmdPlay(msg *MessageStream) (err error) {
 	}
 
 	rtmp.Role = RTMP_ROLE_PALY
+	rtmp.msgChan = make(chan *MessageStream, 256)
+	registerRes := rtmp.PlayerRegistePublishStream()
+	if !registerRes {
+		err = fmt.Errorf("can not play, because the stream is not publishing.", rtmp.StreamInfo.stream)
+		return
+	}
 
 	log.Println("handle amf0 cmd play success. ",
 		",transactionId=", transactionId,
@@ -104,7 +110,12 @@ func (rtmp *RtmpConn) handleAmf0CmdPlay(msg *MessageStream) (err error) {
 		return
 	}
 
-	log.Println("response to play client success.")
+	log.Println("response to play client success. now playing loop....")
+
+	err = rtmp.handlePlayLoop()
+	if err != nil {
+		return
+	}
 
 	return
 }

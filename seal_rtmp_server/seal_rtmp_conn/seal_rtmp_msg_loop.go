@@ -15,6 +15,8 @@ const (
 	RTMP_ROLE_PALY    = 2
 )
 
+//key: publish stream without token. value: RtmpConn.
+//this map just use to judge if stream has published
 var MapPublishingStreams sync.Map
 
 type RtmpConn struct {
@@ -28,7 +30,7 @@ type RtmpConn struct {
 	}
 	RecvBytesSum   uint64
 	ChunkSize      uint32 //default is RTMP_DEFAULT_CHUNK_SIZE. can set by peer.
-	Role           uint8  //publish or play.
+	Role           uint8  //publish or play. RTMP_ROLE_*
 	ObjectEncoding float64
 	MetaData       struct {
 		marker uint8
@@ -38,6 +40,13 @@ type RtmpConn struct {
 		stream string //withou token.
 		token  string
 	}
+
+	//key: client remoteAddr. value: chan *MessageStream
+	//when role is publish, this is significative
+	players sync.Map
+
+	//when role is player, this is significative
+	msgChan chan *MessageStream
 }
 
 func (rtmpSession *RtmpConn) RtmpMsgLoop() (err error) {
