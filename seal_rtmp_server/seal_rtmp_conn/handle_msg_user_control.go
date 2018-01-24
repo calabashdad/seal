@@ -80,44 +80,15 @@ func (rtmp *RtmpConn) handleUserControlMessage(msg *MessageStream) (err error) {
 	case protocol_stack.SrcPCUCStreamEOF:
 	case protocol_stack.SrcPCUCStreamDry:
 	case protocol_stack.SrcPCUCSetBufferLength:
+
 	case protocol_stack.SrcPCUCStreamIsRecorded:
 	case protocol_stack.SrcPCUCPingRequest:
-		err = rtmp.ResponsePingMessage(msg.header.preferCsId, &userCtrlMsg)
+		err = rtmp.handleUserCtrlResponsePingMessage(msg.header.preferCsId, &userCtrlMsg)
 	case protocol_stack.SrcPCUCPingResponse:
 	default:
-		log.Println("HandleMsgUserControl unknown event type.type=", userCtrlMsg.eventType)
+		err = fmt.Errorf("HandleMsgUserControl unknown event type.type=", userCtrlMsg.eventType)
 	}
 
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func (rtmp *RtmpConn) ResponsePingMessage(chunkStreamId uint32, userCtrl *UserControlMsg) (err error) {
-	var msg MessageStream
-
-	//msg payload
-	var offset uint32
-
-	msg.payload = make([]uint8, 2+4) // 2(type) + 4(data)
-	binary.BigEndian.PutUint16(msg.payload[offset:offset+2], protocol_stack.SrcPCUCPingResponse)
-	offset += 2
-	binary.BigEndian.PutUint32(msg.payload[offset:offset+4], userCtrl.eventData)
-	offset += 4
-
-	//msg header
-	msg.header.length = uint32(len(msg.payload))
-	msg.header.typeId = protocol_stack.RTMP_MSG_UserControlMessage
-	msg.header.streamId = 0
-	if chunkStreamId < 2 {
-		msg.header.preferCsId = protocol_stack.RTMP_CID_ProtocolControl
-	} else {
-		msg.header.preferCsId = chunkStreamId
-	}
-
-	err = rtmp.SendMsg(&msg)
 	if err != nil {
 		return
 	}
