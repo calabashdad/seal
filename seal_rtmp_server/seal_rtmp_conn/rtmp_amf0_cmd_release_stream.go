@@ -6,7 +6,6 @@ import (
 	"log"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/amf_serial"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
-	"strings"
 )
 
 func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error) {
@@ -109,17 +108,3 @@ func (rtmp *RtmpConn) ResponseAmf0CmdReleaseStream(chunkStreamId uint32, transac
 	return
 }
 
-func ParseStreamName(s string) (stream string, token string) {
-
-	const TOKEN_STR = "?token="
-
-	loc := strings.Index(s, TOKEN_STR)
-	if loc < 0 {
-		stream = s
-	} else {
-		stream = s[0:loc]
-		token = s[loc+len(TOKEN_STR):]
-	}
-
-	return
-}
