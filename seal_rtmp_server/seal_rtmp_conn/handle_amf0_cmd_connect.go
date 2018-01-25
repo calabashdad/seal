@@ -60,11 +60,11 @@ func (rtmp *RtmpConn) handleAMF0CmdConnect(msg *MessageStream) (err error) {
 		}
 	}
 
-	err = rtmp.ParseConnectPkg(&connectPkg)
-	if err != nil {
-		log.Println("parse connect pkg error.", err)
-		return
-	}
+	// err = rtmp.ParseConnectPkg(&connectPkg)
+	// if err != nil {
+	// 	log.Println("parse connect pkg error.", err)
+	// 	return
+	// }
 
 	err = rtmp.CommonMsgSetWindowAcknowledgementSize(msg.header.preferCsId, 2500000)
 	if err != nil {
@@ -256,7 +256,6 @@ type RtmpUrlData struct {
 	token  string
 }
 
-//format: rtmp://127.0.0.1:1935/live/test?token=abc123
 func (urlData *RtmpUrlData) ParseUrl(url string) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -318,7 +317,7 @@ func (rtmp *RtmpConn) CommonMsgSetWindowAcknowledgementSize(chunkStreamId uint32
 	binary.BigEndian.PutUint32(msg.payload[:], WindowAcknowledgementSize)
 
 	//msg header
-	msg.header.length = 4
+	msg.header.length = uint32(len(msg.payload))
 	msg.header.typeId = protocol_stack.RTMP_MSG_WindowAcknowledgementSize
 	msg.header.streamId = 0
 	msg.header.preferCsId = chunkStreamId
@@ -346,7 +345,7 @@ func (rtmp *RtmpConn) CommonMsgSetPeerBandwidth(chunkStreamId uint32, bandWidthV
 	msg.payload[4] = limitType
 
 	//msg header
-	msg.header.length = 4
+	msg.header.length = uint32(len(msg.payload))
 	msg.header.typeId = protocol_stack.RTMP_MSG_SetPeerBandwidth
 	msg.header.streamId = 0
 	msg.header.preferCsId = chunkStreamId
@@ -372,7 +371,7 @@ func (rtmp *RtmpConn) CommonMsgSetChunkSize(chunkSize uint32) (err error) {
 	binary.BigEndian.PutUint32(msg.payload[:], chunkSize)
 
 	//msg header
-	msg.header.length = 4
+	msg.header.length = uint32(len(msg.payload))
 	msg.header.typeId = protocol_stack.RTMP_MSG_SetChunkSize
 	msg.header.streamId = 0
 	msg.header.preferCsId = protocol_stack.RTMP_CID_ProtocolControl

@@ -1,15 +1,17 @@
 package seal_conf
 
 import (
-	"github.com/yaml"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/yaml"
 )
 
 type ConfInfoRtmp struct {
-	Listen  string `yaml:"listen"`
-	TimeOut uint32 `yaml:"timeout"`
+	Listen    string `yaml:"listen"`
+	TimeOut   uint32 `yaml:"timeout"`
+	ChunkSize uint32 `yaml:"chunk_size"`
 }
 
 type ConfInfo struct {

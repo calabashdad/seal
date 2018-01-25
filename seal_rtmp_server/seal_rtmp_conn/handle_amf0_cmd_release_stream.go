@@ -73,6 +73,15 @@ func (rtmp *RtmpConn) handleAmf0CmdReleaseStream(msg *MessageStream) (err error)
 	log.Println("handle amf0 cmd release stream success. new publish role, comand=", commandName, ", transaction id=", transactionId,
 		"stream name=", streamWithoutToken, ",token=", tokenStr)
 
+	err = rtmp.SetChunkSize(msg.header.preferCsId, rtmp.ChunkSizeConf)
+	if err != nil {
+		return
+	}
+
+	rtmp.ChunkSize = rtmp.ChunkSizeConf
+
+	log.Println("publisher, set chunk size success.", rtmp.ChunkSize)
+
 	return
 }
 

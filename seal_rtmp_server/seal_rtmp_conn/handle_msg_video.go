@@ -26,7 +26,7 @@ func (rtmp *RtmpConn) handleMsgVideo(msg *MessageStream) (err error) {
 		msgChanLocal := value.(chan *MessageStream)
 		msgChanLocal <- msg
 
-		log.Println("publisher put a video msg")
+		log.Println("publisher put a video msg. timestamp=", msg.header.timestamp, ",msg payloadLen=", len(msg.payload))
 
 		return true
 	})

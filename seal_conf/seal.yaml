@@ -2,3 +2,5 @@
 rtmp:
   listen: 1935
   timeout: 30
+  #chunk size. [128, 65535]
+  chunk_size: 60000

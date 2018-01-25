@@ -110,6 +110,15 @@ func (rtmp *RtmpConn) handleAmf0CmdPlay(msg *MessageStream) (err error) {
 		return
 	}
 
+	err = rtmp.SetChunkSize(msg.header.preferCsId, rtmp.ChunkSizeConf)
+	if err != nil {
+		return
+	}
+
+	rtmp.ChunkSize = rtmp.ChunkSizeConf
+
+	log.Println("player, set chunk size success.", rtmp.ChunkSize)
+
 	log.Println("response to play client success. now playing loop....")
 
 	err = rtmp.handlePlayLoop()

@@ -276,7 +276,7 @@ func (rtmp *RtmpConn) CommonMsgResponseWindowAcknowledgement(chunkStreamId uint3
 	binary.BigEndian.PutUint32(msg.payload[:], ackedSize)
 
 	//msg header
-	msg.header.length = 4
+	msg.header.length = uint32(len(msg.payload))
 	msg.header.typeId = protocol_stack.RTMP_MSG_Acknowledgement
 	msg.header.streamId = 0
 	msg.header.preferCsId = chunkStreamId
