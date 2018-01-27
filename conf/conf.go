@@ -8,14 +8,16 @@ import (
 	"github.com/yaml"
 )
 
-type ConfInfoRtmp struct {
+var GlobalConfInfo ConfInfo
+
+type RtmpConfInfo struct {
 	Listen    string `yaml:"listen"`
 	TimeOut   uint32 `yaml:"timeout"`
 	ChunkSize uint32 `yaml:"chunk_size"`
 }
 
 type ConfInfo struct {
-	Rtmp ConfInfoRtmp `yaml:"rtmp"`
+	Rtmp RtmpConfInfo `yaml:"rtmp"`
 }
 
 func (t *ConfInfo) Loads(c string) (err error) {

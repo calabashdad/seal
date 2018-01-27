@@ -5,51 +5,49 @@ import (
 	"log"
 	"net"
 	"seal/conf"
-	"seal/seal_rtmp_server/seal_rtmp_conn"
-	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
+	"seal/kernel"
+	"seal/rtmp/conn"
 )
 
 type RtmpServer struct {
-	Conf *conf.ConfInfoRtmp
 }
 
-func (rtmpServer *RtmpServer) NewRtmpSession(c net.Conn) *seal_rtmp_conn.RtmpConn {
-	return &seal_rtmp_conn.RtmpConn{
-		Conn:          c,
-		TimeOut:       rtmpServer.Conf.TimeOut,
-		Chunks:        make(map[uint32]*seal_rtmp_conn.ChunkStream),
-		ChunkSize:     protocol_stack.RTMP_CHUNKSIZE_MIN,
-		ChunkSizeConf: rtmpServer.Conf.ChunkSize,
-		Role:          seal_rtmp_conn.RTMP_ROLE_UNKNOWN,
-	}
-}
-
-func (rtmpServer *RtmpServer) Start() {
+func (rtmp_server *RtmpServer) Start() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, "-", identify_panic.IdentifyPanic())
+			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
 		}
 
-		g_wg.Done()
+		gWGServers.Done()
 	}()
 
-	listener, err := net.Listen("tcp", ":"+rtmpServer.Conf.Listen)
+	listener, err := net.Listen("tcp", ":"+conf.GlobalConfInfo.Rtmp.Listen)
 	if err != nil {
-		log.Println("start listen at "+rtmpServer.Conf.Listen+" failed. err=", err)
+		log.Println("start listen at "+conf.GlobalConfInfo.Rtmp.Listen+" failed. err=", err)
 		return
 	}
-
-	log.Println("rtmp server start liste at :" + rtmpServer.Conf.Listen)
+	log.Println("rtmp server start liste at :" + conf.GlobalConfInfo.Rtmp.Listen)
 
 	for {
-		netConn, err := listener.Accept()
+		net_conn, err := listener.Accept()
 		if err != nil {
 			log.Println("rtmp server, listen accept failed, err=", err)
 			break
 		}
 
-		rtmpConn := rtmpServer.NewRtmpSession(netConn)
+		log.Println("one rtmp connection come in, remote=", net_conn.RemoteAddr())
 
-		go rtmpConn.HandleRtmpSession()
+		rtmp_conn := rtmp_server.NewRtmpConnection(net_conn)
+
+		go rtmp_conn.Cycle()
+	}
+}
+
+func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
+	return &conn.RtmpConn{
+		TcpConn: &kernel.TcpSock{
+			c,
+			conf.GlobalConfInfo.Rtmp.TimeOut,
+		},
 	}
 }

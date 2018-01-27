@@ -18,8 +18,7 @@ var (
 )
 
 var (
-	g_conf_info conf.ConfInfo
-	g_wg        sync.WaitGroup
+	gWGServers sync.WaitGroup
 )
 
 func init() {
@@ -30,7 +29,7 @@ func init() {
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, identify_panic.IdentifyPanic())
+			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
 			time.Sleep(1 * time.Second)
 		}
 	}()
@@ -45,25 +44,23 @@ func main() {
 		return
 	}
 
-	err := g_conf_info.Loads(*conf_file)
+	err := conf.GlobalConfInfo.Loads(*conf_file)
 	if err != nil {
 		log.Println("conf loads failed.err=", err)
 
 		//load conf file failed. use default config.
-		g_conf_info.Default()
+		conf.GlobalConfInfo.Default()
 	} else {
-		log.Println("load conf file success, conf=", g_conf_info)
+		log.Println("load conf file success, conf=", conf.GlobalConfInfo)
 	}
 
-	g_wg.Add(1)
+	gWGServers.Add(1)
 	if true {
-		rtmpServer := RtmpServer{
-			Conf: &g_conf_info.Rtmp,
-		}
+		rtmp_server := RtmpServer{}
 
-		rtmpServer.Start()
+		rtmp_server.Start()
 	}
 
-	g_wg.Wait()
+	gWGServers.Wait()
 	log.Println("seal quit gracefully.")
 }
