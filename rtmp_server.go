@@ -1,18 +1,16 @@
-package seal_rtmp_server
+package main
 
 import (
 	"UtilsTools/identify_panic"
 	"log"
 	"net"
-	"seal/seal_conf"
+	"seal/conf"
 	"seal/seal_rtmp_server/seal_rtmp_conn"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
-	"sync"
 )
 
 type RtmpServer struct {
-	Conf *seal_conf.ConfInfoRtmp
-	Wg   *sync.WaitGroup
+	Conf *conf.ConfInfoRtmp
 }
 
 func (rtmpServer *RtmpServer) NewRtmpSession(c net.Conn) *seal_rtmp_conn.RtmpConn {
@@ -32,7 +30,7 @@ func (rtmpServer *RtmpServer) Start() {
 			log.Println(err, "-", identify_panic.IdentifyPanic())
 		}
 
-		rtmpServer.Wg.Done()
+		g_wg.Done()
 	}()
 
 	listener, err := net.Listen("tcp", ":"+rtmpServer.Conf.Listen)

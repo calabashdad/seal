@@ -4,6 +4,7 @@ import (
 	"UtilsTools/identify_panic"
 	"log"
 	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
+	"time"
 )
 
 func (rtmp *RtmpConn) handleMsgVideo(msg *MessageStream) (err error) {
@@ -24,9 +25,14 @@ func (rtmp *RtmpConn) handleMsgVideo(msg *MessageStream) (err error) {
 	rtmp.players.Range(func(key, value interface{}) bool {
 
 		msgChanLocal := value.(chan *MessageStream)
-		msgChanLocal <- msg
 
-		log.Println("publisher put a video msg. timestamp=", msg.header.timestamp, ",msg payloadLen=", len(msg.payload))
+		select {
+		case <-time.After(time.Millisecond * 100):
+		case msgChanLocal <- msg:
+			// log.Println("publisher put a video msg. timestamp=", msg.header.timestamp,
+			// 	",msg payloadLen=", len(msg.payload),
+			// 	",msg type=", msg.header.typeId)
+		}
 
 		return true
 	})

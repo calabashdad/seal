@@ -1,4 +1,4 @@
-package seal_conf
+package conf
 
 import (
 	"io/ioutil"
@@ -48,7 +48,8 @@ func (t *ConfInfo) Loads(c string) (err error) {
 	return nil
 }
 
-func (t *ConfInfo) Default() {
-	t.Rtmp.Listen = "1935"
-	t.Rtmp.TimeOut = 30
+func (c *ConfInfo) Default() {
+	c.Rtmp.Listen = "1935"
+	c.Rtmp.TimeOut = 30
+	c.Rtmp.ChunkSize = 6000
 }

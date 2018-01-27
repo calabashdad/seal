@@ -21,7 +21,9 @@ func (rtmp *RtmpConn) handlePlayLoop() (err error) {
 			return
 		case msg := <-rtmp.msgChan:
 
-			log.Println("player pop a msg. timestamp=", msg.header.timestamp, ",msg.payloadLen=", len(msg.payload))
+			log.Println("player pop a msg. timestamp=", msg.header.timestamp,
+				",msg.payloadLen=", len(msg.payload),
+				",msg type=", msg.header.typeId)
 
 			err = rtmp.SendMsg(msg)
 			if err != nil {

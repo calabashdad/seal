@@ -13,7 +13,8 @@ func (rtmpSession *RtmpConn) HandleRtmpSession() {
 
 		rtmpSession.DestructWhenRtmpSessionDead()
 
-		log.Println("One RtmpConn finished.remote=", rtmpSession.Conn.RemoteAddr())
+		log.Println("One RtmpConn finished.remote=", rtmpSession.Conn.RemoteAddr(),
+			",role=", rtmpSession.Role)
 	}()
 
 	log.Println("One RtmpConn come in. remote=", rtmpSession.Conn.RemoteAddr())
@@ -37,8 +38,10 @@ func (rtmp *RtmpConn) DestructWhenRtmpSessionDead() {
 
 	if RTMP_ROLE_PUBLISH == rtmp.Role {
 		MapPublishingStreams.Delete(rtmp.StreamInfo.stream)
+		log.Println("destruct, publisher deleted from MapPublishingStreams")
 	} else if RTMP_ROLE_PALY == rtmp.Role {
 		rtmp.PlayerUnRegistePublishStream()
+		log.Println("player dead, unregister from publisher.")
 	}
 }
 
@@ -50,14 +53,20 @@ func (rtmp *RtmpConn) PlayerRegistePublishStream() (res bool) {
 		res = true
 
 		if nil != rtmpPub.cacheMsgMetaData {
+			log.Println("player, register, cache meta data.msg timestamp=", rtmpPub.cacheMsgMetaData.header.timestamp,
+				",msg payloadSize=", len(rtmpPub.cacheMsgMetaData.payload))
 			rtmp.msgChan <- rtmpPub.cacheMsgMetaData
 		}
 
 		if nil != rtmpPub.cacheMsgH264SequenceKeyFrame {
+			log.Println("player, register, cache H264SequenceKeyFrame data.msg timestamp=", rtmpPub.cacheMsgH264SequenceKeyFrame.header.timestamp,
+				",msg payloadSize=", len(rtmpPub.cacheMsgH264SequenceKeyFrame.payload))
 			rtmp.msgChan <- rtmpPub.cacheMsgH264SequenceKeyFrame
 		}
 
 		if nil != rtmpPub.cacheMsgAACSequenceHeader {
+			log.Println("player, register, cache AACSequenceHeader data.msg timestamp=", rtmpPub.cacheMsgAACSequenceHeader.header.timestamp,
+				",msg payloadSize=", len(rtmpPub.cacheMsgAACSequenceHeader.payload))
 			rtmp.msgChan <- rtmpPub.cacheMsgAACSequenceHeader
 		}
 
@@ -73,7 +82,5 @@ func (rtmp *RtmpConn) PlayerUnRegistePublishStream() {
 	if ok {
 		rtmpPub := v.(*RtmpConn)
 		rtmpPub.players.Delete(rtmp.Conn.RemoteAddr())
-
-		log.Println("player dead, unregister from publisher.")
 	}
 }

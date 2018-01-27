@@ -5,8 +5,7 @@ import (
 	"flag"
 	"log"
 	"os"
-	"seal/seal_conf"
-	"seal/seal_rtmp_server"
+	"seal/conf"
 	"sync"
 	"time"
 )
@@ -19,7 +18,7 @@ var (
 )
 
 var (
-	g_conf_info seal_conf.ConfInfo
+	g_conf_info conf.ConfInfo
 	g_wg        sync.WaitGroup
 )
 
@@ -58,10 +57,10 @@ func main() {
 
 	g_wg.Add(1)
 	if true {
-		rtmpServer := seal_rtmp_server.RtmpServer{
+		rtmpServer := RtmpServer{
 			Conf: &g_conf_info.Rtmp,
-			Wg:   &g_wg,
 		}
+
 		rtmpServer.Start()
 	}
 

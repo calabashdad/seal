@@ -54,34 +54,33 @@ func (rtmp *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 			return
 		}
 
-		chunk_fmt := (buf[0] & 0xc0) >> 6
-		csid := uint32(buf[0] & 0x3f)
+		chunkFmt := (buf[0] & 0xc0) >> 6
+		csId := uint32(buf[0] & 0x3f)
 
-		switch csid {
+		switch csId {
 		case 0:
 			//csId 2 bytes. 64-319
 			err = rtmp.ExpectBytes(1, buf[1:2])
-			csid = uint32(64 + buf[1])
+			csId = uint32(64 + buf[1])
 		case 1:
 			//csId 3 bytes. 64-65599
 			err = rtmp.ExpectBytes(2, buf[1:3])
-			csid = uint32(64) + uint32(buf[1]) + uint32(buf[2])*256
+			csId = uint32(64) + uint32(buf[1]) + uint32(buf[2])*256
 		}
 
 		if err != nil {
 			return
 		}
 
-		chunk, ok := rtmp.Chunks[csid]
+		chunk, ok := rtmp.Chunks[csId]
 		if !ok {
 			chunk = &ChunkStream{}
-
-			rtmp.Chunks[csid] = chunk
+			rtmp.Chunks[csId] = chunk
 		}
 
-		chunk.chunkFmt = chunk_fmt
-		chunk.csId = csid
-		chunk.msg.header.preferCsId = csid
+		chunk.chunkFmt = chunkFmt
+		chunk.csId = csId
+		chunk.msg.header.preferCsId = csId
 
 		//read message header
 		if 0 == chunk.msgCount && chunk.chunkFmt != protocol_stack.RTMP_FMT_TYPE0 {
@@ -129,6 +128,7 @@ func (rtmp *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 		//*   4bytes: stream id,          fmt=0
 		switch chunk.chunkFmt {
 		case protocol_stack.RTMP_FMT_TYPE0:
+
 			chunk.msg.header.timestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
 			if chunk.msg.header.timestampDelta >= protocol_stack.RTMP_EXTENDED_TIMESTAMP {
 				chunk.hasExtendTimestamp = true
@@ -144,12 +144,11 @@ func (rtmp *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 			}
 
 			chunk.msg.header.length = payloadLength
-
 			chunk.msg.header.typeId = msgHeader[6]
-
 			chunk.msg.header.streamId = binary.LittleEndian.Uint32(msgHeader[7:11])
 
 		case protocol_stack.RTMP_FMT_TYPE1:
+
 			chunk.msg.header.timestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
 			if chunk.msg.header.timestampDelta >= protocol_stack.RTMP_EXTENDED_TIMESTAMP {
 				chunk.hasExtendTimestamp = true
@@ -168,6 +167,7 @@ func (rtmp *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 			chunk.msg.header.typeId = msgHeader[6]
 
 		case protocol_stack.RTMP_FMT_TYPE2:
+
 			chunk.msg.header.timestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
 			if chunk.msg.header.timestampDelta >= protocol_stack.RTMP_EXTENDED_TIMESTAMP {
 				chunk.hasExtendTimestamp = true
@@ -231,7 +231,8 @@ func (rtmp *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 			chunk.payloadSizeTmp += remainPayloadSize
 			if chunk.payloadSizeTmp == chunk.msg.header.length {
 
-				chunkStreamId = csid
+				chunkStreamId = csId
+
 				//has recv entire rtmp message.
 				//reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
 				chunk.payloadSizeTmp = 0
