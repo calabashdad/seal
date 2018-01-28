@@ -19,6 +19,7 @@ type RtmpConn struct {
 	Out_chunk_size uint32                           //default 128, set by config file.
 	Pool           *kernel.MemPool
 	Ack_window     AckWindowSize
+	Requests       map[float64]string //key: transactin id, value:command name
 }
 
 func (rtmp_conn *RtmpConn) Cycle() {

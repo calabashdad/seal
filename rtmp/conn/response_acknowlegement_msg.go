@@ -16,6 +16,12 @@ func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
 	var pkt protocol.AcknowlegementPacket
 
 	pkt.Sequence_number = uint32(rc.TcpConn.RecvBytesSum)
+
+	err = rc.SendPacket(&pkt, 0)
+	if err != nil {
+		return
+	}
+
 	rc.Ack_window.Has_acked_size = rc.TcpConn.RecvBytesSum
 
 	return

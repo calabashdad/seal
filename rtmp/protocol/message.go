@@ -44,57 +44,57 @@ type MessageHeader struct {
 	Perfer_csid uint32
 }
 
-func (h *MessageHeader) is_audio() bool {
+func (h *MessageHeader) Is_audio() bool {
 	return RTMP_MSG_AudioMessage == h.Message_type
 }
-func (h *MessageHeader) is_video() bool {
+func (h *MessageHeader) Is_video() bool {
 	return RTMP_MSG_VideoMessage == h.Message_type
 
 }
-func (h *MessageHeader) is_amf0_command() bool {
+func (h *MessageHeader) Is_amf0_command() bool {
 	return RTMP_MSG_AMF0CommandMessage == h.Message_type
 
 }
-func (h *MessageHeader) is_amf0_data() bool {
+func (h *MessageHeader) Is_amf0_data() bool {
 	return RTMP_MSG_AMF0DataMessage == h.Message_type
 
 }
-func (h *MessageHeader) is_amf3_command() bool {
+func (h *MessageHeader) Is_amf3_command() bool {
 	return RTMP_MSG_AMF3CommandMessage == h.Message_type
 
 }
-func (h *MessageHeader) is_amf3_data() bool {
+func (h *MessageHeader) Is_amf3_data() bool {
 	return RTMP_MSG_AMF3DataMessage == h.Message_type
 
 }
-func (h *MessageHeader) is_window_ackledgement_size() bool {
+func (h *MessageHeader) Is_window_ackledgement_size() bool {
 	return RTMP_MSG_WindowAcknowledgementSize == h.Message_type
 
 }
-func (h *MessageHeader) is_ackledgement() bool {
+func (h *MessageHeader) Is_ackledgement() bool {
 	return RTMP_MSG_Acknowledgement == h.Message_type
 
 }
-func (h *MessageHeader) is_set_chunk_size() bool {
+func (h *MessageHeader) Is_set_chunk_size() bool {
 	return RTMP_MSG_SetChunkSize == h.Message_type
 
 }
-func (h *MessageHeader) is_user_control_message() bool {
+func (h *MessageHeader) Is_user_control_message() bool {
 	return RTMP_MSG_UserControlMessage == h.Message_type
 
 }
-func (h *MessageHeader) is_set_peer_bandwidth() bool {
+func (h *MessageHeader) Is_set_peer_bandwidth() bool {
 	return RTMP_MSG_SetPeerBandwidth == h.Message_type
 
 }
-func (h *MessageHeader) is_aggregate() bool {
+func (h *MessageHeader) Is_aggregate() bool {
 	return RTMP_MSG_AggregateMessage == h.Message_type
 }
 
 /**
  * create a amf0 script header, set the size and stream_id.
  */
-func (h *MessageHeader) initialize_amf0_script(payload_len uint32, stream_id uint32) {
+func (h *MessageHeader) Initialize_amf0_script(payload_len uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_AMF0DataMessage
 	h.Payload_length = payload_len
 	h.Timestamp_delta = 0
@@ -108,7 +108,7 @@ func (h *MessageHeader) initialize_amf0_script(payload_len uint32, stream_id uin
 /**
  * create a audio header, set the size, timestamp and stream_id.
  */
-func (h *MessageHeader) initialize_audio(payload_size uint32, time uint32, stream_id uint32) {
+func (h *MessageHeader) Initialize_audio(payload_size uint32, time uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_AudioMessage
 	h.Payload_length = payload_size
 	h.Timestamp_delta = time
@@ -122,7 +122,7 @@ func (h *MessageHeader) initialize_audio(payload_size uint32, time uint32, strea
 /**
  * create a video header, set the size, timestamp and stream_id.
  */
-func (h *MessageHeader) initialize_video(payload_size uint32, time uint32, stream_id uint32) {
+func (h *MessageHeader) Initialize_video(payload_size uint32, time uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_VideoMessage
 	h.Payload_length = payload_size
 	h.Timestamp_delta = time

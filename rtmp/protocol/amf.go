@@ -1,11 +1,10 @@
-package amf_serial
+package protocol
 
 import (
 	"encoding/binary"
 	"fmt"
 	"log"
 	"math"
-	"seal/seal_rtmp_server/seal_rtmp_protocol/protocol_stack"
 )
 
 type Amf0Object struct {
@@ -33,7 +32,7 @@ func Amf0ObjectEof(data []uint8, offset *uint32) (res bool) {
 
 	if 0x00 == data[*offset] &&
 		0x00 == data[*offset+1] &&
-		protocol_stack.RTMP_AMF0_ObjectEnd == data[*offset+2] {
+		RTMP_AMF0_ObjectEnd == data[*offset+2] {
 		res = true
 		*offset += 3
 	} else {
@@ -96,23 +95,23 @@ func Amf0ReadAny(data []uint8, marker *uint8, offset *uint32) (err error, value 
 	*marker = data[*offset]
 
 	switch *marker {
-	case protocol_stack.RTMP_AMF0_String:
+	case RTMP_AMF0_String:
 		err, value = Amf0ReadString(data, offset)
-	case protocol_stack.RTMP_AMF0_Boolean:
+	case RTMP_AMF0_Boolean:
 		err, value = Amf0ReadBool(data, offset)
-	case protocol_stack.RTMP_AMF0_Number:
+	case RTMP_AMF0_Number:
 		err, value = Amf0ReadNumber(data, offset)
-	case protocol_stack.RTMP_AMF0_Null:
+	case RTMP_AMF0_Null:
 		err = Amf0ReadNull(data, offset)
-	case protocol_stack.RTMP_AMF0_Undefined:
+	case RTMP_AMF0_Undefined:
 		err = Amf0ReadUndefined(data, offset)
-	case protocol_stack.RTMP_AMF0_Object:
+	case RTMP_AMF0_Object:
 		err, value = Amf0ReadObject(data, offset)
-	case protocol_stack.RTMP_AMF0_LongString:
+	case RTMP_AMF0_LongString:
 		err, value = Amf0ReadLongString(data, offset)
-	case protocol_stack.RTMP_AMF0_EcmaArray:
+	case RTMP_AMF0_EcmaArray:
 		err, value = Amf0ReadEcmaArray(data, offset)
-	case protocol_stack.RTMP_AMF0_StrictArray:
+	case RTMP_AMF0_StrictArray:
 		err, value = Amf0ReadStrictArray(data, offset)
 	default:
 		err = fmt.Errorf("Amf0ReadAny: unknown marker Value, marker=", marker)
@@ -127,23 +126,23 @@ func Amf0ReadAny(data []uint8, marker *uint8, offset *uint32) (err error, value 
 
 func Amf0WriteAny(any Amf0Object) (data []uint8) {
 	switch any.ValueType {
-	case protocol_stack.RTMP_AMF0_String:
+	case RTMP_AMF0_String:
 		data = Amf0WriteString(any.Value.(string))
-	case protocol_stack.RTMP_AMF0_Boolean:
+	case RTMP_AMF0_Boolean:
 		data = Amf0WriteBool(any.Value.(bool))
-	case protocol_stack.RTMP_AMF0_Number:
+	case RTMP_AMF0_Number:
 		data = Amf0WriteNumber(any.Value.(float64))
-	case protocol_stack.RTMP_AMF0_Null:
+	case RTMP_AMF0_Null:
 		data = Amf0WriteNull()
-	case protocol_stack.RTMP_AMF0_Undefined:
+	case RTMP_AMF0_Undefined:
 		data = Amf0WriteUndefined()
-	case protocol_stack.RTMP_AMF0_Object:
+	case RTMP_AMF0_Object:
 		data = Amf0WriteObject(any.Value.([]Amf0Object))
-	case protocol_stack.RTMP_AMF0_LongString:
+	case RTMP_AMF0_LongString:
 		data = Amf0WriteLongString(any.Value.(string))
-	case protocol_stack.RTMP_AMF0_EcmaArray:
+	case RTMP_AMF0_EcmaArray:
 		data = Amf0WriteEcmaArray(any.Value.([]Amf0Object))
-	case protocol_stack.RTMP_AMF0_StrictArray:
+	case RTMP_AMF0_StrictArray:
 		data = Amf0WriteStrictArray(any.Value.([]Amf0Object))
 	default:
 		log.Println("Amf0WriteAny: unknown type.", any.ValueType)
@@ -161,7 +160,7 @@ func Amf0ReadString(data []uint8, offset *uint32) (err error, value string) {
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_String != marker {
+	if RTMP_AMF0_String != marker {
 		err = fmt.Errorf("Amf0ReadString: RTMP_AMF0_String != marker")
 		return
 	}
@@ -173,7 +172,7 @@ func Amf0ReadString(data []uint8, offset *uint32) (err error, value string) {
 
 func Amf0WriteString(value string) (data []uint8) {
 
-	data = append(data, protocol_stack.RTMP_AMF0_String)
+	data = append(data, RTMP_AMF0_String)
 	data = append(data, Amf0WriteUtf8(value)...)
 
 	return
@@ -189,7 +188,7 @@ func Amf0ReadNumber(data []uint8, offset *uint32) (err error, value float64) {
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_Number != marker {
+	if RTMP_AMF0_Number != marker {
 		err = fmt.Errorf("Amf0ReadNumber: RTMP_AMF0_Number != marker")
 		return
 	}
@@ -212,7 +211,7 @@ func Amf0WriteNumber(value float64) (data []uint8) {
 
 	var offset uint32
 
-	data[offset] = protocol_stack.RTMP_AMF0_Number
+	data[offset] = RTMP_AMF0_Number
 	offset += 1
 
 	v2 := math.Float64bits(value)
@@ -232,7 +231,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_Object != marker {
+	if RTMP_AMF0_Object != marker {
 		err = fmt.Errorf("error: Amf0ReadObject:RTMP_AMF0_Object != marker")
 		return
 	}
@@ -267,7 +266,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 
 func Amf0WriteObject(amf0objects []Amf0Object) (data []uint8) {
 
-	data = append(data, protocol_stack.RTMP_AMF0_Object)
+	data = append(data, RTMP_AMF0_Object)
 
 	for _, v := range amf0objects {
 		data = append(data, Amf0WriteUtf8(v.PropertyName)...)
@@ -288,7 +287,7 @@ func Amf0ReadBool(data []uint8, offset *uint32) (err error, value bool) {
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_Boolean != marker {
+	if RTMP_AMF0_Boolean != marker {
 		err = fmt.Errorf("Amf0ReadBool: RTMP_AMF0_Boolean != marker")
 		return
 	}
@@ -313,7 +312,7 @@ func Amf0ReadBool(data []uint8, offset *uint32) (err error, value bool) {
 func Amf0WriteBool(value bool) (data []uint8) {
 
 	data = make([]uint8, 1+1)
-	data[0] = protocol_stack.RTMP_AMF0_Boolean
+	data[0] = RTMP_AMF0_Boolean
 	if value {
 		data[1] = 1
 	} else {
@@ -332,7 +331,7 @@ func Amf0ReadNull(data []uint8, offset *uint32) (err error) {
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_Null != marker {
+	if RTMP_AMF0_Null != marker {
 		err = fmt.Errorf("Amf0ReadNull: RTMP_AMF0_Null != marker")
 		return
 	}
@@ -341,7 +340,7 @@ func Amf0ReadNull(data []uint8, offset *uint32) (err error) {
 }
 
 func Amf0WriteNull() (data []uint8) {
-	data = append(data, protocol_stack.RTMP_AMF0_Null)
+	data = append(data, RTMP_AMF0_Null)
 
 	return
 }
@@ -355,7 +354,7 @@ func Amf0ReadUndefined(data []uint8, offset *uint32) (err error) {
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_Undefined != marker {
+	if RTMP_AMF0_Undefined != marker {
 		err = fmt.Errorf("Amf0ReadUndefined: RTMP_AMF0_Undefined != marker")
 		return
 	}
@@ -364,7 +363,7 @@ func Amf0ReadUndefined(data []uint8, offset *uint32) (err error) {
 }
 
 func Amf0WriteUndefined() (data []uint8) {
-	data = append(data, protocol_stack.RTMP_AMF0_Undefined)
+	data = append(data, RTMP_AMF0_Undefined)
 	return
 }
 
@@ -378,7 +377,7 @@ func Amf0ReadLongString(data []uint8, offset *uint32) (err error, value string) 
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_LongString != marker {
+	if RTMP_AMF0_LongString != marker {
 		err = fmt.Errorf("Amf0ReadLongString: RTMP_AMF0_LongString != marker")
 		return
 	}
@@ -413,7 +412,7 @@ func Amf0WriteLongString(value string) (data []uint8) {
 
 	var offset uint32
 
-	data[offset] = protocol_stack.RTMP_AMF0_LongString
+	data[offset] = RTMP_AMF0_LongString
 	offset += 1
 
 	dataLen := len(value)
@@ -435,7 +434,7 @@ func Amf0ReadEcmaArray(data []uint8, offset *uint32) (err error, value Amf0EcmaA
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_EcmaArray != marker {
+	if RTMP_AMF0_EcmaArray != marker {
 		err = fmt.Errorf("error: Amf0ReadEcmaArray: RTMP_AMF0_EcmaArray != marker")
 		return
 	}
@@ -480,7 +479,7 @@ func Amf0WriteEcmaArray(objs []Amf0Object) (data []uint8) {
 
 	var offset uint32
 
-	data[offset] = protocol_stack.RTMP_AMF0_EcmaArray
+	data[offset] = RTMP_AMF0_EcmaArray
 	offset += 1
 
 	count := len(objs)
@@ -507,7 +506,7 @@ func Amf0ReadStrictArray(data []uint8, offset *uint32) (err error, value Amf0Str
 	marker := data[*offset]
 	*offset += 1
 
-	if protocol_stack.RTMP_AMF0_StrictArray != marker {
+	if RTMP_AMF0_StrictArray != marker {
 		err = fmt.Errorf("Amf0ReadStrictArray: error: RTMP_AMF0_StrictArray != marker")
 		return
 	}
@@ -544,7 +543,7 @@ func Amf0WriteStrictArray(objs []Amf0Object) (data []uint8) {
 
 	var offset uint32
 
-	data[offset] = protocol_stack.RTMP_AMF0_StrictArray
+	data[offset] = RTMP_AMF0_StrictArray
 	offset += 1
 
 	count := len(objs)
@@ -575,23 +574,23 @@ func Amf0Discovery(data []uint8, offset *uint32) (err error, value interface{}, 
 	marker = data[*offset]
 
 	switch marker {
-	case protocol_stack.RTMP_AMF0_String:
+	case RTMP_AMF0_String:
 		err, value = Amf0ReadString(data, offset)
-	case protocol_stack.RTMP_AMF0_Boolean:
+	case RTMP_AMF0_Boolean:
 		err, value = Amf0ReadBool(data, offset)
-	case protocol_stack.RTMP_AMF0_Number:
+	case RTMP_AMF0_Number:
 		err, value = Amf0ReadNumber(data, offset)
-	case protocol_stack.RTMP_AMF0_Null:
+	case RTMP_AMF0_Null:
 		err = Amf0ReadNull(data, offset)
-	case protocol_stack.RTMP_AMF0_Undefined:
+	case RTMP_AMF0_Undefined:
 		err = Amf0ReadUndefined(data, offset)
-	case protocol_stack.RTMP_AMF0_Object:
+	case RTMP_AMF0_Object:
 		err, value = Amf0ReadObject(data, offset)
-	case protocol_stack.RTMP_AMF0_LongString:
+	case RTMP_AMF0_LongString:
 		err, value = Amf0ReadLongString(data, offset)
-	case protocol_stack.RTMP_AMF0_EcmaArray:
+	case RTMP_AMF0_EcmaArray:
 		err, value = Amf0ReadEcmaArray(data, offset)
-	case protocol_stack.RTMP_AMF0_StrictArray:
+	case RTMP_AMF0_StrictArray:
 		err, value = Amf0ReadStrictArray(data, offset)
 	default:
 		err = fmt.Errorf("Amf0Discovery: unknown marker type, marker=", marker)

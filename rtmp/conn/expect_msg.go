@@ -15,10 +15,9 @@ func (rc *RtmpConn) ExpectMsg(packet interface{}) (err error) {
 
 	for {
 
-		rc.RecvMsg()
+		// rc.RecvMsg()
 
-		rc.DecodeMsg()
-
+		// rc.DecodeMsg()
 	}
 
 	return

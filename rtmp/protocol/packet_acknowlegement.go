@@ -13,6 +13,10 @@ type AcknowlegementPacket struct {
 	Sequence_number uint32
 }
 
+func (pkt *AcknowlegementPacket) Decode(b []uint8) (err error) {
+	return
+}
+
 func (pkt *AcknowlegementPacket) Encode() (b []uint8) {
 
 	b = make([]uint8, 4)

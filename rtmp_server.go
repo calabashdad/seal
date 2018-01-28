@@ -56,5 +56,6 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
 		Ack_window: conn.AckWindowSize{
 			Ack_window_size: 250000,
 		},
+		Requests: make(map[float64]string),
 	}
 }

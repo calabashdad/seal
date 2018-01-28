@@ -23,5 +23,15 @@ func (rc *RtmpConn) OnRecvMsg(msg *protocol.Message) (err error) {
 		}
 	}
 
+	switch msg.Header.Message_type {
+	case protocol.RTMP_MSG_SetChunkSize, protocol.RTMP_MSG_UserControlMessage, protocol.RTMP_MSG_WindowAcknowledgementSize:
+
+		var pkt protocol.Packet
+		err = rc.DecodeMsg(msg, pkt)
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }
