@@ -7,6 +7,7 @@ import (
 	"seal/conf"
 	"seal/kernel"
 	"seal/rtmp/conn"
+	"seal/rtmp/protocol"
 )
 
 type RtmpServer struct {
@@ -46,8 +47,14 @@ func (rtmp_server *RtmpServer) Start() {
 func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
 	return &conn.RtmpConn{
 		TcpConn: &kernel.TcpSock{
-			c,
-			conf.GlobalConfInfo.Rtmp.TimeOut,
+			Conn:    c,
+			TimeOut: conf.GlobalConfInfo.Rtmp.TimeOut,
+		},
+		In_chunk_size:  protocol.RTMP_DEFAULT_CHUNK_SIZE,
+		Out_chunk_size: protocol.RTMP_DEFAULT_CHUNK_SIZE,
+		Pool:           kernel.NewMemPool(),
+		Ack_window: conn.AckWindowSize{
+			Ack_window_size: 250000,
 		},
 	}
 }

@@ -9,7 +9,8 @@ import (
 
 type TcpSock struct {
 	net.Conn
-	TimeOut uint32
+	TimeOut      uint32
+	RecvBytesSum uint64
 }
 
 func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32) (err error) {
@@ -19,9 +20,12 @@ func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32) (err error) {
 		return
 	}
 
-	if _, err = io.ReadFull(conn.Conn, buf[:size]); err != nil {
+	var n int
+	if n, err = io.ReadFull(conn.Conn, buf[:size]); err != nil {
 		return
 	}
+
+	conn.RecvBytesSum += uint64(n)
 
 	return
 }
