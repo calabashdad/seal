@@ -45,5 +45,7 @@ func (rc *RtmpConn) Cycle() {
 	}
 	log.Println("connect success.")
 
+	rc.Loop()
+
 	log.Println("rtmp conn finished, remote=", rc.TcpConn.Conn.RemoteAddr())
 }

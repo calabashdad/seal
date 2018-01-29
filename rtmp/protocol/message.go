@@ -51,7 +51,7 @@ func (h *MessageHeader) Is_video() bool {
 	return RTMP_MSG_VideoMessage == h.Message_type
 
 }
-func (h *MessageHeader) Is_amf0_command() bool {
+func (h *MessageHeader) IsAmf0Command() bool {
 	return RTMP_MSG_AMF0CommandMessage == h.Message_type
 
 }
@@ -59,7 +59,7 @@ func (h *MessageHeader) Is_amf0_data() bool {
 	return RTMP_MSG_AMF0DataMessage == h.Message_type
 
 }
-func (h *MessageHeader) Is_amf3_command() bool {
+func (h *MessageHeader) IsAmf3Command() bool {
 	return RTMP_MSG_AMF3CommandMessage == h.Message_type
 
 }
@@ -67,19 +67,19 @@ func (h *MessageHeader) Is_amf3_data() bool {
 	return RTMP_MSG_AMF3DataMessage == h.Message_type
 
 }
-func (h *MessageHeader) Is_window_ackledgement_size() bool {
+func (h *MessageHeader) IsWindowAckledgementSize() bool {
 	return RTMP_MSG_WindowAcknowledgementSize == h.Message_type
 
 }
-func (h *MessageHeader) Is_ackledgement() bool {
+func (h *MessageHeader) IsAckledgement() bool {
 	return RTMP_MSG_Acknowledgement == h.Message_type
 
 }
-func (h *MessageHeader) Is_set_chunk_size() bool {
+func (h *MessageHeader) IsSetChunkSize() bool {
 	return RTMP_MSG_SetChunkSize == h.Message_type
 
 }
-func (h *MessageHeader) Is_user_control_message() bool {
+func (h *MessageHeader) IsUserControlMessage() bool {
 	return RTMP_MSG_UserControlMessage == h.Message_type
 
 }

@@ -24,6 +24,9 @@ func (rc *RtmpConn) Connect() (err error) {
 
 	connectPkg = pkt.(*protocol.ConnectPacket)
 
+	//todo.
+	//parse the params and analysis them.
+
 	log.Println("expect connect pkt success.", connectPkg)
 
 	return

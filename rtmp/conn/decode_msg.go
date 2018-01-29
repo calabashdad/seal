@@ -22,10 +22,10 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 	//offset of parsed msg payload.
 	var offset uint32
 
-	if (*msg).Header.Is_amf0_command() || (*msg).Header.Is_amf3_command() ||
+	if (*msg).Header.IsAmf0Command() || (*msg).Header.IsAmf3Command() ||
 		(*msg).Header.Is_amf0_data() || (*msg).Header.Is_amf3_data() {
 
-		if (*msg).Header.Is_amf3_command() && len((*msg).Payload) > 1 {
+		if (*msg).Header.IsAmf3Command() && len((*msg).Payload) > 1 {
 			offset += 1
 		}
 
@@ -112,7 +112,7 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 			*pkt = &protocol.CloseStreamPacket{}
 			err = (*pkt).Decode((*msg).Payload)
 		default:
-			if (*msg).Header.Is_amf0_command() || (*msg).Header.Is_amf3_command() {
+			if (*msg).Header.IsAmf0Command() || (*msg).Header.IsAmf3Command() {
 				*pkt = &protocol.CallPacket{}
 				err = (*pkt).Decode((*msg).Payload)
 			}
@@ -122,17 +122,17 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 			return
 		}
 
-	} else if (*msg).Header.Is_user_control_message() {
+	} else if (*msg).Header.IsUserControlMessage() {
 		*pkt = &protocol.UserControlPacket{}
 		err = (*pkt).Decode((*msg).Payload)
-	} else if (*msg).Header.Is_window_ackledgement_size() {
+	} else if (*msg).Header.IsWindowAckledgementSize() {
 		*pkt = &protocol.SetWindowAckSizePacket{}
 		err = (*pkt).Decode((*msg).Payload)
-	} else if (*msg).Header.Is_set_chunk_size() {
+	} else if (*msg).Header.IsSetChunkSize() {
 		*pkt = &protocol.SetChunkSizePacket{}
 		err = (*pkt).Decode((*msg).Payload)
 	} else {
-		if !(*msg).Header.Is_ackledgement() && !(*msg).Header.Is_set_peer_bandwidth() {
+		if !(*msg).Header.IsAckledgement() && !(*msg).Header.Is_set_peer_bandwidth() {
 			//drop msg
 		}
 	}

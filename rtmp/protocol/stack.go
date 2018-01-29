@@ -305,7 +305,7 @@ const (
 
 const (
 	//objectEncoding default value.
-	RTMP_SIG_AMF0_VER = 0.0
+	RTMP_SIG_AMF0_VER = 0
 )
 
 const (
@@ -382,7 +382,7 @@ const (
 )
 
 const (
-	FMS_VERSION = "1.0.0"
+	FMS_VERSION = "1.0.0.0"
 )
 
 const (
