@@ -20,10 +20,12 @@ type FmleStartResPacket struct {
 }
 
 func (pkt *FmleStartResPacket) Decode([]uint8) (err error) {
+
 	return
 }
 
 func (pkt *FmleStartResPacket) Encode() (b []uint8) {
+
 	return
 }
 

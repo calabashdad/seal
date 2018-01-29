@@ -68,6 +68,12 @@ func (pkt *ConnectResPacket) Decode(b []uint8) (err error) {
 }
 
 func (pkt *ConnectResPacket) Encode() (b []uint8) {
+
+	b = append(b, Amf0WriteString(pkt.Command_name)...)
+	b = append(b, Amf0WriteNumber(pkt.Transaction_id)...)
+	b = append(b, Amf0WriteObject(pkt.Props)...)
+	b = append(b, Amf0WriteObject(pkt.Info)...)
+
 	return
 }
 

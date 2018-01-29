@@ -1,5 +1,9 @@
 package protocol
 
+import (
+	"fmt"
+)
+
 type CreateStreamResPacket struct {
 	/**
 	 * _result or _error; indicates whether the response is result or error.
@@ -21,10 +25,44 @@ type CreateStreamResPacket struct {
 }
 
 func (pkt *CreateStreamResPacket) Encode() (b []uint8) {
+
+	b = append(b, Amf0WriteString(pkt.Command_name)...)
+	b = append(b, Amf0WriteNumber(pkt.Transaction_id)...)
+	b = append(b, Amf0WriteNull()...)
+	b = append(b, Amf0WriteNumber(pkt.Stream_id)...)
+
 	return
 }
 
 func (pkt *CreateStreamResPacket) Decode(b []uint8) (err error) {
+
+	var offset uint32
+
+	err, pkt.Command_name = Amf0ReadString(b, &offset)
+	if err != nil {
+		return
+	}
+
+	if RTMP_AMF0_COMMAND_RESULT != pkt.Command_name {
+		err = fmt.Errorf("decode create stream packet, command name is not result.")
+		return
+	}
+
+	err, pkt.Transaction_id = Amf0ReadNumber(b, &offset)
+	if err != nil {
+		return
+	}
+
+	err = Amf0ReadNull(b, &offset)
+	if err != nil {
+		return
+	}
+
+	err, pkt.Transaction_id = Amf0ReadNumber(b, &offset)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
