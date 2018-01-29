@@ -3,10 +3,10 @@ package protocol
 type UserControlPacket struct {
 }
 
-func (pkt *UserControlPacket) Decode([]uint8) (err error) {
+func (pkt *UserControlPacket) Decode(data []uint8) (err error) {
 	return
 }
-func (pkt *UserControlPacket) Encode() (b []uint8) {
+func (pkt *UserControlPacket) Encode() (data []uint8) {
 	return
 }
 func (pkt *UserControlPacket) GetMessageType() uint8 {

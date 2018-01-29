@@ -30,10 +30,10 @@ type ConnectResPacket struct {
 	Info []Amf0Object
 }
 
-func (pkt *ConnectResPacket) Decode(b []uint8) (err error) {
+func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(b, &offset)
+	err, pkt.Command_name = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func (pkt *ConnectResPacket) Decode(b []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(b, &offset)
+	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -54,12 +54,12 @@ func (pkt *ConnectResPacket) Decode(b []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Props = Amf0ReadObject(b, &offset)
+	err, pkt.Props = Amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Info = Amf0ReadObject(b, &offset)
+	err, pkt.Info = Amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
@@ -67,12 +67,12 @@ func (pkt *ConnectResPacket) Decode(b []uint8) (err error) {
 	return
 }
 
-func (pkt *ConnectResPacket) Encode() (b []uint8) {
+func (pkt *ConnectResPacket) Encode() (data []uint8) {
 
-	b = append(b, Amf0WriteString(pkt.Command_name)...)
-	b = append(b, Amf0WriteNumber(pkt.Transaction_id)...)
-	b = append(b, Amf0WriteObject(pkt.Props)...)
-	b = append(b, Amf0WriteObject(pkt.Info)...)
+	data = append(data, Amf0WriteString(pkt.Command_name)...)
+	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteObject(pkt.Props)...)
+	data = append(data, Amf0WriteObject(pkt.Info)...)
 
 	return
 }

@@ -10,7 +10,7 @@ import (
 type Amf0Object struct {
 	PropertyName string
 	Value        interface{}
-	ValueType    uint32 //just for help known type.
+	ValueType    uint8 //just for help known type.
 }
 
 type Amf0EcmaArray struct {

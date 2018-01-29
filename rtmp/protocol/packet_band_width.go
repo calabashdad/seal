@@ -7,13 +7,30 @@ package protocol
 * 2. decode ignore the data field, donot care.
  */
 type BandWidthPacket struct {
+	/**
+	 * Name of command.
+	 */
+	Command_name string
+	/**
+	 * Transaction ID set to 0.
+	 */
+	Transaction_id float64
+	/**
+	 * Command information does not exist. Set to null type.
+	 */
+	Args Amf0Object // null
+	/**
+	 * Name-value pairs that describe the response from the server.
+	 * ‘code’,‘level’, ‘description’ are names of few among such information.
+	 */
+	Data Amf0Object
 }
 
-func (pkt *BandWidthPacket) Decode([]uint8) (err error) {
+func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
 	return
 }
 
-func (pkt *BandWidthPacket) Encode() (b []uint8) {
+func (pkt *BandWidthPacket) Encode() (data []uint8) {
 	return
 }
 

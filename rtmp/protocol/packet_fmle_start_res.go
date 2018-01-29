@@ -21,10 +21,10 @@ type FmleStartResPacket struct {
 	Args Amf0Object // undefined
 }
 
-func (pkt *FmleStartResPacket) Decode(b []uint8) (err error) {
+func (pkt *FmleStartResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(b, &offset)
+	err, pkt.Command_name = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -34,17 +34,17 @@ func (pkt *FmleStartResPacket) Decode(b []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(b, &offset)
+	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err = Amf0ReadNull(b, &offset)
+	err = Amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err = Amf0ReadUndefined(b, &offset)
+	err = Amf0ReadUndefined(data, &offset)
 	if err != nil {
 		return
 	}
@@ -52,12 +52,12 @@ func (pkt *FmleStartResPacket) Decode(b []uint8) (err error) {
 	return
 }
 
-func (pkt *FmleStartResPacket) Encode() (b []uint8) {
+func (pkt *FmleStartResPacket) Encode() (data []uint8) {
 
-	b = append(b, Amf0WriteString(pkt.Command_name)...)
-	b = append(b, Amf0WriteNumber(pkt.Transaction_id)...)
-	b = append(b, Amf0WriteNull()...)
-	b = append(b, Amf0WriteUndefined()...)
+	data = append(data, Amf0WriteString(pkt.Command_name)...)
+	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteNull()...)
+	data = append(data, Amf0WriteUndefined()...)
 
 	return
 }

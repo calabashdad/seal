@@ -24,21 +24,21 @@ type CreateStreamResPacket struct {
 	Stream_id float64
 }
 
-func (pkt *CreateStreamResPacket) Encode() (b []uint8) {
+func (pkt *CreateStreamResPacket) Encode() (data []uint8) {
 
-	b = append(b, Amf0WriteString(pkt.Command_name)...)
-	b = append(b, Amf0WriteNumber(pkt.Transaction_id)...)
-	b = append(b, Amf0WriteNull()...)
-	b = append(b, Amf0WriteNumber(pkt.Stream_id)...)
+	data = append(data, Amf0WriteString(pkt.Command_name)...)
+	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteNull()...)
+	data = append(data, Amf0WriteNumber(pkt.Stream_id)...)
 
 	return
 }
 
-func (pkt *CreateStreamResPacket) Decode(b []uint8) (err error) {
+func (pkt *CreateStreamResPacket) Decode(data []uint8) (err error) {
 
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(b, &offset)
+	err, pkt.Command_name = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -48,17 +48,17 @@ func (pkt *CreateStreamResPacket) Decode(b []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(b, &offset)
+	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err = Amf0ReadNull(b, &offset)
+	err = Amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(b, &offset)
+	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}

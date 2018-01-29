@@ -3,10 +3,10 @@ package protocol
 type SetChunkSizePacket struct {
 }
 
-func (pkt *SetChunkSizePacket) Decode([]uint8) (err error) {
+func (pkt *SetChunkSizePacket) Decode(data []uint8) (err error) {
 	return
 }
-func (pkt *SetChunkSizePacket) Encode() (b []uint8) {
+func (pkt *SetChunkSizePacket) Encode() (data []uint8) {
 	return
 }
 func (pkt *SetChunkSizePacket) GetMessageType() uint8 {

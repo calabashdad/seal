@@ -13,16 +13,15 @@ type AcknowlegementPacket struct {
 	Sequence_number uint32
 }
 
-func (pkt *AcknowlegementPacket) Decode(b []uint8) (err error) {
+func (pkt *AcknowlegementPacket) Decode(data []uint8) (err error) {
 
-	//no decode for this packet..
 	return
 }
 
-func (pkt *AcknowlegementPacket) Encode() (b []uint8) {
+func (pkt *AcknowlegementPacket) Encode() (data []uint8) {
 
-	b = make([]uint8, 4)
-	binary.BigEndian.PutUint32(b[:], pkt.Sequence_number)
+	data = make([]uint8, 4)
+	binary.BigEndian.PutUint32(data[:], pkt.Sequence_number)
 
 	return
 }
