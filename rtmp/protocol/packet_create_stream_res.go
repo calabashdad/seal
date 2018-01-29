@@ -44,7 +44,7 @@ func (pkt *CreateStreamResPacket) Decode(b []uint8) (err error) {
 	}
 
 	if RTMP_AMF0_COMMAND_RESULT != pkt.Command_name {
-		err = fmt.Errorf("decode create stream packet, command name is not result.")
+		err = fmt.Errorf("decode create stream res packet, command name is not result.")
 		return
 	}
 

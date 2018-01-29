@@ -14,6 +14,8 @@ type AcknowlegementPacket struct {
 }
 
 func (pkt *AcknowlegementPacket) Decode(b []uint8) (err error) {
+
+	//no decode for this packet..
 	return
 }
 
