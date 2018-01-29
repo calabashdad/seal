@@ -8,7 +8,7 @@ import (
 )
 
 //expect msg type, ignore other msgs until the type special has recv success.
-func (rc *RtmpConn) ExpectMsg(pkt protocol.Packet) (err error) {
+func (rc *RtmpConn) ExpectMsg(pkt *protocol.Packet) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -23,14 +23,14 @@ func (rc *RtmpConn) ExpectMsg(pkt protocol.Packet) (err error) {
 			break
 		}
 
-		var pkt_local protocol.Packet
-		err = rc.DecodeMsg(&msg, &pkt_local)
+		var pktLocal protocol.Packet
+		err = rc.DecodeMsg(&msg, &pktLocal)
 		if err != nil {
 			break
 		}
 
-		if reflect.TypeOf(pkt_local) == reflect.TypeOf(pkt) {
-			pkt = pkt_local
+		if reflect.TypeOf(*pkt) == reflect.TypeOf(pktLocal) {
+			*pkt = pktLocal
 			break
 		}
 

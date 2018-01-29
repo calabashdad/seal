@@ -13,14 +13,18 @@ func (rc *RtmpConn) Connect() (err error) {
 		}
 	}()
 
-	var connect_pkg protocol.ConnectPacket
-
-	err = rc.ExpectMsg(&connect_pkg)
+	var connectPkg *protocol.ConnectPacket
+	var pkt protocol.Packet
+	pkt = connectPkg
+	err = rc.ExpectMsg(&pkt)
 	if err != nil {
 		log.Println("expect connect packet failed. err=", err)
 		return
 	}
-	log.Println("expect connect pkg success.")
+
+	connectPkg = pkt.(*protocol.ConnectPacket)
+
+	log.Println("expect connect pkt success.", connectPkg)
 
 	return
 }
