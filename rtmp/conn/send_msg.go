@@ -24,62 +24,62 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 	}
 
 	//current position of payload send.
-	var payload_offset uint32
+	var payloadOffset uint32
 
 	// always write the header event payload is empty.
 	for {
-		if payload_offset >= msg.Header.Payload_length {
+		if payloadOffset >= msg.Header.Payload_length {
 			break
 		}
 
-		var header_offset uint32
+		var headerOffset uint32
 		var header [RTMP_MAX_FMT0_HEADER_SIZE]uint8
 
-		if 0 == payload_offset {
+		if 0 == payloadOffset {
 			// write new chunk stream header, fmt is 0
-			header[header_offset] = 0x00 | uint8(msg.Header.Perfer_csid&0x3f)
-			header_offset += 1
+			header[headerOffset] = 0x00 | uint8(msg.Header.Perfer_csid&0x3f)
+			headerOffset++
 
 			// chunk message header, 11 bytes
 			// timestamp, 3bytes, big-endian
 			timestamp := msg.Header.Timestamp
 			if timestamp < protocol.RTMP_EXTENDED_TIMESTAMP {
-				header[header_offset] = uint8((timestamp & 0x00ff0000) >> 16)
-				header_offset += 1
-				header[header_offset] = uint8((timestamp & 0x0000ff00) >> 8)
-				header_offset += 1
-				header[header_offset] = uint8(timestamp & 0x000000ff)
-				header_offset += 1
+				header[headerOffset] = uint8((timestamp & 0x00ff0000) >> 16)
+				headerOffset++
+				header[headerOffset] = uint8((timestamp & 0x0000ff00) >> 8)
+				headerOffset++
+				header[headerOffset] = uint8(timestamp & 0x000000ff)
+				headerOffset++
 			} else {
-				header[header_offset] = 0xff
-				header_offset += 1
-				header[header_offset] = 0xff
-				header_offset += 1
-				header[header_offset] = 0xff
-				header_offset += 1
+				header[headerOffset] = 0xff
+				headerOffset++
+				header[headerOffset] = 0xff
+				headerOffset++
+				header[headerOffset] = 0xff
+				headerOffset++
 			}
 
 			// message_length, 3bytes, big-endian
-			payload_lengh := msg.Header.Payload_length
-			header[header_offset] = uint8((payload_lengh & 0x00ff0000) >> 16)
-			header_offset += 1
-			header[header_offset] = uint8((payload_lengh & 0x0000ff00) >> 8)
-			header_offset += 1
-			header[header_offset] = uint8((payload_lengh & 0x000000ff))
-			header_offset += 1
+			payloadLengh := msg.Header.Payload_length
+			header[headerOffset] = uint8((payloadLengh & 0x00ff0000) >> 16)
+			headerOffset++
+			header[headerOffset] = uint8((payloadLengh & 0x0000ff00) >> 8)
+			headerOffset++
+			header[headerOffset] = uint8((payloadLengh & 0x000000ff))
+			headerOffset++
 
 			// message_type, 1bytes
-			header[header_offset] = msg.Header.Message_type
-			header_offset += 1
+			header[headerOffset] = msg.Header.Message_type
+			headerOffset++
 
 			// stream id, 4 bytes, little-endian
-			binary.LittleEndian.PutUint32(header[header_offset:header_offset+4], msg.Header.Stream_id)
-			header_offset += 4
+			binary.LittleEndian.PutUint32(header[headerOffset:headerOffset+4], msg.Header.Stream_id)
+			headerOffset += 4
 
 			// chunk extended timestamp header, 0 or 4 bytes, big-endian
 			if timestamp >= protocol.RTMP_EXTENDED_TIMESTAMP {
-				binary.BigEndian.PutUint32(header[header_offset:header_offset+4], uint32(timestamp))
-				header_offset += 4
+				binary.BigEndian.PutUint32(header[headerOffset:headerOffset+4], uint32(timestamp))
+				headerOffset += 4
 			}
 
 		} else {
@@ -88,8 +88,8 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 			// rollback to 1B chunk header.
 
 			// fmt is 3
-			header[header_offset] = 0xc0 | uint8(msg.Header.Perfer_csid&0x3f)
-			header_offset += 1
+			header[headerOffset] = 0xc0 | uint8(msg.Header.Perfer_csid&0x3f)
+			headerOffset++
 
 			// chunk extended timestamp header, 0 or 4 bytes, big-endian
 			// 6.1.3. Extended Timestamp
@@ -104,31 +104,31 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 			//        must send the extended-timestamp to flash-player.
 			timestamp := msg.Header.Timestamp
 			if timestamp >= protocol.RTMP_EXTENDED_TIMESTAMP {
-				binary.BigEndian.PutUint32(header[header_offset:header_offset+4], uint32(timestamp))
-				header_offset += 4
+				binary.BigEndian.PutUint32(header[headerOffset:headerOffset+4], uint32(timestamp))
+				headerOffset += 4
 			}
 		}
 
 		//send header
-		err = rc.TcpConn.SendBytes(header[:header_offset])
+		err = rc.TcpConn.SendBytes(header[:headerOffset])
 		if err != nil {
 			log.Println("send msg header failed.")
 			return
 		}
 
 		//payload
-		payload_size := msg.Header.Payload_length - payload_offset
-		if payload_size > rc.Out_chunk_size {
-			payload_size = rc.Out_chunk_size
+		payloadSize := msg.Header.Payload_length - payloadOffset
+		if payloadSize > rc.OutChunkSize {
+			payloadSize = rc.OutChunkSize
 		}
 
-		err = rc.TcpConn.SendBytes(msg.Payload[payload_offset : payload_offset+payload_size])
+		err = rc.TcpConn.SendBytes(msg.Payload[payloadOffset : payloadOffset+payloadSize])
 		if err != nil {
 			log.Println("send msg payload failed.")
 			return
 		}
 
-		payload_offset += payload_size
+		payloadOffset += payloadSize
 	}
 
 	return

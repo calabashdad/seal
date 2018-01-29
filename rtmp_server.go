@@ -50,11 +50,12 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
 			Conn:    c,
 			TimeOut: conf.GlobalConfInfo.Rtmp.TimeOut,
 		},
-		In_chunk_size:  protocol.RTMP_DEFAULT_CHUNK_SIZE,
-		Out_chunk_size: protocol.RTMP_DEFAULT_CHUNK_SIZE,
-		Pool:           kernel.NewMemPool(),
-		Ack_window: conn.AckWindowSize{
-			Ack_window_size: 250000,
+		ChunkStreams: make(map[uint32]*protocol.ChunkStream),
+		InChunkSize:  protocol.RTMP_DEFAULT_CHUNK_SIZE,
+		OutChunkSize: protocol.RTMP_DEFAULT_CHUNK_SIZE,
+		Pool:         kernel.NewMemPool(),
+		AckWindow: conn.AckWindowSizeS{
+			AckWindowSize: 250000,
 		},
 		Requests: make(map[float64]string),
 	}

@@ -22,7 +22,7 @@ func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
 		return
 	}
 
-	rc.Ack_window.Has_acked_size = rc.TcpConn.RecvBytesSum
+	rc.AckWindow.HasAckedSize = rc.TcpConn.RecvBytesSum
 
 	return
 }

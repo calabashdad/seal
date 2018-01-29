@@ -4,7 +4,10 @@ import (
 	"seal/rtmp/protocol"
 )
 
-func (rc *RtmpConn) SendPacket(pkt protocol.Packet, stream_id uint32) (err error) {
+/**
+* SendPacket the function has call the message 
+*/
+func (rc *RtmpConn) SendPacket(pkt protocol.Packet, streamID uint32) (err error) {
 
 	var msg protocol.Message
 
@@ -19,7 +22,7 @@ func (rc *RtmpConn) SendPacket(pkt protocol.Packet, stream_id uint32) (err error
 	msg.Header.Payload_length = uint32(len(msg.Payload))
 	msg.Header.Message_type = pkt.GetMessageType()
 	msg.Header.Perfer_csid = pkt.GetPreferCsId()
-	msg.Header.Stream_id = stream_id
+	msg.Header.Stream_id = streamID
 
 	err = rc.SendMsg(&msg)
 	if err != nil {

@@ -7,22 +7,22 @@ import (
 	"seal/rtmp/protocol"
 )
 
-type AckWindowSize struct {
-	Ack_window_size uint32
-	Has_acked_size  uint64
+type AckWindowSizeS struct {
+	AckWindowSize uint32
+	HasAckedSize  uint64
 }
 
 type RtmpConn struct {
-	TcpConn        *kernel.TcpSock
-	chunk_streams  map[uint32]*protocol.ChunkStream //key:cs id
-	In_chunk_size  uint32                           //default 128, set by peer
-	Out_chunk_size uint32                           //default 128, set by config file.
-	Pool           *kernel.MemPool
-	Ack_window     AckWindowSize
-	Requests       map[float64]string //key: transactin id, value:command name
+	TcpConn      *kernel.TcpSock
+	ChunkStreams map[uint32]*protocol.ChunkStream //key:cs id
+	InChunkSize  uint32                           //default 128, set by peer
+	OutChunkSize uint32                           //default 128, set by config file.
+	Pool         *kernel.MemPool
+	AckWindow    AckWindowSizeS
+	Requests     map[float64]string //key: transactin id, value:command name
 }
 
-func (rtmp_conn *RtmpConn) Cycle() {
+func (rc *RtmpConn) Cycle() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -31,12 +31,19 @@ func (rtmp_conn *RtmpConn) Cycle() {
 
 	var err error
 
-	err = rtmp_conn.HandShake()
+	err = rc.HandShake()
 	if err != nil {
 		log.Println("rtmp handshake failed.err=", err)
 		return
 	}
 	log.Println("rtmp handshake success.")
 
-	log.Println("rtmp conn finished, remote=", rtmp_conn.TcpConn.Conn.RemoteAddr())
+	err = rc.Connect()
+	if err != nil {
+		log.Println("connect failed. err=", err)
+		return
+	}
+	log.Println("connect success.")
+
+	log.Println("rtmp conn finished, remote=", rc.TcpConn.Conn.RemoteAddr())
 }

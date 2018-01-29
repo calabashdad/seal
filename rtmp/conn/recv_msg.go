@@ -6,7 +6,7 @@ import (
 	"seal/rtmp/protocol"
 )
 
-func (rc *RtmpConn) RecvMsg() (err error) {
+func (rc *RtmpConn) RecvMsg(msg **protocol.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -14,7 +14,6 @@ func (rc *RtmpConn) RecvMsg() (err error) {
 	}()
 
 	for {
-		var msg *protocol.Message
 
 		err = rc.RecvInterlacedMsg(msg)
 		if err != nil {
@@ -22,11 +21,12 @@ func (rc *RtmpConn) RecvMsg() (err error) {
 			return
 		}
 
-		if nil == msg {
+		if nil == *msg {
+			//has not recv an entire msg.
 			continue
 		}
 
-		if msg.Size <= 0 || msg.Header.Payload_length <= 0 {
+		if (*msg).Size <= 0 || (*msg).Header.Payload_length <= 0 {
 			log.Println("ignore empty msg.")
 			continue
 		}
@@ -36,6 +36,7 @@ func (rc *RtmpConn) RecvMsg() (err error) {
 			return
 		}
 
+		break
 	}
 
 	return
