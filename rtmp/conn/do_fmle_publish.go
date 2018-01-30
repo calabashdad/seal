@@ -4,6 +4,7 @@ import (
 	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
+	"reflect"
 	"seal/rtmp/pt"
 )
 
@@ -141,6 +142,116 @@ func (rc *RtmpConn) DoFmlePublisherCycle() (err error) {
 		return
 	}
 	log.Println("send on status packet success.")
+
+	return
+}
+
+func (rc *RtmpConn) Publishing() (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+		}
+	}()
+
+	log.Println("publishing.....", rc.StreamName)
+
+	for {
+		var msg *pt.Message
+		err = rc.RecvMsg(&msg)
+		if err != nil {
+			break
+		}
+
+		if msg.Header.IsAmf0Command() || msg.Header.IsAmf3Command() {
+			var pktUnpublish *pt.FmleStartPacket
+
+			var pktLocal pt.Packet
+			err = rc.DecodeMsg(&msg, &pktLocal)
+			if err != nil {
+				break
+			}
+
+			if reflect.TypeOf(pktUnpublish) == reflect.TypeOf(pktLocal) {
+				pktUnpublish = pktLocal.(*pt.FmleStartPacket)
+
+				err = rc.fmleUnpublish(pktUnpublish)
+				if err != nil {
+					break
+				}
+			}
+
+			continue
+		}
+	}
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (rc *RtmpConn) fmleUnpublish(pkt *pt.FmleStartPacket) (err error) {
+
+	// publish response onFCUnpublish(NetStream.unpublish.Success)
+	var pktOnFcUnpublishRes pt.OnStatusCallPacket
+	pktOnFcUnpublishRes.CommandName = pt.RTMP_AMF0_COMMAND_ON_FC_UNPUBLISH
+	pktOnFcUnpublishRes.Data = append(pktOnFcUnpublishRes.Data, pt.Amf0Object{
+		PropertyName: pt.StatusCode,
+		Value:        pt.StatusCodeUnpublishSuccess,
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	pktOnFcUnpublishRes.Data = append(pktOnFcUnpublishRes.Data, pt.Amf0Object{
+		PropertyName: pt.StatusDescription,
+		Value:        "Stop publishing stream.",
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+
+	err = rc.SendPacket(&pktOnFcUnpublishRes, uint32(rc.DefaultStreamId))
+	if err != nil {
+		log.Println("send unpublish packet error.err=", err)
+		return
+	}
+
+	// FCUnpublish response
+	var pktFCUnpublish pt.FmleStartResPacket
+	pktFCUnpublish.Command_name = pt.RTMP_AMF0_COMMAND_RESULT
+	pktFCUnpublish.Transaction_id = pkt.Transaction_id
+	err = rc.SendPacket(&pktFCUnpublish, uint32(rc.DefaultStreamId))
+	if err != nil {
+		log.Println("send unpublish FCUnpublish response error. err=", err)
+		return
+	}
+
+	// publish response onStatus(NetStream.Unpublish.Success)
+
+	var pktOnstatus pt.OnStatusCallPacket
+	pktOnstatus.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+	pktOnstatus.Data = append(pktOnstatus.Data, pt.Amf0Object{
+		PropertyName: pt.StatusLevel,
+		Value:        pt.StatusLevelStatus,
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	pktOnstatus.Data = append(pktOnstatus.Data, pt.Amf0Object{
+		PropertyName: pt.StatusCode,
+		Value:        pt.StatusCodeUnpublishSuccess,
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	pktOnstatus.Data = append(pktOnstatus.Data, pt.Amf0Object{
+		PropertyName: pt.StatusDescription,
+		Value:        "Stream is now unpublished",
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	pktOnstatus.Data = append(pktOnstatus.Data, pt.Amf0Object{
+		PropertyName: pt.StatusClientId,
+		Value:        pt.RTMP_SIG_CLIENT_ID,
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	err = rc.SendPacket(&pktOnstatus, uint32(rc.DefaultStreamId))
+	if err != nil {
+		log.Println("send unpublish on status error.err=", err)
+		return
+	}
 
 	return
 }
