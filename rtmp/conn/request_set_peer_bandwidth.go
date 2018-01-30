@@ -3,7 +3,7 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 /**
@@ -17,7 +17,7 @@ func (rc *RtmpConn) SetPeerBandWidth(bandwidth uint32, typeLimit uint8) (err err
 		}
 	}()
 
-	var pkt protocol.SetPeerBandWidthPacket
+	var pkt pt.SetPeerBandWidthPacket
 
 	pkt.Bandwidth = bandwidth
 	pkt.TypeLimit = typeLimit

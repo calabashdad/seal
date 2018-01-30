@@ -3,20 +3,20 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 /**
 * SendPacket the function has call the message
  */
-func (rc *RtmpConn) SendPacket(pkt protocol.Packet, streamID uint32) (err error) {
+func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
 		}
 	}()
 
-	var msg protocol.Message
+	var msg pt.Message
 
 	msg.Payload = pkt.Encode()
 	msg.Size = uint32(len(msg.Payload))

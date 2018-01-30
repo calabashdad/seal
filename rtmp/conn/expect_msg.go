@@ -4,11 +4,11 @@ import (
 	"UtilsTools/identify_panic"
 	"log"
 	"reflect"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 //expect msg type, ignore other msgs until the type special has recv success.
-func (rc *RtmpConn) ExpectMsg(pkt *protocol.Packet) (err error) {
+func (rc *RtmpConn) ExpectMsg(pkt *pt.Packet) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -16,14 +16,14 @@ func (rc *RtmpConn) ExpectMsg(pkt *protocol.Packet) (err error) {
 	}()
 
 	for {
-		var msg *protocol.Message
+		var msg *pt.Message
 
 		err = rc.RecvMsg(&msg)
 		if err != nil {
 			break
 		}
 
-		var pktLocal protocol.Packet
+		var pktLocal pt.Packet
 		err = rc.DecodeMsg(&msg, &pktLocal)
 		if err != nil {
 			break

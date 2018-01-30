@@ -4,7 +4,7 @@ import (
 	"UtilsTools/identify_panic"
 	"log"
 	"seal/kernel"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 type AckWindowSizeS struct {
@@ -14,7 +14,7 @@ type AckWindowSizeS struct {
 
 type RtmpConn struct {
 	TcpConn      *kernel.TcpSock
-	ChunkStreams map[uint32]*protocol.ChunkStream //key:cs id
+	ChunkStreams map[uint32]*pt.ChunkStream //key:cs id
 	InChunkSize  uint32                           //default 128, set by peer
 	OutChunkSize uint32                           //default 128, set by config file.
 	Pool         *kernel.MemPool

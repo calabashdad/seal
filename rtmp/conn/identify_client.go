@@ -4,7 +4,7 @@ import (
 	"UtilsTools/identify_panic"
 	"log"
 	"reflect"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 func (rc *RtmpConn) IdentifyClient() (err error) {
@@ -15,7 +15,7 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 	}()
 
 	for {
-		var msg *protocol.Message
+		var msg *pt.Message
 
 		err = rc.RecvMsg(&msg)
 		if err != nil {
@@ -32,29 +32,29 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 			continue
 		}
 
-		var pkt protocol.Packet
+		var pkt pt.Packet
 
 		err = rc.DecodeMsg(&msg, &pkt)
 		if err != nil {
 			break
 		}
 
-		var pktCreateStream *protocol.CreateStreamPacket
-		var pktFMLEStart *protocol.FmleStartPacket
-		var pktPlay *protocol.PlayPacket
-		var pktCallRes *protocol.CallResPacket
+		var pktCreateStream *pt.CreateStreamPacket
+		var pktFMLEStart *pt.FmleStartPacket
+		var pktPlay *pt.PlayPacket
+		var pktCallRes *pt.CallResPacket
 		switch reflect.TypeOf(pkt) {
 		case reflect.TypeOf(pktCreateStream):
-			pktCreateStream = pkt.(*protocol.CreateStreamPacket)
+			pktCreateStream = pkt.(*pt.CreateStreamPacket)
 			return rc.identifyCreateStreamClient(pktCreateStream)
 		case reflect.TypeOf(pktFMLEStart):
-			pktFMLEStart = pkt.(*protocol.FmleStartPacket)
+			pktFMLEStart = pkt.(*pt.FmleStartPacket)
 			return
 		case reflect.TypeOf(pktPlay):
-			pktPlay = pkt.(*protocol.PlayPacket)
+			pktPlay = pkt.(*pt.PlayPacket)
 			return
 		case reflect.TypeOf(pktCallRes):
-			pktCallRes = pkt.(*protocol.CallResPacket)
+			pktCallRes = pkt.(*pt.CallResPacket)
 		}
 	}
 
@@ -65,11 +65,11 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 	return
 }
 
-func (rc *RtmpConn) identifyCreateStreamClient(req *protocol.CreateStreamPacket) (err error) {
+func (rc *RtmpConn) identifyCreateStreamClient(req *pt.CreateStreamPacket) (err error) {
 
-	var pkt protocol.CreateStreamResPacket
+	var pkt pt.CreateStreamResPacket
 
-	pkt.Command_name = protocol.RTMP_AMF0_COMMAND_RESULT
+	pkt.Command_name = pt.RTMP_AMF0_COMMAND_RESULT
 	pkt.Transaction_id = req.Transaction_id
 	pkt.Stream_id = 1 //default for the response of create stream.
 

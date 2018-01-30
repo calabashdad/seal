@@ -4,10 +4,10 @@ import (
 	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err error) {
+func (rc *RtmpConn) DecodeMsg(msg **pt.Message, pkt *pt.Packet) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -30,7 +30,7 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 		}
 
 		var command string
-		err, command = protocol.Amf0ReadString((*msg).Payload, &offset)
+		err, command = pt.Amf0ReadString((*msg).Payload, &offset)
 		if err != nil {
 			log.Println("read command failed when decode msg.")
 			return
@@ -38,10 +38,10 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 
 		switch command {
 		//command: result or error.
-		case protocol.RTMP_AMF0_COMMAND_RESULT, protocol.RTMP_AMF0_COMMAND_ERROR:
+		case pt.RTMP_AMF0_COMMAND_RESULT, pt.RTMP_AMF0_COMMAND_ERROR:
 			if true {
 				var transaction_id float64
-				err, transaction_id = protocol.Amf0ReadNumber((*msg).Payload, &offset)
+				err, transaction_id = pt.Amf0ReadNumber((*msg).Payload, &offset)
 				if err != nil {
 					log.Println("read transaction id failed when decode msg.")
 					return
@@ -54,21 +54,21 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 				}
 
 				switch req_command_name {
-				case protocol.RTMP_AMF0_COMMAND_CONNECT:
-					*pkt = &protocol.ConnectResPacket{}
+				case pt.RTMP_AMF0_COMMAND_CONNECT:
+					*pkt = &pt.ConnectResPacket{}
 					err = (*pkt).Decode((*msg).Payload)
 
-				case protocol.RTMP_AMF0_COMMAND_CREATE_STREAM:
-					(*pkt) = &protocol.CreateStreamResPacket{
+				case pt.RTMP_AMF0_COMMAND_CREATE_STREAM:
+					(*pkt) = &pt.CreateStreamResPacket{
 						Transaction_id: 0,
 						Stream_id:      0,
 					}
 					err = (*pkt).Decode((*msg).Payload)
 
-				case protocol.RTMP_AMF0_COMMAND_RELEASE_STREAM,
-					protocol.RTMP_AMF0_COMMAND_FC_PUBLISH,
-					protocol.RTMP_AMF0_COMMAND_UNPUBLISH:
-					(*pkt) = &protocol.FmleStartResPacket{
+				case pt.RTMP_AMF0_COMMAND_RELEASE_STREAM,
+					pt.RTMP_AMF0_COMMAND_FC_PUBLISH,
+					pt.RTMP_AMF0_COMMAND_UNPUBLISH:
+					(*pkt) = &pt.FmleStartResPacket{
 						Transaction_id: 0,
 					}
 					err = (*pkt).Decode((*msg).Payload)
@@ -84,36 +84,36 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 				}
 
 			}
-		case protocol.RTMP_AMF0_COMMAND_CONNECT:
-			*pkt = &protocol.ConnectPacket{}
+		case pt.RTMP_AMF0_COMMAND_CONNECT:
+			*pkt = &pt.ConnectPacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_COMMAND_CREATE_STREAM:
-			*pkt = &protocol.CreateStreamPacket{}
+		case pt.RTMP_AMF0_COMMAND_CREATE_STREAM:
+			*pkt = &pt.CreateStreamPacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_COMMAND_PLAY:
-			*pkt = &protocol.PlayPacket{}
+		case pt.RTMP_AMF0_COMMAND_PLAY:
+			*pkt = &pt.PlayPacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_COMMAND_PAUSE:
-			*pkt = &protocol.PausePacket{}
+		case pt.RTMP_AMF0_COMMAND_PAUSE:
+			*pkt = &pt.PausePacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_COMMAND_RELEASE_STREAM, protocol.RTMP_AMF0_COMMAND_FC_PUBLISH, protocol.RTMP_AMF0_COMMAND_UNPUBLISH:
-			*pkt = &protocol.FmleStartPacket{}
+		case pt.RTMP_AMF0_COMMAND_RELEASE_STREAM, pt.RTMP_AMF0_COMMAND_FC_PUBLISH, pt.RTMP_AMF0_COMMAND_UNPUBLISH:
+			*pkt = &pt.FmleStartPacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_COMMAND_PUBLISH:
-			*pkt = &protocol.PublishPacket{}
+		case pt.RTMP_AMF0_COMMAND_PUBLISH:
+			*pkt = &pt.PublishPacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_DATA_SET_DATAFRAME, protocol.RTMP_AMF0_DATA_ON_METADATA:
-			*pkt = &protocol.OnMetaDataPacket{}
+		case pt.RTMP_AMF0_DATA_SET_DATAFRAME, pt.RTMP_AMF0_DATA_ON_METADATA:
+			*pkt = &pt.OnMetaDataPacket{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_DATA_ON_CUSTOMDATA:
-			(*pkt) = &protocol.OnCustomDataPakcet{}
+		case pt.RTMP_AMF0_DATA_ON_CUSTOMDATA:
+			(*pkt) = &pt.OnCustomDataPakcet{}
 			err = (*pkt).Decode((*msg).Payload)
-		case protocol.RTMP_AMF0_COMMAND_CLOSE_STREAM:
-			*pkt = &protocol.CloseStreamPacket{}
+		case pt.RTMP_AMF0_COMMAND_CLOSE_STREAM:
+			*pkt = &pt.CloseStreamPacket{}
 			err = (*pkt).Decode((*msg).Payload)
 		default:
 			if (*msg).Header.IsAmf0Command() || (*msg).Header.IsAmf3Command() {
-				*pkt = &protocol.CallPacket{}
+				*pkt = &pt.CallPacket{}
 				err = (*pkt).Decode((*msg).Payload)
 			}
 		}
@@ -123,13 +123,13 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 		}
 
 	} else if (*msg).Header.IsUserControlMessage() {
-		*pkt = &protocol.UserControlPacket{}
+		*pkt = &pt.UserControlPacket{}
 		err = (*pkt).Decode((*msg).Payload)
 	} else if (*msg).Header.IsWindowAckledgementSize() {
-		*pkt = &protocol.SetWindowAckSizePacket{}
+		*pkt = &pt.SetWindowAckSizePacket{}
 		err = (*pkt).Decode((*msg).Payload)
 	} else if (*msg).Header.IsSetChunkSize() {
-		*pkt = &protocol.SetChunkSizePacket{}
+		*pkt = &pt.SetChunkSizePacket{}
 		err = (*pkt).Decode((*msg).Payload)
 	} else {
 		if !(*msg).Header.IsAckledgement() && !(*msg).Header.IsSetPeerBandwidth() {

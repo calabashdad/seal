@@ -4,10 +4,10 @@ import (
 	"UtilsTools/identify_panic"
 	"encoding/binary"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
+func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -20,7 +20,7 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 
 	// ensure the basic header is 1bytes. make simple.
 	if msg.Header.Perfer_csid < 2 {
-		msg.Header.Perfer_csid = protocol.RTMP_CID_ProtocolControl
+		msg.Header.Perfer_csid = pt.RTMP_CID_ProtocolControl
 	}
 
 	//current position of payload send.
@@ -43,7 +43,7 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 			// chunk message header, 11 bytes
 			// timestamp, 3bytes, big-endian
 			timestamp := msg.Header.Timestamp
-			if timestamp < protocol.RTMP_EXTENDED_TIMESTAMP {
+			if timestamp < pt.RTMP_EXTENDED_TIMESTAMP {
 				header[headerOffset] = uint8((timestamp & 0x00ff0000) >> 16)
 				headerOffset++
 				header[headerOffset] = uint8((timestamp & 0x0000ff00) >> 8)
@@ -77,7 +77,7 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 			headerOffset += 4
 
 			// chunk extended timestamp header, 0 or 4 bytes, big-endian
-			if timestamp >= protocol.RTMP_EXTENDED_TIMESTAMP {
+			if timestamp >= pt.RTMP_EXTENDED_TIMESTAMP {
 				binary.BigEndian.PutUint32(header[headerOffset:headerOffset+4], uint32(timestamp))
 				headerOffset += 4
 			}
@@ -103,7 +103,7 @@ func (rc *RtmpConn) SendMsg(msg *protocol.Message) (err error) {
 			//        must send the extended-timestamp to FMS,
 			//        must send the extended-timestamp to flash-player.
 			timestamp := msg.Header.Timestamp
-			if timestamp >= protocol.RTMP_EXTENDED_TIMESTAMP {
+			if timestamp >= pt.RTMP_EXTENDED_TIMESTAMP {
 				binary.BigEndian.PutUint32(header[headerOffset:headerOffset+4], uint32(timestamp))
 				headerOffset += 4
 			}

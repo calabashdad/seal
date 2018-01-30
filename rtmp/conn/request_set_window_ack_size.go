@@ -3,7 +3,7 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 func (rc *RtmpConn) SetWindowAckSize(ackSize uint32) (err error) {
@@ -13,7 +13,7 @@ func (rc *RtmpConn) SetWindowAckSize(ackSize uint32) (err error) {
 		}
 	}()
 
-	var pkt protocol.SetWindowAckSizePacket
+	var pkt pt.SetWindowAckSizePacket
 	pkt.Ackowledgement_window_size = ackSize
 
 	err = rc.SendPacket(&pkt, 0)

@@ -5,10 +5,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) RecvInterlacedMsg(msg **protocol.Message) (err error) {
+func (rc *RtmpConn) RecvInterlacedMsg(msg **pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -27,7 +27,7 @@ func (rc *RtmpConn) RecvInterlacedMsg(msg **protocol.Message) (err error) {
 
 	chunk := rc.ChunkStreams[cs_id]
 	if nil == chunk {
-		chunk = &protocol.ChunkStream{
+		chunk = &pt.ChunkStream{
 			Cs_id: cs_id,
 		}
 
@@ -156,7 +156,7 @@ func (rc *RtmpConn) ReadBasicHeader(header_fmt *uint8, cs_id *uint32, chunk_head
 *   fmt=2, 0x8X
 *   fmt=3, 0xCX
  */
-func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint8, chunkHeaderSize uint32, msgHeaderSize *uint32) (err error) {
+func (rc *RtmpConn) ReadMessageHeader(chunk *pt.ChunkStream, chunkFmt uint8, chunkHeaderSize uint32, msgHeaderSize *uint32) (err error) {
 
 	/**
 	 * we should not assert anything about fmt, for the first packet.
@@ -186,18 +186,18 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 	is_first_chunk_of_msg = (nil == chunk.Msg)
 
 	//when a chunk stream is fresh, the fmt must be 0, a new stream.
-	if 0 == chunk.Msg_count && chunkFmt != protocol.RTMP_FMT_TYPE0 {
+	if 0 == chunk.Msg_count && chunkFmt != pt.RTMP_FMT_TYPE0 {
 		// for librtmp, if ping, it will send a fresh stream with fmt=1,
-		// 0x42             where: fmt=1, cid=2, protocol contorl user-control message
+		// 0x42             where: fmt=1, cid=2, pt contorl user-control message
 		// 0x00 0x00 0x00   where: timestamp=0
 		// 0x00 0x00 0x06   where: payload_length=6
-		// 0x04             where: message_type=4(protocol control user-control message)
+		// 0x04             where: message_type=4(pt control user-control message)
 		// 0x00 0x06            where: event Ping(0x06)
 		// 0x00 0x00 0x0d 0x0f  where: event data 4bytes ping timestamp.
-		if protocol.RTMP_CID_ProtocolControl == chunk.Cs_id && protocol.RTMP_FMT_TYPE1 == chunkFmt {
+		if pt.RTMP_CID_ProtocolControl == chunk.Cs_id && pt.RTMP_FMT_TYPE1 == chunkFmt {
 			log.Println("accept cid=2, fmt=1 to make librtmp happy.")
 		} else {
-			// must be a RTMP protocol level error.
+			// must be a RTMP pt level error.
 			err = fmt.Errorf("chunk stream is fresh, fmt must be RTMP_FMT_TYPE0, actual is %d", chunkFmt)
 			return
 		}
@@ -205,13 +205,13 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 
 	// when exists cache msg, means got an partial message,
 	// the fmt must not be type0 which means new message.
-	if nil != chunk.Msg && protocol.RTMP_FMT_TYPE0 == chunkFmt {
+	if nil != chunk.Msg && pt.RTMP_FMT_TYPE0 == chunkFmt {
 		err = fmt.Errorf("chunk stream exists, fmt must not be RTMP_FMT_TYPE0, actual is %d", chunkFmt)
 		return
 	}
 
 	if nil == chunk.Msg {
-		chunk.Msg = &protocol.Message{}
+		chunk.Msg = &pt.Message{}
 	}
 
 	switch chunkFmt {
@@ -247,7 +247,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 	 *   fmt=3, 0xCX
 	 */
 
-	if chunkFmt <= protocol.RTMP_FMT_TYPE2 {
+	if chunkFmt <= pt.RTMP_FMT_TYPE2 {
 		chunk.Msg_header.Timestamp_delta = 0
 
 		var offset uint32
@@ -272,7 +272,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 		// timestamp header’ MUST be present. Otherwise, this value SHOULD be
 		// the entire delta.
 
-		chunk.Extended_timestamp = (chunk.Msg_header.Timestamp_delta >= protocol.RTMP_EXTENDED_TIMESTAMP)
+		chunk.Extended_timestamp = (chunk.Msg_header.Timestamp_delta >= pt.RTMP_EXTENDED_TIMESTAMP)
 		if !chunk.Extended_timestamp {
 			// Extended timestamp: 0 or 4 bytes
 			// This field MUST be sent when the normal timsestamp is set to
@@ -283,7 +283,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 			// the normal timestamp field MUST NOT be used and MUST be set to
 			// 0xffffff and the extended timestamp MUST be sent.
 
-			if protocol.RTMP_FMT_TYPE0 == chunkFmt {
+			if pt.RTMP_FMT_TYPE0 == chunkFmt {
 				// 6.1.2.1. Type 0
 				// For a type-0 chunk, the absolute timestamp of the message is sent
 				// here.
@@ -297,7 +297,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 			}
 		}
 
-		if chunkFmt <= protocol.RTMP_FMT_TYPE1 {
+		if chunkFmt <= pt.RTMP_FMT_TYPE1 {
 			var payloadLength uint32
 
 			payloadLength |= (uint32(msg_header_buf[offset]) << 16)
@@ -320,7 +320,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 			chunk.Msg_header.Message_type = msg_header_buf[offset]
 			offset += 1
 
-			if protocol.RTMP_FMT_TYPE0 == chunkFmt {
+			if pt.RTMP_FMT_TYPE0 == chunkFmt {
 				chunk.Msg_header.Stream_id = binary.LittleEndian.Uint32(msg_header_buf[offset : offset+4])
 				offset += 4
 
@@ -386,7 +386,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 	// the extended-timestamp must be unsigned-int,
 	//         24bits timestamp: 0xffffff = 16777215ms = 16777.215s = 4.66h
 	//         32bits timestamp: 0xffffffff = 4294967295ms = 4294967.295s = 1193.046h = 49.71d
-	// because the rtmp protocol says the 32bits timestamp is about "50 days":
+	// because the rtmp pt says the 32bits timestamp is about "50 days":
 	//         3. Byte Order, Alignment, and Time Format
 	//                Because timestamps are generally only 32 bits long, they will roll
 	//                over after fewer than 50 days.
@@ -414,7 +414,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *protocol.ChunkStream, chunkFmt uint
 	return
 }
 
-func (rc *RtmpConn) ReadMsgPayload(chunk *protocol.ChunkStream) (err error) {
+func (rc *RtmpConn) ReadMsgPayload(chunk *pt.ChunkStream) (err error) {
 
 	payloadSize := chunk.Msg_header.Payload_length - chunk.Msg.Size
 

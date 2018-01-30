@@ -3,10 +3,10 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) OnRecvMsg(msg **protocol.Message) (err error) {
+func (rc *RtmpConn) OnRecvMsg(msg **pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -23,9 +23,9 @@ func (rc *RtmpConn) OnRecvMsg(msg **protocol.Message) (err error) {
 		}
 	}
 
-	var pkt protocol.Packet
+	var pkt pt.Packet
 	switch (*msg).Header.Message_type {
-	case protocol.RTMP_MSG_SetChunkSize, protocol.RTMP_MSG_UserControlMessage, protocol.RTMP_MSG_WindowAcknowledgementSize:
+	case pt.RTMP_MSG_SetChunkSize, pt.RTMP_MSG_UserControlMessage, pt.RTMP_MSG_WindowAcknowledgementSize:
 
 		err = rc.DecodeMsg(msg, &pkt)
 		if err != nil {
@@ -35,19 +35,19 @@ func (rc *RtmpConn) OnRecvMsg(msg **protocol.Message) (err error) {
 	}
 
 	switch (*msg).Header.Message_type {
-	case protocol.RTMP_MSG_SetChunkSize:
-		chunk_size := pkt.(*protocol.SetChunkSizePacket).Chunk_size
-		if chunk_size >= protocol.RTMP_CHUNKSIZE_MIN && chunk_size <= protocol.RTMP_CHUNKSIZE_MAX {
+	case pt.RTMP_MSG_SetChunkSize:
+		chunk_size := pkt.(*pt.SetChunkSizePacket).Chunk_size
+		if chunk_size >= pt.RTMP_CHUNKSIZE_MIN && chunk_size <= pt.RTMP_CHUNKSIZE_MAX {
 			rc.InChunkSize = chunk_size
 		}
-	case protocol.RTMP_MSG_UserControlMessage:
-		if protocol.SrcPCUCSetBufferLength == pkt.(*protocol.UserControlPacket).Event_type {
+	case pt.RTMP_MSG_UserControlMessage:
+		if pt.SrcPCUCSetBufferLength == pkt.(*pt.UserControlPacket).Event_type {
 
-		} else if protocol.SrcPCUCPingRequest == pkt.(*protocol.UserControlPacket).Event_type {
-			err = rc.ResponsePingMsg(pkt.(*protocol.UserControlPacket).Event_data)
+		} else if pt.SrcPCUCPingRequest == pkt.(*pt.UserControlPacket).Event_type {
+			err = rc.ResponsePingMsg(pkt.(*pt.UserControlPacket).Event_data)
 		}
-	case protocol.RTMP_MSG_WindowAcknowledgementSize:
-		ack_size := pkt.(*protocol.SetWindowAckSizePacket).Ackowledgement_window_size
+	case pt.RTMP_MSG_WindowAcknowledgementSize:
+		ack_size := pkt.(*pt.SetWindowAckSizePacket).Ackowledgement_window_size
 		if ack_size > 0 {
 			rc.AckWindow.AckWindowSize = ack_size
 		}

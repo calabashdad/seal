@@ -3,7 +3,7 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
@@ -13,7 +13,7 @@ func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
 		}
 	}()
 
-	var pkt protocol.AcknowlegementPacket
+	var pkt pt.AcknowlegementPacket
 
 	pkt.Sequence_number = uint32(rc.TcpConn.RecvBytesSum)
 

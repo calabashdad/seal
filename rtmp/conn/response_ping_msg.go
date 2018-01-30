@@ -3,7 +3,7 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 func (rc *RtmpConn) ResponsePingMsg(timeStamp uint32) (err error) {
@@ -13,9 +13,9 @@ func (rc *RtmpConn) ResponsePingMsg(timeStamp uint32) (err error) {
 		}
 	}()
 
-	var pkt protocol.UserControlPacket
+	var pkt pt.UserControlPacket
 
-	pkt.Event_type = protocol.SrcPCUCPingResponse
+	pkt.Event_type = pt.SrcPCUCPingResponse
 	pkt.Event_data = timeStamp
 
 	err = rc.SendPacket(&pkt, 0)

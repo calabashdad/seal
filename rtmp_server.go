@@ -7,7 +7,7 @@ import (
 	"seal/conf"
 	"seal/kernel"
 	"seal/rtmp/conn"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 type RtmpServer struct {
@@ -50,9 +50,9 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
 			Conn:    c,
 			TimeOut: conf.GlobalConfInfo.Rtmp.TimeOut,
 		},
-		ChunkStreams: make(map[uint32]*protocol.ChunkStream),
-		InChunkSize:  protocol.RTMP_DEFAULT_CHUNK_SIZE,
-		OutChunkSize: protocol.RTMP_DEFAULT_CHUNK_SIZE,
+		ChunkStreams: make(map[uint32]*pt.ChunkStream),
+		InChunkSize:  pt.RTMP_DEFAULT_CHUNK_SIZE,
+		OutChunkSize: pt.RTMP_DEFAULT_CHUNK_SIZE,
 		Pool:         kernel.NewMemPool(),
 		AckWindow: conn.AckWindowSizeS{
 			AckWindowSize: 250000,

@@ -3,7 +3,7 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 //OnBwDone is the response of bandwidth done packet
@@ -14,9 +14,9 @@ func (rc *RtmpConn) OnBwDone() (err error) {
 		}
 	}()
 
-	var pkt protocol.OnBwDonePacket
+	var pkt pt.OnBwDonePacket
 
-	pkt.CommandName = protocol.RTMP_AMF0_COMMAND_ON_BW_DONE
+	pkt.CommandName = pt.RTMP_AMF0_COMMAND_ON_BW_DONE
 	pkt.TransactionId = 0
 
 	err = rc.SendPacket(&pkt, 0)

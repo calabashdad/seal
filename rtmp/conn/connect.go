@@ -3,7 +3,7 @@ package conn
 import (
 	"UtilsTools/identify_panic"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 func (rc *RtmpConn) Connect() (err error) {
@@ -13,8 +13,8 @@ func (rc *RtmpConn) Connect() (err error) {
 		}
 	}()
 
-	var connectPkg *protocol.ConnectPacket
-	var pkt protocol.Packet
+	var connectPkg *pt.ConnectPacket
+	var pkt pt.Packet
 	pkt = connectPkg
 	err = rc.ExpectMsg(&pkt)
 	if err != nil {
@@ -22,7 +22,7 @@ func (rc *RtmpConn) Connect() (err error) {
 		return
 	}
 
-	connectPkg = pkt.(*protocol.ConnectPacket)
+	connectPkg = pkt.(*pt.ConnectPacket)
 
 	//todo.
 	//parse the params and analysis them.

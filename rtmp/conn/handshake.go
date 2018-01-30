@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"seal/rtmp/protocol"
+	"seal/rtmp/pt"
 )
 
 func (rc *RtmpConn) HandShake() (err error) {
@@ -44,7 +44,7 @@ func (rc *RtmpConn) HandShake() (err error) {
 	//parse c1
 	clientVer := binary.BigEndian.Uint32(c1[4:8])
 	if 0 != clientVer {
-		err = protocol.ComplexHandShake(c1, s0, s1, s2)
+		err = pt.ComplexHandShake(c1, s0, s1, s2)
 		if err != nil {
 			return
 		}
