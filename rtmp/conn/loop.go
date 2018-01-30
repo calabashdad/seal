@@ -38,11 +38,12 @@ func (rc *RtmpConn) Loop() {
 	}
 	log.Println("response connect success.")
 
-	err = rc.OnBwDone()
-	if err != nil {
-		return
-	}
-	log.Println("send on bw done success.")
+	//todo.
+	// err = rc.OnBwDone()
+	// if err != nil {
+	// 	return
+	// }
+	// log.Println("send on bw done success.")
 
 	err = rc.IdentifyClient()
 	if err != nil {

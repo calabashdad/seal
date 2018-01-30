@@ -135,6 +135,7 @@ func (rc *RtmpConn) identifyFmlePublishClient(pktPublishPacket *pt.FmleStartPack
 	rc.StreamName = pktPublishPacket.StreamName
 
 	var pktRes pt.FmleStartResPacket
+	pktRes.Command_name = pt.RTMP_AMF0_COMMAND_RESULT
 	pktRes.Transaction_id = pktPublishPacket.Transaction_id
 
 	err = rc.SendPacket(&pktRes, 0)
