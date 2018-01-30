@@ -48,5 +48,5 @@ func (rc *RtmpConn) Loop() {
 		return
 	}
 
-	log.Println("client identify success. role=", rc.Role)
+	log.Println("client identify success. role=", rc.Role, ",streamName=", rc.StreamName, ",tokenStr=", rc.TokenStr)
 }

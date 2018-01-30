@@ -22,6 +22,7 @@ type RtmpConn struct {
 	Requests     map[float64]string //key: transactin id, value:command name
 	Role         uint8              //publisher or player.
 	StreamName   string
+	TokenStr     string  //token str for authentication. it's optional.
 	Duration     float64 //for player.used to specified the stop when exceed the duration.
 }
 

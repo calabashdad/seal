@@ -2,6 +2,7 @@ package pt
 
 import (
 	"fmt"
+	"strings"
 )
 
 type PublishPacket struct {
@@ -21,6 +22,12 @@ type PublishPacket struct {
 	 * Name with which the stream is published.
 	 */
 	StreamName string
+
+	/**
+	* Token value, for authentication. it's optional.
+	**/
+	TokenStr string
+
 	/**
 	 * Type of publishing. Set to “live”, “record”, or “append”.
 	 *   record: The stream is published and the data is recorded to a new file.The file
@@ -59,9 +66,18 @@ func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.StreamName = Amf0ReadString(data, &offset)
+	var streamNameLocal string
+	err, streamNameLocal = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
+	}
+
+	i := strings.Index(streamNameLocal, TokenStr)
+	if i < 0 {
+		pkt.StreamName = streamNameLocal
+	} else {
+		pkt.StreamName = streamNameLocal[0:i]
+		pkt.TokenStr = streamNameLocal[i+len(TokenStr):]
 	}
 
 	if uint32(len(data))-offset > 0 {

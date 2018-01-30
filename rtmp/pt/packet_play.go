@@ -2,6 +2,7 @@ package pt
 
 import (
 	"fmt"
+	"strings"
 )
 
 type PlayPacket struct {
@@ -28,6 +29,12 @@ type PlayPacket struct {
 	 *       "mp4:sample.m4v"
 	 */
 	StreamName string
+
+	/**
+	* Token value, for authentication. it's optional.
+	**/
+	TokenStr string
+
 	/**
 	 * An optional parameter that specifies the start time in seconds.
 	 * The default value is -2, which means the subscriber first tries to play the live
@@ -89,9 +96,18 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.StreamName = Amf0ReadString(data, &offset)
+	var streamNameLocal string
+	err, streamNameLocal = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
+	}
+
+	i := strings.Index(streamNameLocal, TokenStr)
+	if i < 0 {
+		pkt.StreamName = streamNameLocal
+	} else {
+		pkt.StreamName = streamNameLocal[0:i]
+		pkt.TokenStr = streamNameLocal[i+len(TokenStr):]
 	}
 
 	if maxOffset-offset > (1 + 8) { // number need at least 1(marker) + 8(number)

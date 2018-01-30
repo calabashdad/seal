@@ -2,6 +2,7 @@ package pt
 
 import (
 	"fmt"
+	"strings"
 )
 
 /**
@@ -24,6 +25,11 @@ type FmleStartPacket struct {
 	 * the stream name to start publish or release.
 	 */
 	StreamName string
+
+	/**
+	* Token value, for authentication. it's optional.
+	**/
+	TokenStr string
 }
 
 func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
@@ -51,9 +57,18 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.StreamName = Amf0ReadString(data, &offset)
+	var streamNameLocal string
+	err, streamNameLocal = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
+	}
+
+	i := strings.Index(streamNameLocal, TokenStr)
+	if i < 0 {
+		pkt.StreamName = streamNameLocal
+	} else {
+		pkt.StreamName = streamNameLocal[0:i]
+		pkt.TokenStr = streamNameLocal[i+len(TokenStr):]
 	}
 
 	return

@@ -131,6 +131,7 @@ func (rc *RtmpConn) identifyFmlePublishClient(pktPublishPacket *pt.FmleStartPack
 	}
 
 	rc.Role = RtmpRoleFMLEPublisher
+	rc.TokenStr = pktPublishPacket.TokenStr
 	rc.StreamName = pktPublishPacket.StreamName
 
 	var pktRes pt.FmleStartResPacket
@@ -152,6 +153,7 @@ func (rc *RtmpConn) identifyFlashPublishClient(pktPublishPacket *pt.PublishPacke
 
 	rc.Role = RtmpRoleFMLEPublisher
 	rc.StreamName = pktPublishPacket.StreamName
+	rc.TokenStr = pktPublishPacket.TokenStr
 
 	return
 }
@@ -165,6 +167,7 @@ func (rc *RtmpConn) identifyPlayClient(pktPlayPacket *pt.PlayPacket) (err error)
 
 	rc.Role = RtmpRolePlayer
 	rc.StreamName = pktPlayPacket.StreamName
+	rc.TokenStr = pktPlayPacket.TokenStr
 	rc.Duration = pktPlayPacket.Duration
 
 	return

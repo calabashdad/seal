@@ -499,3 +499,5 @@ const (
 	SrsCodecAudioReservedMP3_8kHz                = 14
 	SrsCodecAudioReservedDeviceSpecificSound     = 15
 )
+
+const TokenStr = "?token="
