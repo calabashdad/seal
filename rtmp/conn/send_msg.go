@@ -28,7 +28,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 
 	// always write the header event payload is empty.
 	for {
-		if payloadOffset >= msg.Header.Payload_length {
+		if payloadOffset >= msg.Header.PayloadLength {
 			break
 		}
 
@@ -60,7 +60,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 			}
 
 			// message_length, 3bytes, big-endian
-			payloadLengh := msg.Header.Payload_length
+			payloadLengh := msg.Header.PayloadLength
 			header[headerOffset] = uint8((payloadLengh & 0x00ff0000) >> 16)
 			headerOffset++
 			header[headerOffset] = uint8((payloadLengh & 0x0000ff00) >> 8)
@@ -117,7 +117,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 		}
 
 		//payload
-		payloadSize := msg.Header.Payload_length - payloadOffset
+		payloadSize := msg.Header.PayloadLength - payloadOffset
 		if payloadSize > rc.OutChunkSize {
 			payloadSize = rc.OutChunkSize
 		}

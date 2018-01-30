@@ -26,12 +26,12 @@ func (rc *RtmpConn) RecvMsg(msg **pt.Message) (err error) {
 			continue
 		}
 
-		log.Println("got an entire msg, msg type=", (*msg).Header.Message_type,
-			",msg stream id=", (*msg).Header.Stream_id,
-			",preferCsId=", (*msg).Header.Perfer_csid,
-			",payloadLength=", (*msg).Header.Payload_length,
-			",timestamp=", (*msg).Header.Timestamp,
-			", timestamp delta=", (*msg).Header.Timestamp_delta)
+		// log.Println("got an entire msg, msg type=", (*msg).Header.Message_type,
+		// 	",msg stream id=", (*msg).Header.Stream_id,
+		// 	",preferCsId=", (*msg).Header.Perfer_csid,
+		// 	",payloadLength=", (*msg).Header.Payload_length,
+		// 	",timestamp=", (*msg).Header.Timestamp,
+		// 	", timestamp delta=", (*msg).Header.Timestamp_delta)
 
 		err = rc.OnRecvMsg(msg)
 		if err != nil {

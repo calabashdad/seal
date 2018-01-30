@@ -143,6 +143,12 @@ func (rc *RtmpConn) DoFmlePublisherCycle() (err error) {
 	}
 	log.Println("send on status packet success.")
 
+	err = rc.Publishing()
+	if err != nil {
+		log.Println("publishing is done, err=", err)
+		return
+	}
+
 	return
 }
 
@@ -153,7 +159,7 @@ func (rc *RtmpConn) Publishing() (err error) {
 		}
 	}()
 
-	log.Println("publishing.....", rc.StreamName)
+	log.Println("publishing.....stream name=", rc.StreamName)
 
 	for {
 		var msg *pt.Message
@@ -162,6 +168,12 @@ func (rc *RtmpConn) Publishing() (err error) {
 			break
 		}
 
+		//todo.
+		if 86 == msg.Header.Timestamp {
+			log.Println("time=86")
+		}
+
+		//amf0 or amf3 command
 		if msg.Header.IsAmf0Command() || msg.Header.IsAmf3Command() {
 			var pktUnpublish *pt.FmleStartPacket
 
@@ -182,11 +194,25 @@ func (rc *RtmpConn) Publishing() (err error) {
 
 			continue
 		}
+
+		//process video  audio data message
+		err = rc.processPublishMessage(msg)
+		if err != nil {
+			break
+		}
 	}
 
 	if err != nil {
 		return
 	}
+
+	return
+}
+
+func (rc *RtmpConn) processPublishMessage(msg *pt.Message) (err error) {
+
+	log.Println("msg type=", msg.Header.Message_type, ",perferCsid=", msg.Header.Perfer_csid,
+		", payload=", msg.Header.PayloadLength, ",timestamp=", msg.Header.Timestamp)
 
 	return
 }

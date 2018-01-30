@@ -14,7 +14,7 @@ type MessageHeader struct {
 	 * Three-byte field that represents the size of the payload in bytes.
 	 * It is set in big-endian format.
 	 */
-	Payload_length uint32
+	PayloadLength uint32
 	/**
 	 * 1byte.
 	 * One byte field to represent the message type. A range of type IDs
@@ -96,7 +96,7 @@ func (h *MessageHeader) IsAggregate() bool {
  */
 func (h *MessageHeader) InitializeAmf0Script(payload_len uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_AMF0DataMessage
-	h.Payload_length = payload_len
+	h.PayloadLength = payload_len
 	h.Timestamp_delta = 0
 	h.Timestamp = 0
 	h.Stream_id = stream_id
@@ -110,7 +110,7 @@ func (h *MessageHeader) InitializeAmf0Script(payload_len uint32, stream_id uint3
  */
 func (h *MessageHeader) InitializeAudio(payload_size uint32, time uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_AudioMessage
-	h.Payload_length = payload_size
+	h.PayloadLength = payload_size
 	h.Timestamp_delta = time
 	h.Timestamp = uint64(time)
 	h.Stream_id = stream_id
@@ -124,7 +124,7 @@ func (h *MessageHeader) InitializeAudio(payload_size uint32, time uint32, stream
  */
 func (h *MessageHeader) InitializeVideo(payloadSize uint32, time uint32, streamId uint32) {
 	h.Message_type = RTMP_MSG_VideoMessage
-	h.Payload_length = payloadSize
+	h.PayloadLength = payloadSize
 	h.Timestamp_delta = time
 	h.Timestamp = uint64(time)
 	h.Stream_id = streamId

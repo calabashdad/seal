@@ -49,7 +49,9 @@ func (rc *RtmpConn) RecvInterlacedMsg(msg **pt.Message) (err error) {
 
 	if chunk.GotEntireMsg() {
 		*msg = chunk.Msg
-		//may be the msg cache can be reused by multi chunks, so when recv an entire msg, reset to zero.
+		(*msg).Header.Perfer_csid = chunk.Cs_id		
+
+		//may be the msg cache can be reused by multi chunks, so when recv an entire msg, reset to zero for next use.
 		(*msg).Size = 0
 	}
 
@@ -321,13 +323,13 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *pt.ChunkStream, chunkFmt uint8, chu
 			// always use the actual msg size to compare, for the cache payload length can changed,
 			// for the fmt type1(stream_id not changed), user can change the payload
 			// length(it's not allowed in the continue chunks).
-			if !is_first_chunk_of_msg && chunk.Msg_header.Payload_length != payloadLength {
+			if !is_first_chunk_of_msg && chunk.Msg_header.PayloadLength != payloadLength {
 				err = fmt.Errorf("msg exists in chunk cache, payload size=%d is not equal to msg header, should be=%d",
-					payloadLength, chunk.Msg_header.Payload_length)
+					payloadLength, chunk.Msg_header.PayloadLength)
 				return
 			}
 
-			chunk.Msg_header.Payload_length = payloadLength
+			chunk.Msg_header.PayloadLength = payloadLength
 			chunk.Msg_header.Message_type = msg_header_buf[offset]
 			offset += 1
 
@@ -427,18 +429,14 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *pt.ChunkStream, chunkFmt uint8, chu
 
 func (rc *RtmpConn) ReadMsgPayload(chunk *pt.ChunkStream) (err error) {
 
-	payloadSize := chunk.Msg_header.Payload_length - chunk.Msg.Size
+	payloadSize := chunk.Msg_header.PayloadLength - chunk.Msg.Size
 
 	if payloadSize > rc.InChunkSize {
 		payloadSize = rc.InChunkSize
 	}
 
-	if nil == chunk.Msg.Payload {
-		chunk.Msg.Payload = rc.Pool.GetMem(chunk.Msg.Header.Payload_length)
-		if nil == chunk.Msg.Payload {
-			err = fmt.Errorf("alloc msg payload space failed.")
-			return
-		}
+	if uint32(len(chunk.Msg.Payload)) < chunk.Msg.Header.PayloadLength {
+		chunk.Msg.Payload = make([]uint8, chunk.Msg.Header.PayloadLength)
 	}
 
 	err = rc.TcpConn.ExpectBytesFull(chunk.Msg.Payload[chunk.Msg.Size:], payloadSize)
