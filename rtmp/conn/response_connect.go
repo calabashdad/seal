@@ -56,7 +56,7 @@ func (rc *RtmpConn) ResponseConnect() (err error) {
 
 	pkt.Props = append(pkt.Props, pt.Amf0Object{
 		PropertyName: "objectEncoding",
-		Value:        pt.RTMP_SIG_AMF0_VER,
+		Value:        rc.ConnectInfo.ObjectEncoding,
 		ValueType:    pt.RTMP_AMF0_Number,
 	})
 

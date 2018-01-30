@@ -60,5 +60,8 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
 		Requests:        make(map[float64]string),
 		Role:            conn.RtmpRoleUnknown,
 		DefaultStreamId: 1.0,
+		ConnectInfo: &conn.ConnectInfoS{
+			ObjectEncoding: pt.RTMP_SIG_AMF0_VER,
+		},
 	}
 }

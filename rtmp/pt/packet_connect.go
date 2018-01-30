@@ -11,47 +11,58 @@ type ConnectPacket struct {
 	/**
 	 * Name of the command. Set to “connect”.
 	 */
-	Command_name string
+	CommandName string
 	/**
 	 * Always set to 1.
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * Command information object which has the name-value pairs.
 	 * @remark: alloc in packet constructor, user can directly use it,
 	 *       user should never alloc it again which will cause memory leak.
 	 */
-	Command_object []Amf0Object
+	CommandObject []Amf0Object
 	/**
 	 * Any optional information
 	 */
 	Args []Amf0Object
 }
 
+func (pkt *ConnectPacket) GetObjectProperty(name string) (value interface{}) {
+
+	for _, v := range pkt.CommandObject {
+		if name == v.PropertyName {
+			return v.Value
+		}
+	}
+
+	return
+}
+
 func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_CONNECT != pkt.Command_name {
+	if RTMP_AMF0_COMMAND_CONNECT != pkt.CommandName {
 		err = fmt.Errorf("decode connect packet, command name is not connect.")
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if 1.0 != pkt.Transaction_id {
+	if 1.0 != pkt.TransactionId {
 		err = fmt.Errorf("decode conenct packet, transaction id is not 1.0")
 		return
 	}
 
-	err, pkt.Command_object = Amf0ReadObject(data, &offset)
+	err, pkt.CommandObject = Amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
@@ -72,9 +83,9 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *ConnectPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.Command_name)...)
-	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
-	data = append(data, Amf0WriteObject(pkt.Command_object)...)
+	data = append(data, Amf0WriteString(pkt.CommandName)...)
+	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, Amf0WriteObject(pkt.CommandObject)...)
 	if len(pkt.Args) > 0 {
 		data = append(data, Amf0WriteObject(pkt.Args)...)
 	}

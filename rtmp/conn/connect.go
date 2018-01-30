@@ -2,6 +2,7 @@ package conn
 
 import (
 	"UtilsTools/identify_panic"
+	"fmt"
 	"log"
 	"seal/rtmp/pt"
 )
@@ -24,10 +25,22 @@ func (rc *RtmpConn) Connect() (err error) {
 
 	connectPkg = pkt.(*pt.ConnectPacket)
 
-	//todo.
-	//parse the params and analysis them.
+	if nil == connectPkg.GetObjectProperty("tcUrl") {
+		err = fmt.Errorf("no tcUrl info in connect.")
+		return
+	}
+	rc.ConnectInfo.TcUrl = connectPkg.GetObjectProperty("tcUrl").(string)
+	if o := connectPkg.GetObjectProperty("pageUrl"); o != nil {
+		rc.ConnectInfo.PageUrl = o.(string)
+	}
+	if o := connectPkg.GetObjectProperty("swfUrl"); o != nil {
+		rc.ConnectInfo.SwfUrl = o.(string)
+	}
+	if o := connectPkg.GetObjectProperty("objectEncoding"); o != nil {
+		rc.ConnectInfo.ObjectEncoding = o.(float64)
+	}
 
-	log.Println("expect connect pkt success.", connectPkg)
+	log.Println("expect connect pkt success.", connectPkg, ", info=", rc.ConnectInfo)
 
 	return
 }

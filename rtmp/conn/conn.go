@@ -11,6 +11,12 @@ type AckWindowSizeS struct {
 	AckWindowSize uint32
 	HasAckedSize  uint64
 }
+type ConnectInfoS struct {
+	TcUrl          string
+	PageUrl        string
+	SwfUrl         string
+	ObjectEncoding float64
+}
 
 type RtmpConn struct {
 	TcpConn         *kernel.TcpSock
@@ -22,9 +28,10 @@ type RtmpConn struct {
 	Requests        map[float64]string //key: transactin id, value:command name
 	Role            uint8              //publisher or player.
 	StreamName      string
-	TokenStr        string  //token str for authentication. it's optional.
-	Duration        float64 //for player.used to specified the stop when exceed the duration.
-	DefaultStreamId float64 //default stream id for request.
+	TokenStr        string       //token str for authentication. it's optional.
+	Duration        float64      //for player.used to specified the stop when exceed the duration.
+	DefaultStreamId float64      //default stream id for request.
+	ConnectInfo     *ConnectInfoS //connect info.
 }
 
 func (rc *RtmpConn) Cycle() {
