@@ -57,7 +57,7 @@ func (rc *RtmpConn) Loop() {
 	if err != nil {
 		return
 	}
-	log.Println("set chunk size success. chunk size=", chunkSize)
+	log.Println("send set chunk size success. chunk size")
 
 	switch rc.Role {
 	case RtmpRolePlayer:
