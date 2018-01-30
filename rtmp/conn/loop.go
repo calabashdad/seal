@@ -2,7 +2,9 @@ package conn
 
 import (
 	"UtilsTools/identify_panic"
+	"fmt"
 	"log"
+	"seal/conf"
 )
 
 func (rc *RtmpConn) Loop() {
@@ -49,4 +51,29 @@ func (rc *RtmpConn) Loop() {
 	}
 
 	log.Println("client identify success. role=", rc.Role, ",streamName=", rc.StreamName, ",tokenStr=", rc.TokenStr)
+
+	chunkSize := conf.GlobalConfInfo.Rtmp.ChunkSize
+	err = rc.RequestSetChunkSize(chunkSize)
+	if err != nil {
+		return
+	}
+	log.Println("set chunk size success. chunk size=", chunkSize)
+
+	switch rc.Role {
+	case RtmpRolePlayer:
+		err = rc.DoPlayerCycle()
+	case RtmpRoleFMLEPublisher:
+		err = rc.DoFmlePublisherCycle()
+	case RtmpRoleFlashPublisher:
+		err = rc.DoFlashPublisherCycle()
+	default:
+		err = fmt.Errorf("unknown rtmp role.")
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	return
 }

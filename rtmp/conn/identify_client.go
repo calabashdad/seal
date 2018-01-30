@@ -151,7 +151,7 @@ func (rc *RtmpConn) identifyFlashPublishClient(pktPublishPacket *pt.PublishPacke
 		return
 	}
 
-	rc.Role = RtmpRoleFMLEPublisher
+	rc.Role = RtmpRoleFlashPublisher
 	rc.StreamName = pktPublishPacket.StreamName
 	rc.TokenStr = pktPublishPacket.TokenStr
 

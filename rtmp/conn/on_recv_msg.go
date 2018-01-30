@@ -36,9 +36,11 @@ func (rc *RtmpConn) OnRecvMsg(msg **pt.Message) (err error) {
 
 	switch (*msg).Header.Message_type {
 	case pt.RTMP_MSG_SetChunkSize:
-		chunk_size := pkt.(*pt.SetChunkSizePacket).Chunk_size
-		if chunk_size >= pt.RTMP_CHUNKSIZE_MIN && chunk_size <= pt.RTMP_CHUNKSIZE_MAX {
-			rc.InChunkSize = chunk_size
+		chunkSize := pkt.(*pt.SetChunkSizePacket).ChunkSize
+		if chunkSize >= pt.RTMP_CHUNKSIZE_MIN && chunkSize <= pt.RTMP_CHUNKSIZE_MAX {
+			rc.InChunkSize = chunkSize
+
+			log.Println("set in chunk size to ", chunkSize)
 		}
 	case pt.RTMP_MSG_UserControlMessage:
 		if pt.SrcPCUCSetBufferLength == pkt.(*pt.UserControlPacket).Event_type {

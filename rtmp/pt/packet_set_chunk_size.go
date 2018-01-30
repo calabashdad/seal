@@ -10,7 +10,7 @@ type SetChunkSizePacket struct {
 	 * The maximum chunk size can be 65536 bytes. The chunk size is
 	 * maintained independently for each direction.
 	 */
-	Chunk_size uint32
+	ChunkSize uint32
 }
 
 func (pkt *SetChunkSizePacket) Decode(data []uint8) (err error) {
@@ -20,7 +20,7 @@ func (pkt *SetChunkSizePacket) Decode(data []uint8) (err error) {
 	}
 
 	var offset uint32
-	pkt.Chunk_size = binary.BigEndian.Uint32(data[offset : offset+4])
+	pkt.ChunkSize = binary.BigEndian.Uint32(data[offset : offset+4])
 	offset += 4
 
 	return
@@ -31,7 +31,7 @@ func (pkt *SetChunkSizePacket) Encode() (data []uint8) {
 
 	var offset uint32
 
-	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.Chunk_size)
+	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.ChunkSize)
 	offset += 4
 
 	return
