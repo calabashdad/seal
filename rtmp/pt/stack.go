@@ -305,7 +305,7 @@ const (
 
 const (
 	//objectEncoding default value.
-	RTMP_SIG_AMF0_VER = 0
+	RTMP_SIG_AMF0_VER = 0.0
 )
 
 const (

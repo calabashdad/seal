@@ -26,7 +26,7 @@ func (pkt *SetWindowAckSizePacket) Encode() (data []uint8) {
 	data = make([]uint8, 4)
 
 	var offset uint32
-	binary.BigEndian.PutUint32(data[offset:offset], pkt.Ackowledgement_window_size)
+	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.Ackowledgement_window_size)
 	offset += 4
 
 	return

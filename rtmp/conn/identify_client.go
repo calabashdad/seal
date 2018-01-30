@@ -49,10 +49,10 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 			return rc.identifyCreateStreamClient(pktCreateStream)
 		case reflect.TypeOf(pktFMLEStart):
 			pktFMLEStart = pkt.(*pt.FmleStartPacket)
-			return
+			return rc.identifyFmlePublishClient(pktFMLEStart)
 		case reflect.TypeOf(pktPlay):
 			pktPlay = pkt.(*pt.PlayPacket)
-			return
+			return rc.identifyPlayClient(pktPlay)
 		case reflect.TypeOf(pktCallRes):
 			pktCallRes = pkt.(*pt.CallResPacket)
 		}
@@ -78,13 +78,94 @@ func (rc *RtmpConn) identifyCreateStreamClient(req *pt.CreateStreamPacket) (err 
 		return
 	}
 
+	for {
+		var msg *pt.Message
+
+		err = rc.RecvMsg(&msg)
+		if err != nil {
+			break
+		}
+
+		if msg.Header.IsAckledgement() || msg.Header.IsSetChunkSize() || msg.Header.IsWindowAckledgementSize() || msg.Header.IsUserControlMessage() {
+			continue
+		}
+
+		if !msg.Header.IsAmf0Command() && !msg.Header.IsAmf3Command() {
+			continue
+		}
+
+		var pktLocal pt.Packet
+		err = rc.DecodeMsg(&msg, &pktLocal)
+		if err != nil {
+			break
+		}
+
+		var pktPlayPacket *pt.PlayPacket
+		var pktPublishPacket *pt.PublishPacket
+		var pktCreateStreamPacket *pt.CreateStreamPacket
+		switch reflect.TypeOf(pktLocal) {
+		case reflect.TypeOf(pktPlayPacket):
+			pktPlayPacket = pktLocal.(*pt.PlayPacket)
+			return rc.identifyPlayClient(pktPlayPacket)
+		case reflect.TypeOf(pktPublishPacket):
+			pktPublishPacket = pktLocal.(*pt.PublishPacket)
+			return rc.identifyFlashPublishClient(pktPublishPacket)
+		case reflect.TypeOf(pktCreateStreamPacket):
+			pktCreateStreamPacket = pktLocal.(*pt.CreateStreamPacket)
+			return rc.IdentifyClient()
+		}
+	}
+
+	if err != nil {
+		return
+	}
+
 	return
 }
 
-func (rc *RtmpConn) identifyFmlePublishClient() (err error) {
+//publish role.
+func (rc *RtmpConn) identifyFmlePublishClient(pktPublishPacket *pt.FmleStartPacket) (err error) {
+
+	if nil == pktPublishPacket {
+		return
+	}
+
+	rc.Role = RtmpRoleFMLEPublisher
+	rc.StreamName = pktPublishPacket.StreamName
+
+	var pktRes pt.FmleStartResPacket
+	pktRes.Transaction_id = pktPublishPacket.Transaction_id
+
+	err = rc.SendPacket(&pktRes, 0)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
-func (rc *RtmpConn) identifyPlayClient() (err error) {
+func (rc *RtmpConn) identifyFlashPublishClient(pktPublishPacket *pt.PublishPacket) (err error) {
+
+	if nil == pktPublishPacket {
+		return
+	}
+
+	rc.Role = RtmpRoleFMLEPublisher
+	rc.StreamName = pktPublishPacket.StreamName
+
+	return
+}
+
+//play role.
+func (rc *RtmpConn) identifyPlayClient(pktPlayPacket *pt.PlayPacket) (err error) {
+
+	if nil == pktPlayPacket {
+		return
+	}
+
+	rc.Role = RtmpRolePlayer
+	rc.StreamName = pktPlayPacket.StreamName
+	rc.Duration = pktPlayPacket.Duration
+
 	return
 }

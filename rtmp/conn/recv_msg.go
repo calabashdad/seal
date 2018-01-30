@@ -26,10 +26,12 @@ func (rc *RtmpConn) RecvMsg(msg **pt.Message) (err error) {
 			continue
 		}
 
-		if (*msg).Size <= 0 || (*msg).Header.Payload_length <= 0 {
-			log.Println("ignore empty msg.")
-			continue
-		}
+		log.Println("got an entire msg, msg type=", (*msg).Header.Message_type,
+			",msg stream id=", (*msg).Header.Stream_id,
+			",preferCsId=", (*msg).Header.Perfer_csid,
+			",payloadLength=", (*msg).Header.Payload_length,
+			",timestamp=", (*msg).Header.Timestamp,
+			", timestamp delta=", (*msg).Header.Timestamp_delta)
 
 		err = rc.OnRecvMsg(msg)
 		if err != nil {

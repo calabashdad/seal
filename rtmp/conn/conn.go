@@ -15,11 +15,14 @@ type AckWindowSizeS struct {
 type RtmpConn struct {
 	TcpConn      *kernel.TcpSock
 	ChunkStreams map[uint32]*pt.ChunkStream //key:cs id
-	InChunkSize  uint32                           //default 128, set by peer
-	OutChunkSize uint32                           //default 128, set by config file.
+	InChunkSize  uint32                     //default 128, set by peer
+	OutChunkSize uint32                     //default 128, set by config file.
 	Pool         *kernel.MemPool
 	AckWindow    AckWindowSizeS
 	Requests     map[float64]string //key: transactin id, value:command name
+	Role         uint8              //publisher or player.
+	StreamName   string
+	Duration     float64 //for player.used to specified the stop when exceed the duration.
 }
 
 func (rc *RtmpConn) Cycle() {

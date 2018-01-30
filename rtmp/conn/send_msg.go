@@ -33,7 +33,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 		}
 
 		var headerOffset uint32
-		var header [RTMP_MAX_FMT0_HEADER_SIZE]uint8
+		var header [RtmpMaxFmt0HeaderSize]uint8
 
 		if 0 == payloadOffset {
 			// write new chunk stream header, fmt is 0

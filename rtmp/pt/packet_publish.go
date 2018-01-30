@@ -20,7 +20,7 @@ type PublishPacket struct {
 	/**
 	 * Name with which the stream is published.
 	 */
-	Stream_name string
+	StreamName string
 	/**
 	 * Type of publishing. Set to “live”, “record”, or “append”.
 	 *   record: The stream is published and the data is recorded to a new file.The file
@@ -59,7 +59,7 @@ func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Stream_name = Amf0ReadString(data, &offset)
+	err, pkt.StreamName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -77,9 +77,9 @@ func (pkt *PublishPacket) Encode() (data []uint8) {
 	data = append(data, Amf0WriteString(pkt.Command_name)...)
 	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
 	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteString(pkt.Stream_name)...)
+	data = append(data, Amf0WriteString(pkt.StreamName)...)
 	data = append(data, Amf0WriteString(pkt.Type)...)
-	
+
 	return
 }
 func (pkt *PublishPacket) GetMessageType() uint8 {

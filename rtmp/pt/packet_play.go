@@ -27,7 +27,7 @@ type PlayPacket struct {
 	 *       file extension. For example, to play the file sample.m4v, specify
 	 *       "mp4:sample.m4v"
 	 */
-	Stream_name string
+	StreamName string
 	/**
 	 * An optional parameter that specifies the start time in seconds.
 	 * The default value is -2, which means the subscriber first tries to play the live
@@ -64,6 +64,9 @@ type PlayPacket struct {
 }
 
 func (pkt *PlayPacket) Decode(data []uint8) (err error) {
+	var maxOffset uint32
+	maxOffset = uint32(len(data)) - 1
+
 	var offset uint32
 
 	err, pkt.Command_name = Amf0ReadString(data, &offset)
@@ -86,19 +89,19 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Stream_name = Amf0ReadString(data, &offset)
+	err, pkt.StreamName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if uint32(len(data))-offset > 0 {
+	if maxOffset-offset > (1 + 8) { // number need at least 1(marker) + 8(number)
 		err, pkt.Start = Amf0ReadNumber(data, &offset)
 		if err != nil {
 			return
 		}
 	}
 
-	if uint32(len(data))-offset > 0 {
+	if maxOffset-offset > (1 + 8) {
 		err, pkt.Duration = Amf0ReadNumber(data, &offset)
 		if err != nil {
 			return
@@ -109,17 +112,20 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	var v interface{}
-	var marker uint8
-	err, v = Amf0ReadAny(data, &marker, &offset)
-	if err != nil {
-		return
-	}
+	if maxOffset-offset >= 2 { //because the bool type need 2 bytes at least
 
-	if RTMP_AMF0_Boolean == marker {
-		pkt.Reset = v.(bool)
-	} else if RTMP_AMF0_Number == marker {
-		pkt.Reset = (v.(float64) != 0)
+		var v interface{}
+		var marker uint8
+		err, v = Amf0ReadAny(data, &marker, &offset)
+		if err != nil {
+			return
+		}
+
+		if RTMP_AMF0_Boolean == marker {
+			pkt.Reset = v.(bool)
+		} else if RTMP_AMF0_Number == marker {
+			pkt.Reset = (v.(float64) != 0)
+		}
 	}
 
 	return
@@ -129,7 +135,7 @@ func (pkt *PlayPacket) Encode() (data []uint8) {
 	data = append(data, Amf0WriteString(pkt.Command_name)...)
 	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
 	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteString(pkt.Stream_name)...)
+	data = append(data, Amf0WriteString(pkt.StreamName)...)
 	data = append(data, Amf0WriteNumber(pkt.Start)...)
 	data = append(data, Amf0WriteNumber(pkt.Duration)...)
 	data = append(data, Amf0WriteBool(pkt.Reset)...)

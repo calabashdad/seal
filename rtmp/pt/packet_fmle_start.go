@@ -23,7 +23,7 @@ type FmleStartPacket struct {
 	/**
 	 * the stream name to start publish or release.
 	 */
-	Stream_name string
+	StreamName string
 }
 
 func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
@@ -51,7 +51,7 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Stream_name = Amf0ReadString(data, &offset)
+	err, pkt.StreamName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -62,7 +62,7 @@ func (pkt *FmleStartPacket) Encode() (data []uint8) {
 	data = append(data, Amf0WriteString(pkt.Command_name)...)
 	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
 	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteString(pkt.Stream_name)...)
+	data = append(data, Amf0WriteString(pkt.StreamName)...)
 
 	return
 }
