@@ -46,7 +46,7 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 		switch reflect.TypeOf(pkt) {
 		case reflect.TypeOf(pktCreateStream):
 			pktCreateStream = pkt.(*protocol.CreateStreamPacket)
-			return rc.identifyCreateStreamClient()
+			return rc.identifyCreateStreamClient(pktCreateStream)
 		case reflect.TypeOf(pktFMLEStart):
 			pktFMLEStart = pkt.(*protocol.FmleStartPacket)
 			return
@@ -65,8 +65,19 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 	return
 }
 
-func (rc *RtmpConn) identifyCreateStreamClient() (err error) {
-	
+func (rc *RtmpConn) identifyCreateStreamClient(req *protocol.CreateStreamPacket) (err error) {
+
+	var pkt protocol.CreateStreamResPacket
+
+	pkt.Command_name = protocol.RTMP_AMF0_COMMAND_RESULT
+	pkt.Transaction_id = req.Transaction_id
+	pkt.Stream_id = 1 //default for the response of create stream.
+
+	err = rc.SendPacket(&pkt, 0)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
