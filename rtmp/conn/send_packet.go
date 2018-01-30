@@ -19,7 +19,7 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32) (err error) {
 	var msg pt.Message
 
 	msg.Payload = pkt.Encode()
-	msg.Size = uint32(len(msg.Payload))
+	msg.SizeTmp = uint32(len(msg.Payload))
 
 	if uint32(len(msg.Payload)) <= 0 {
 		//ignore empty msg.

@@ -34,5 +34,5 @@ type ChunkStream struct {
 }
 
 func (chunk *ChunkStream) GotEntireMsg() bool {
-	return (chunk.Msg.Header.PayloadLength == chunk.Msg.Size)
+	return (chunk.Msg.Header.PayloadLength == chunk.Msg.SizeTmp)
 }

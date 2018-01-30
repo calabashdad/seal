@@ -49,10 +49,10 @@ func (rc *RtmpConn) RecvInterlacedMsg(msg **pt.Message) (err error) {
 
 	if chunk.GotEntireMsg() {
 		*msg = chunk.Msg
-		(*msg).Header.Perfer_csid = chunk.Cs_id		
+		(*msg).Header.Perfer_csid = chunk.Cs_id
 
 		//may be the msg cache can be reused by multi chunks, so when recv an entire msg, reset to zero for next use.
-		(*msg).Size = 0
+		(*msg).SizeTmp = 0
 	}
 
 	return
@@ -190,7 +190,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *pt.ChunkStream, chunkFmt uint8, chu
 	if nil == chunk.Msg {
 		is_first_chunk_of_msg = true
 	} else {
-		if 0 == chunk.Msg.Size {
+		if 0 == chunk.Msg.SizeTmp {
 			is_first_chunk_of_msg = true
 		} else {
 			is_first_chunk_of_msg = false
@@ -217,7 +217,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *pt.ChunkStream, chunkFmt uint8, chu
 
 	// when exists cache msg, means got an partial message,
 	// the fmt must not be type0 which means new message.
-	if nil != chunk.Msg && chunk.Msg.Size > 0 && pt.RTMP_FMT_TYPE0 == chunkFmt {
+	if nil != chunk.Msg && chunk.Msg.SizeTmp > 0 && pt.RTMP_FMT_TYPE0 == chunkFmt {
 		err = fmt.Errorf("chunk stream exists, fmt must not be RTMP_FMT_TYPE0, actual is %d", chunkFmt)
 		return
 	}
@@ -429,7 +429,7 @@ func (rc *RtmpConn) ReadMessageHeader(chunk *pt.ChunkStream, chunkFmt uint8, chu
 
 func (rc *RtmpConn) ReadMsgPayload(chunk *pt.ChunkStream) (err error) {
 
-	payloadSize := chunk.Msg_header.PayloadLength - chunk.Msg.Size
+	payloadSize := chunk.Msg_header.PayloadLength - chunk.Msg.SizeTmp
 
 	if payloadSize > rc.InChunkSize {
 		payloadSize = rc.InChunkSize
@@ -439,12 +439,12 @@ func (rc *RtmpConn) ReadMsgPayload(chunk *pt.ChunkStream) (err error) {
 		chunk.Msg.Payload = make([]uint8, chunk.Msg.Header.PayloadLength)
 	}
 
-	err = rc.TcpConn.ExpectBytesFull(chunk.Msg.Payload[chunk.Msg.Size:], payloadSize)
+	err = rc.TcpConn.ExpectBytesFull(chunk.Msg.Payload[chunk.Msg.SizeTmp:], payloadSize)
 	if err != nil {
 		return
 	}
 
-	chunk.Msg.Size += payloadSize
+	chunk.Msg.SizeTmp += payloadSize
 
 	return
 }

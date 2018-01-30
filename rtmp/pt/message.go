@@ -137,11 +137,12 @@ func (h *MessageHeader) InitializeVideo(payloadSize uint32, time uint32, streamI
 type Message struct {
 	Header MessageHeader
 	/**
-	 * current message parsed Size,
-	 *       Size <= header.payload_length
+	 * current message parsed SizeTmp,
+	 *       SizeTmp <= header.payload_length
 	 * for the payload maybe sent in multiple chunks.
+	 * when finish recv whole msg, it will be reset to 0.
 	 */
-	Size uint32
+	SizeTmp uint32
 	/**
 	 * the Payload of message, can not know about the detail of Payload,
 	 * user must use decode_message to get concrete packet.
