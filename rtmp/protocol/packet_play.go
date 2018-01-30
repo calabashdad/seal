@@ -72,7 +72,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 	}
 
 	if RTMP_AMF0_COMMAND_PLAY != pkt.Command_name {
-		err = fmt.Errorf("decode play packet, command name is not play.", pkt.Command_name)
+		err = fmt.Errorf("decode play packet, command name is not play.actully=%s", pkt.Command_name)
 		return
 	}
 

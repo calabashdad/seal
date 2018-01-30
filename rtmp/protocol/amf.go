@@ -114,7 +114,7 @@ func Amf0ReadAny(data []uint8, marker *uint8, offset *uint32) (err error, value 
 	case RTMP_AMF0_StrictArray:
 		err, value = Amf0ReadStrictArray(data, offset)
 	default:
-		err = fmt.Errorf("Amf0ReadAny: unknown marker Value, marker=", marker)
+		err = fmt.Errorf("Amf0ReadAny: unknown marker Value, marker=%d", marker)
 	}
 
 	if err != nil {
@@ -391,7 +391,7 @@ func Amf0ReadLongString(data []uint8, offset *uint32) (err error, value string) 
 	dataLen := binary.BigEndian.Uint32(data[*offset : *offset+4])
 	*offset += 4
 	if dataLen <= 0 {
-		err = fmt.Errorf("Amf0ReadLongString: data len is <= 0, dataLen=", dataLen)
+		err = fmt.Errorf("Amf0ReadLongString: data len is <= 0, dataLen=%d", dataLen)
 		return
 	}
 
@@ -593,7 +593,7 @@ func Amf0Discovery(data []uint8, offset *uint32) (err error, value interface{}, 
 	case RTMP_AMF0_StrictArray:
 		err, value = Amf0ReadStrictArray(data, offset)
 	default:
-		err = fmt.Errorf("Amf0Discovery: unknown marker type, marker=", marker)
+		err = fmt.Errorf("Amf0Discovery: unknown marker type, marker=%d", marker)
 	}
 
 	if err != nil {

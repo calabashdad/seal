@@ -39,8 +39,8 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 	}
 
 	if pkt.Command_name != RTMP_AMF0_COMMAND_RESULT {
-		err = fmt.Errorf("decode connect res packet command name is error. actuall name=",
-			pkt.Command_name, ", shoule be ", RTMP_AMF0_COMMAND_RESULT)
+		err = fmt.Errorf("decode connect res packet command name is error. actuall name=%s, should be %s",
+			pkt.Command_name, RTMP_AMF0_COMMAND_RESULT)
 		return
 	}
 

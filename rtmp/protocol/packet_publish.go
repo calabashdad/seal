@@ -45,7 +45,7 @@ func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 	}
 
 	if RTMP_AMF0_COMMAND_PUBLISH != pkt.Command_name {
-		err = fmt.Errorf("decode publish packet command name is error.", pkt.Command_name)
+		err = fmt.Errorf("decode publish packet command name is error.actully=%s", pkt.Command_name)
 		return
 	}
 

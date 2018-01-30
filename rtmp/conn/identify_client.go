@@ -66,6 +66,7 @@ func (rc *RtmpConn) IdentifyClient() (err error) {
 }
 
 func (rc *RtmpConn) identifyCreateStreamClient() (err error) {
+	
 	return
 }
 

@@ -55,7 +55,7 @@ func (h *MessageHeader) IsAmf0Command() bool {
 	return RTMP_MSG_AMF0CommandMessage == h.Message_type
 
 }
-func (h *MessageHeader) Is_amf0_data() bool {
+func (h *MessageHeader) IsAmf0Data() bool {
 	return RTMP_MSG_AMF0DataMessage == h.Message_type
 
 }
@@ -63,7 +63,7 @@ func (h *MessageHeader) IsAmf3Command() bool {
 	return RTMP_MSG_AMF3CommandMessage == h.Message_type
 
 }
-func (h *MessageHeader) Is_amf3_data() bool {
+func (h *MessageHeader) IsAmf3Data() bool {
 	return RTMP_MSG_AMF3DataMessage == h.Message_type
 
 }
@@ -83,18 +83,18 @@ func (h *MessageHeader) IsUserControlMessage() bool {
 	return RTMP_MSG_UserControlMessage == h.Message_type
 
 }
-func (h *MessageHeader) Is_set_peer_bandwidth() bool {
+func (h *MessageHeader) IsSetPeerBandwidth() bool {
 	return RTMP_MSG_SetPeerBandwidth == h.Message_type
 
 }
-func (h *MessageHeader) Is_aggregate() bool {
+func (h *MessageHeader) IsAggregate() bool {
 	return RTMP_MSG_AggregateMessage == h.Message_type
 }
 
 /**
  * create a amf0 script header, set the size and stream_id.
  */
-func (h *MessageHeader) Initialize_amf0_script(payload_len uint32, stream_id uint32) {
+func (h *MessageHeader) InitializeAmf0Script(payload_len uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_AMF0DataMessage
 	h.Payload_length = payload_len
 	h.Timestamp_delta = 0
@@ -108,7 +108,7 @@ func (h *MessageHeader) Initialize_amf0_script(payload_len uint32, stream_id uin
 /**
  * create a audio header, set the size, timestamp and stream_id.
  */
-func (h *MessageHeader) Initialize_audio(payload_size uint32, time uint32, stream_id uint32) {
+func (h *MessageHeader) InitializeAudio(payload_size uint32, time uint32, stream_id uint32) {
 	h.Message_type = RTMP_MSG_AudioMessage
 	h.Payload_length = payload_size
 	h.Timestamp_delta = time
@@ -122,12 +122,12 @@ func (h *MessageHeader) Initialize_audio(payload_size uint32, time uint32, strea
 /**
  * create a video header, set the size, timestamp and stream_id.
  */
-func (h *MessageHeader) Initialize_video(payload_size uint32, time uint32, stream_id uint32) {
+func (h *MessageHeader) InitializeVideo(payloadSize uint32, time uint32, streamId uint32) {
 	h.Message_type = RTMP_MSG_VideoMessage
-	h.Payload_length = payload_size
+	h.Payload_length = payloadSize
 	h.Timestamp_delta = time
 	h.Timestamp = uint64(time)
-	h.Stream_id = stream_id
+	h.Stream_id = streamId
 
 	// video chunk-id
 	h.Perfer_csid = RTMP_CID_Video

@@ -38,4 +38,10 @@ func (rc *RtmpConn) Loop() {
 		return
 	}
 
+	err = rc.IdentifyClient()
+	if err != nil {
+		log.Println("identify client type failed.err=", err)
+		return
+	}
+
 }

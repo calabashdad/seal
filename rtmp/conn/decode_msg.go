@@ -23,7 +23,7 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 	var offset uint32
 
 	if (*msg).Header.IsAmf0Command() || (*msg).Header.IsAmf3Command() ||
-		(*msg).Header.Is_amf0_data() || (*msg).Header.Is_amf3_data() {
+		(*msg).Header.IsAmf0Data() || (*msg).Header.IsAmf3Data() {
 
 		if (*msg).Header.IsAmf3Command() && len((*msg).Payload) > 1 {
 			offset += 1
@@ -132,7 +132,7 @@ func (rc *RtmpConn) DecodeMsg(msg **protocol.Message, pkt *protocol.Packet) (err
 		*pkt = &protocol.SetChunkSizePacket{}
 		err = (*pkt).Decode((*msg).Payload)
 	} else {
-		if !(*msg).Header.IsAckledgement() && !(*msg).Header.Is_set_peer_bandwidth() {
+		if !(*msg).Header.IsAckledgement() && !(*msg).Header.IsSetPeerBandwidth() {
 			//drop msg
 		}
 	}
