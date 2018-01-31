@@ -1,6 +1,7 @@
 package co
 
 import (
+	"seal/conf"
 	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
@@ -471,6 +472,24 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 		return
 	}
 
+	var pp pt.FmleStartResPacket
+	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pp.TransactionId = p.TransactionId
+	err = rc.SendPacket(&pp, 0)
+	if err != nil {
+		return
+	}
+	log.Println("send release stream response success.")
+
+	//set chunk size to peer.
+	var pkt pt.SetChunkSizePacket
+	pkt.ChunkSize = conf.GlobalConfInfo.Rtmp.ChunkSize
+	err = rc.SendPacket(&pkt, msg.Header.StreamId)
+	if err != nil {
+		return
+	}
+	log.Println("send request, set chunk size to ",pkt.ChunkSize)
+
 	return
 }
 
@@ -523,6 +542,25 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 
 	rc.Role = RtmpRoleFMLEPublisher
 	log.Println("a new publisher come in, stream name=", rc.StreamName)
+
+	var pp pt.OnStatusCallPacket
+	pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+	pp.Data = append(pp.Data, pt.Amf0Object{
+		PropertyName: pt.StatusCode,
+		Value:        pt.StatusCodePublishStart,
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	pp.Data = append(pp.Data, pt.Amf0Object{
+		PropertyName: pt.StatusDescription,
+		Value:        "Started publishing stream.",
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+	err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+	if err != nil {
+		return
+	}
+
+	log.Println("send publish response success.")
 
 	return
 }
