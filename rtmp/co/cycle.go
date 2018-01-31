@@ -43,7 +43,7 @@ func (rc *RtmpConn) Cycle() {
 
 	var err error
 
-	err = rc.HandShake()
+	err = rc.handShake()
 	if err != nil {
 		log.Println("rtmp handshake failed.err=", err)
 		return
@@ -52,12 +52,12 @@ func (rc *RtmpConn) Cycle() {
 
 	for {
 		var csid uint32
-		err, csid = rc.RecvMsg()
+		err = rc.RecvMsg(&csid)
 		if err != nil {
 			break
 		}
 
-		err = rc.OnRecvMsg(csid)
+		err = rc.onRecvMsg(csid)
 		if err != nil {
 			break
 		}

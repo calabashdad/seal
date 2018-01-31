@@ -8,7 +8,7 @@ import (
 	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) HandShake() (err error) {
+func (rc *RtmpConn) handShake() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())

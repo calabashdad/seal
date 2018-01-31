@@ -7,7 +7,7 @@ import (
 	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) MsgAmf(msg *pt.Message) (err error) {
+func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -18,7 +18,7 @@ func (rc *RtmpConn) MsgAmf(msg *pt.Message) (err error) {
 
 	// skip 1bytes to decode the amf3 command.
 	if pt.RTMP_MSG_AMF3CommandMessage == msg.Header.MessageType && msg.Header.PayloadLength >= 1 {
-		offset += 1
+		offset++
 	}
 
 	//read the command name.
@@ -28,7 +28,7 @@ func (rc *RtmpConn) MsgAmf(msg *pt.Message) (err error) {
 	}
 
 	if 0 == len(command) {
-		err = fmt.Errorf("Amf0ReadString failed, command is nil.")
+		err = fmt.Errorf("Amf0ReadString failed, command is nil.csid=%d", msg.Header.PerferCsid)
 		return
 	}
 
@@ -36,43 +36,43 @@ func (rc *RtmpConn) MsgAmf(msg *pt.Message) (err error) {
 
 	switch command {
 	case pt.RTMP_AMF0_COMMAND_RESULT, pt.RTMP_AMF0_COMMAND_ERROR:
-		err = rc.Amf0ResultError(msg)
+		err = rc.amf0ResultError(msg)
 	case pt.RTMP_AMF0_COMMAND_CONNECT:
-		err = rc.Amf0Connect(msg)
+		err = rc.amf0Connect(msg)
 	case pt.RTMP_AMF0_COMMAND_CREATE_STREAM:
-		err = rc.Amf0CreateStream(msg)
+		err = rc.amf0CreateStream(msg)
 	case pt.RTMP_AMF0_COMMAND_PLAY:
-		err = rc.Amf0Play(msg)
+		err = rc.amf0Play(msg)
 	case pt.RTMP_AMF0_COMMAND_PAUSE:
-		err = rc.Amf0Pause(msg)
+		err = rc.amf0Pause(msg)
 	case pt.RTMP_AMF0_COMMAND_RELEASE_STREAM:
-		err = rc.Amf0ReleaseStream(msg)
+		err = rc.amf0ReleaseStream(msg)
 	case pt.RTMP_AMF0_COMMAND_FC_PUBLISH:
-		err = rc.Amf0FcPublish(msg)
+		err = rc.amf0FcPublish(msg)
 	case pt.RTMP_AMF0_COMMAND_PUBLISH:
-		err = rc.Amf0Publish(msg)
+		err = rc.amf0Publish(msg)
 	case pt.RTMP_AMF0_COMMAND_UNPUBLISH:
-		err = rc.Amf0UnPublish(msg)
+		err = rc.amf0UnPublish(msg)
 	case pt.RTMP_AMF0_COMMAND_KEEPLIVE:
 		//todo.
 	case pt.RTMP_AMF0_COMMAND_ENABLEVIDEO:
 		//todo.
 	case pt.RTMP_AMF0_DATA_SET_DATAFRAME, pt.RTMP_AMF0_DATA_ON_METADATA:
-		err = rc.Amf0Meta(msg)
+		err = rc.amf0Meta(msg)
 	case pt.RTMP_AMF0_DATA_ON_CUSTOMDATA:
-		err = rc.Amf0OnCustom(msg)
+		err = rc.amf0OnCustom(msg)
 	case pt.RTMP_AMF0_COMMAND_CLOSE_STREAM:
-		err = rc.Amf0CloseStream(msg)
+		err = rc.amf0CloseStream(msg)
 	case pt.RTMP_AMF0_COMMAND_ON_BW_DONE:
-		err = rc.Amf0OnBwDone(msg)
+		err = rc.amf0OnBwDone(msg)
 	case pt.RTMP_AMF0_COMMAND_ON_STATUS:
-		err = rc.Amf0OnStatus(msg)
+		err = rc.amf0OnStatus(msg)
 	case pt.RTMP_AMF0_COMMAND_GET_STREAM_LENGTH:
-		err = rc.Amf0GetStreamLen(msg)
+		err = rc.amf0GetStreamLen(msg)
 	case pt.RTMP_AMF0_COMMAND_INSERT_KEYFREAME:
 		//todo
 	case pt.RTMP_AMF0_DATA_SAMPLE_ACCESS:
-		err = rc.Amf0SampleAccess(msg)
+		err = rc.amf0SampleAccess(msg)
 	default:
 		log.Println("msg amf unknown command name=", command)
 	}
@@ -83,7 +83,7 @@ func (rc *RtmpConn) MsgAmf(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0ResultError(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -130,7 +130,7 @@ func (rc *RtmpConn) Amf0ResultError(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0Connect(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -257,7 +257,7 @@ func (rc *RtmpConn) Amf0Connect(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0CreateStream(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -289,7 +289,7 @@ func (rc *RtmpConn) Amf0CreateStream(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0Play(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -300,11 +300,145 @@ func (rc *RtmpConn) Amf0Play(msg *pt.Message) (err error) {
 
 	p := pt.PlayPacket{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
+
+	// StreamBegin
+	if true {
+		var pp pt.UserControlPacket
+		pp.EventType = pt.SrcPCUCStreamBegin
+		pp.EventData = msg.Header.StreamId
+		err = rc.SendPacket(&pp, 0)
+		if err != nil {
+			return
+		}
+	}
+
+	// onStatus(NetStream.Play.Reset)
+	if true {
+		var pp pt.OnStatusCallPacket
+		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusLevel,
+			Value:        pt.StatusLevelStatus,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusCode,
+			Value:        pt.StatusCodeStreamReset,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusDescription,
+			Value:        "Playing and resetting stream.",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusDetails,
+			Value:        "stream",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusClientId,
+			Value:        pt.RTMP_SIG_CLIENT_ID,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		if err != nil {
+			return
+		}
+
+	}
+
+	// onStatus(NetStream.Play.Start)
+	if true {
+		var pp pt.OnStatusCallPacket
+		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusLevel,
+			Value:        pt.StatusLevelStatus,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusCode,
+			Value:        pt.StatusCodeStreamStart,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusDescription,
+			Value:        "Started playing stream.",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusDetails,
+			Value:        "stream",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusClientId,
+			Value:        pt.RTMP_SIG_CLIENT_ID,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		if err != nil {
+			return
+		}
+		log.Println("send NetStream.Play.Reset response success.")
+	}
+
+	// |RtmpSampleAccess(false, false)
+	if true {
+		var pp pt.SampleAccessPacket
+		pp.CommandName = pt.RTMP_AMF0_DATA_SAMPLE_ACCESS
+		pp.AudioSampleAccess = true
+		pp.VideoSampleAccess = true
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		if err != nil {
+			return
+		}
+		log.Println("send RtmpSampleAccess success")
+	}
+
+	// onStatus(NetStream.Data.Start)
+	if true {
+		var pp pt.OnStatusDataPacket
+		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusLevel,
+			Value:        pt.StatusLevelStatus,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusCode,
+			Value:        pt.StatusCodeDataStart,
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+
+		pp.Data = append(pp.Data, pt.Amf0Object{
+			PropertyName: pt.StatusDescription,
+			Value:        "Started playing stream data.",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		if err != nil {
+			return
+		}
+		log.Println("send NetStream.Data.Start success.")
+	}
 
 	return
 }
 
-func (rc *RtmpConn) Amf0Pause(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0Pause(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -315,11 +449,14 @@ func (rc *RtmpConn) Amf0Pause(msg *pt.Message) (err error) {
 
 	p := pt.PausePacket{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
 
 	return
 }
 
-func (rc *RtmpConn) Amf0ReleaseStream(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -330,11 +467,14 @@ func (rc *RtmpConn) Amf0ReleaseStream(msg *pt.Message) (err error) {
 
 	p := pt.FmleStartPacket{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
 
 	return
 }
 
-func (rc *RtmpConn) Amf0FcPublish(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -343,10 +483,25 @@ func (rc *RtmpConn) Amf0FcPublish(msg *pt.Message) (err error) {
 
 	log.Println("Amf0FcPublish")
 
+	p := pt.FmleStartPacket{}
+	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
+
+	var pp pt.FmleStartResPacket
+	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pp.TransactionId = p.TransactionId
+	err = rc.SendPacket(&pp, 0)
+	if err != nil {
+		return
+	}
+	log.Println("send FcPublish response success.")
+
 	return
 }
 
-func (rc *RtmpConn) Amf0Publish(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -357,11 +512,22 @@ func (rc *RtmpConn) Amf0Publish(msg *pt.Message) (err error) {
 
 	p := pt.PublishPacket{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
+
+	if !rc.CheckStreamCanPublish(rc.StreamName) {
+		err = fmt.Errorf("stream=%s can not publish, has publishing now", rc.StreamName)
+		return
+	}
+
+	rc.Role = RtmpRoleFMLEPublisher
+	log.Println("a new publisher come in, stream name=", rc.StreamName)
 
 	return
 }
 
-func (rc *RtmpConn) Amf0UnPublish(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -370,10 +536,25 @@ func (rc *RtmpConn) Amf0UnPublish(msg *pt.Message) (err error) {
 
 	log.Println("Amf0UnPublish")
 
+	p := pt.FmleStartPacket{}
+	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
+
+	var pp pt.FmleStartResPacket
+	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pp.TransactionId = p.TransactionId
+	err = rc.SendPacket(&pp, 0)
+	if err != nil {
+		return
+	}
+	log.Println("send unpublish response success.")
+
 	return
 }
 
-func (rc *RtmpConn) Amf0Meta(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -384,11 +565,15 @@ func (rc *RtmpConn) Amf0Meta(msg *pt.Message) (err error) {
 
 	p := pt.OnMetaDataPacket{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
+	log.Println("decode meta data success, meta=", p)
 
 	return
 }
 
-func (rc *RtmpConn) Amf0OnCustom(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0OnCustom(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -399,11 +584,14 @@ func (rc *RtmpConn) Amf0OnCustom(msg *pt.Message) (err error) {
 
 	p := pt.OnCustomDataPakcet{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
 
 	return
 }
 
-func (rc *RtmpConn) Amf0CloseStream(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0CloseStream(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -414,11 +602,14 @@ func (rc *RtmpConn) Amf0CloseStream(msg *pt.Message) (err error) {
 
 	p := pt.CloseStreamPacket{}
 	err = p.Decode(msg.Payload)
+	if err != nil {
+		return
+	}
 
 	return
 }
 
-func (rc *RtmpConn) Amf0OnBwDone(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0OnBwDone(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -430,7 +621,7 @@ func (rc *RtmpConn) Amf0OnBwDone(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0OnStatus(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0OnStatus(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -442,7 +633,7 @@ func (rc *RtmpConn) Amf0OnStatus(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0GetStreamLen(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0GetStreamLen(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -454,7 +645,7 @@ func (rc *RtmpConn) Amf0GetStreamLen(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) Amf0SampleAccess(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0SampleAccess(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())

@@ -8,8 +8,8 @@ import (
 	"seal/rtmp/pt"
 )
 
-//RecvMsg recv whole msg.
-func (rc *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
+//RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.
+func (rc *RtmpConn) RecvMsg(chunkStreamID *uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -201,7 +201,7 @@ func (rc *RtmpConn) RecvMsg() (err error, chunkStreamId uint32) {
 			chunk.Msg.SizeTmp += remainPayloadSize
 			if chunk.Msg.SizeTmp == chunk.Msg.Header.PayloadLength {
 
-				chunkStreamId = csid
+				*chunkStreamID = csid
 				//has recv entire rtmp message.
 				//reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
 				chunk.Msg.SizeTmp = 0

@@ -7,7 +7,7 @@ import (
 	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) OnRecvMsg(csid uint32) (err error) {
+func (rc *RtmpConn) onRecvMsg(csid uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -28,19 +28,19 @@ func (rc *RtmpConn) OnRecvMsg(csid uint32) (err error) {
 	switch chunk.Msg.Header.MessageType {
 	case pt.RTMP_MSG_AMF3CommandMessage, pt.RTMP_MSG_AMF0CommandMessage,
 		pt.RTMP_MSG_AMF0DataMessage, pt.RTMP_MSG_AMF3DataMessage:
-		err = rc.MsgAmf(&chunk.Msg)
+		err = rc.msgAmf(&chunk.Msg)
 	case pt.RTMP_MSG_UserControlMessage:
-		err = rc.MsgUserCtrl(&chunk.Msg)
+		err = rc.msgUserCtrl(&chunk.Msg)
 	case pt.RTMP_MSG_WindowAcknowledgementSize:
-		err = rc.MsgSetAck(&chunk.Msg)
+		err = rc.msgSetAck(&chunk.Msg)
 	case pt.RTMP_MSG_SetChunkSize:
-		err = rc.MsgSetChunk(&chunk.Msg)
+		err = rc.msgSetChunk(&chunk.Msg)
 	case pt.RTMP_MSG_SetPeerBandwidth:
-		err = rc.MsgSetBand(&chunk.Msg)
+		err = rc.msgSetBand(&chunk.Msg)
 	case pt.RTMP_MSG_Acknowledgement:
-		err = rc.MsgAck(&chunk.Msg)
+		err = rc.msgAck(&chunk.Msg)
 	case pt.RTMP_MSG_AbortMessage:
-		err = rc.MsgAbort(&chunk.Msg)
+		err = rc.msgAbort(&chunk.Msg)
 	case pt.RTMP_MSG_EdgeAndOriginServerCommand:
 		//todo
 	case pt.RTMP_MSG_AMF3SharedObject:
@@ -48,11 +48,11 @@ func (rc *RtmpConn) OnRecvMsg(csid uint32) (err error) {
 	case pt.RTMP_MSG_AMF0SharedObject:
 		//todo
 	case pt.RTMP_MSG_AudioMessage:
-		err = rc.MsgAudio(&chunk.Msg)
+		err = rc.msgAudio(&chunk.Msg)
 	case pt.RTMP_MSG_VideoMessage:
-		err = rc.MsgVideo(&chunk.Msg)
+		err = rc.msgVideo(&chunk.Msg)
 	case pt.RTMP_MSG_AggregateMessage:
-		err = rc.MsgAggregate(&chunk.Msg)
+		err = rc.msgAggregate(&chunk.Msg)
 	default:
 		log.Println("on recv msg unknown msg typeid=", chunk.Msg.Header.MessageType)
 	}
