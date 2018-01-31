@@ -1,4 +1,4 @@
-package conn
+package co
 
 import (
 	"UtilsTools/identify_panic"
@@ -28,9 +28,9 @@ type RtmpConn struct {
 	Requests        map[float64]string //key: transactin id, value:command name
 	Role            uint8              //publisher or player.
 	StreamName      string
-	TokenStr        string       //token str for authentication. it's optional.
-	Duration        float64      //for player.used to specified the stop when exceed the duration.
-	DefaultStreamId float64      //default stream id for request.
+	TokenStr        string        //token str for authentication. it's optional.
+	Duration        float64       //for player.used to specified the stop when exceed the duration.
+	DefaultStreamId float64       //default stream id for request.
 	ConnectInfo     *ConnectInfoS //connect info.
 }
 
@@ -50,18 +50,25 @@ func (rc *RtmpConn) Cycle() {
 	}
 	log.Println("rtmp handshake success.")
 
-	err = rc.Connect()
-	if err != nil {
-		log.Println("connect failed. err=", err)
-		return
-	}
-	log.Println("connect success.")
+	for {
+		var csid uint32
+		err, csid = rc.RecvMsg()
+		if err != nil {
+			break
+		}
 
-	rc.Loop()
+		err = rc.OnRecvMsg(csid)
+		if err != nil {
+			break
+		}
+
+	}
+
+	log.Println("rtmp cycle finished, begin clean.err=", err)
 
 	rc.clean()
 
-	log.Println("rtmp conn finished, remote=", rc.TcpConn.Conn.RemoteAddr())
+	log.Println("rtmp clean finished, remote=", rc.TcpConn.Conn.RemoteAddr())
 }
 
 func (rc *RtmpConn) clean() {

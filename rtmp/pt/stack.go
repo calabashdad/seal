@@ -240,36 +240,6 @@ const (
 
 const (
 	/**
-	 * band width check method name, which will be invoked by client.
-	 * band width check mothods use SrsBandwidthPacket as its internal packet type,
-	 * so ensure you set command name when you use it.
-	 */
-	// server play control
-	SRS_BW_CHECK_START_PLAY    = "onSrsBandCheckStartPlayBytes"
-	SRS_BW_CHECK_STARTING_PLAY = "onSrsBandCheckStartingPlayBytes"
-	SRS_BW_CHECK_STOP_PLAY     = "onSrsBandCheckStopPlayBytes"
-	SRS_BW_CHECK_STOPPED_PLAY  = "onSrsBandCheckStoppedPlayBytes"
-
-	// server publish control
-	SRS_BW_CHECK_START_PUBLISH    = "onSrsBandCheckStartPublishBytes"
-	SRS_BW_CHECK_STARTING_PUBLISH = "onSrsBandCheckStartingPublishBytes"
-	SRS_BW_CHECK_STOP_PUBLISH     = "onSrsBandCheckStopPublishBytes"
-	// @remark, flash never send out this packet, for its queue is full.
-	SRS_BW_CHECK_STOPPED_PUBLISH = "onSrsBandCheckStoppedPublishBytes"
-
-	// EOF control.
-	// the report packet when check finished.
-	SRS_BW_CHECK_FINISHED = "onSrsBandCheckFinished"
-	// @remark, flash never send out this packet, for its queue is full.
-	SRS_BW_CHECK_FINAL = "finalClientPacket"
-
-	// data packets
-	SRS_BW_CHECK_PLAYING    = "onSrsBandCheckPlaying"
-	SRS_BW_CHECK_PUBLISHING = "onSrsBandCheckPublishing"
-)
-
-const (
-	/**
 	 * onStatus consts.
 	 */
 	StatusLevel       = "level"
@@ -298,9 +268,6 @@ const (
 	// FMLE
 	RTMP_AMF0_COMMAND_ON_FC_PUBLISH   = "onFCPublish"
 	RTMP_AMF0_COMMAND_ON_FC_UNPUBLISH = "onFCUnpublish"
-
-	// default stream id for response the createStream request.
-	SRS_DEFAULT_SID = 1
 )
 
 const (

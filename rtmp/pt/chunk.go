@@ -9,28 +9,28 @@ type ChunkStream struct {
 	 * represents the basic header fmt,
 	 * which used to identify the variant message header type.
 	 */
-	Header_fmt uint8
+	Fmt uint8
 	/**
 	 * represents the basic header cs_id,
 	 * which is the chunk stream id.
 	 */
-	Cs_id uint32
+	CsId uint32
 	/**
 	 * cached message header
 	 */
-	Msg_header MessageHeader
+	MsgHeader MessageHeader
 	/**
 	 * whether the chunk message header has extended timestamp.
 	 */
-	Extended_timestamp bool
+	HasExtendedTimestamp bool
 	/**
 	 * partially read message.
 	 */
-	Msg *Message
+	Msg Message
 	/**
 	 * decoded msg count, to identify whether the chunk stream is fresh.
 	 */
-	Msg_count uint64
+	MsgCount uint64
 }
 
 func (chunk *ChunkStream) GotEntireMsg() bool {

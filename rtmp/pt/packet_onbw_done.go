@@ -16,6 +16,7 @@ type OnBwDonePacket struct {
 }
 
 func (pkt *OnBwDonePacket) Decode(data []uint8) (err error) {
+	//nothing
 	return
 }
 func (pkt *OnBwDonePacket) Encode() (data []uint8) {

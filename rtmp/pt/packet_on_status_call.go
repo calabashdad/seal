@@ -21,7 +21,7 @@ type OnStatusCallPacket struct {
 }
 
 func (pkt *OnStatusCallPacket) Decode(data []uint8) (err error) {
-
+	//nothing
 	return
 }
 func (pkt *OnStatusCallPacket) Encode() (data []uint8) {

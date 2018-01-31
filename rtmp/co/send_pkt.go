@@ -1,4 +1,4 @@
-package conn
+package co
 
 import (
 	"UtilsTools/identify_panic"
@@ -27,9 +27,9 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32) (err error) {
 	}
 
 	msg.Header.PayloadLength = uint32(len(msg.Payload))
-	msg.Header.Message_type = pkt.GetMessageType()
-	msg.Header.Perfer_csid = pkt.GetPreferCsId()
-	msg.Header.Stream_id = streamID
+	msg.Header.MessageType = pkt.GetMessageType()
+	msg.Header.PerferCsid = pkt.GetPreferCsId()
+	msg.Header.StreamId = streamID
 
 	err = rc.SendMsg(&msg)
 	if err != nil {

@@ -28,12 +28,12 @@ type UserControlPacket struct {
 	 * Event type is followed by Event data.
 	 * @see: SrcPCUCEventType
 	 */
-	Event_type uint16
-	Event_data uint32
+	EventType uint16
+	EventData uint32
 	/**
 	 * 4bytes if event_type is SetBufferLength; otherwise 0.
 	 */
-	Extra_data uint32
+	ExtraData uint32
 }
 
 func (pkt *UserControlPacket) Decode(data []uint8) (err error) {
@@ -43,25 +43,25 @@ func (pkt *UserControlPacket) Decode(data []uint8) (err error) {
 	}
 
 	var offset uint32
-	pkt.Event_type = binary.BigEndian.Uint16(data[offset : offset+2])
+	pkt.EventType = binary.BigEndian.Uint16(data[offset : offset+2])
 	offset += 2
 
-	pkt.Event_data = binary.BigEndian.Uint32(data[offset : offset+4])
+	pkt.EventData = binary.BigEndian.Uint32(data[offset : offset+4])
 	offset += 4
 
-	if SrcPCUCSetBufferLength == pkt.Event_type {
+	if SrcPCUCSetBufferLength == pkt.EventType {
 		if uint32(len(data))-offset < 4 {
 			err = fmt.Errorf("decode user control packet extra data, len is not enough. < 4.")
 			return
 		}
-		pkt.Extra_data = binary.BigEndian.Uint32(data[offset : offset+4])
+		pkt.ExtraData = binary.BigEndian.Uint32(data[offset : offset+4])
 	}
 
 	return
 }
 func (pkt *UserControlPacket) Encode() (data []uint8) {
 
-	if SrcPCUCSetBufferLength == pkt.Event_type {
+	if SrcPCUCSetBufferLength == pkt.EventType {
 		data = make([]uint8, 10)
 	} else {
 		data = make([]uint8, 6)
@@ -69,14 +69,14 @@ func (pkt *UserControlPacket) Encode() (data []uint8) {
 
 	var offset uint32
 
-	binary.BigEndian.PutUint16(data[offset:offset+2], pkt.Event_type)
+	binary.BigEndian.PutUint16(data[offset:offset+2], pkt.EventType)
 	offset += 2
 
-	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.Event_data)
+	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.EventData)
 	offset += 4
 
-	if SrcPCUCSetBufferLength == pkt.Event_type {
-		binary.BigEndian.PutUint32(data[offset:offset+4], pkt.Extra_data)
+	if SrcPCUCSetBufferLength == pkt.EventType {
+		binary.BigEndian.PutUint32(data[offset:offset+4], pkt.ExtraData)
 		offset += 4
 	}
 

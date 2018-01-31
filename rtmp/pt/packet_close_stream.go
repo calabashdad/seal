@@ -4,26 +4,26 @@ type CloseStreamPacket struct {
 	/**
 	 * Name of the command, set to “closeStream”.
 	 */
-	Command_name string
+	CommandName string
 	/**
 	 * Transaction ID set to 0.
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * Command information object does not exist. Set to null type.
 	 */
-	Command_object Amf0Object // null
+	CommandObject Amf0Object // null
 }
 
 func (pkt *CloseStreamPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -36,7 +36,7 @@ func (pkt *CloseStreamPacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *CloseStreamPacket) Encode() (data []uint8) {
-
+	//nothing
 	return
 }
 func (pkt *CloseStreamPacket) GetMessageType() uint8 {

@@ -10,15 +10,15 @@ import (
 	"time"
 )
 
-const SEAL_VERSION = "seal: 1.0.0"
+const SealVersion = "seal: 1.0.0"
 
 var (
-	conf_file    = flag.String("c", "./seal.yaml", "configure filename")
-	show_version = flag.Bool("v", false, "show version of seal")
+	configFile  = flag.String("c", "./seal.yaml", "configure filename")
+	showVersion = flag.Bool("v", false, "show version of seal")
 )
 
 var (
-	gWGServers sync.WaitGroup
+	gWgServers sync.WaitGroup
 )
 
 func init() {
@@ -39,12 +39,12 @@ func main() {
 		return
 	}
 
-	if *show_version {
-		log.Println(SEAL_VERSION)
+	if *showVersion {
+		log.Println(SealVersion)
 		return
 	}
 
-	err := conf.GlobalConfInfo.Loads(*conf_file)
+	err := conf.GlobalConfInfo.Loads(*configFile)
 	if err != nil {
 		log.Println("conf loads failed.err=", err)
 
@@ -54,13 +54,13 @@ func main() {
 		log.Println("load conf file success, conf=", conf.GlobalConfInfo)
 	}
 
-	gWGServers.Add(1)
+	gWgServers.Add(1)
 	if true {
-		rtmp_server := RtmpServer{}
+		rtmpServer := RtmpServer{}
 
-		rtmp_server.Start()
+		rtmpServer.Start()
 	}
 
-	gWGServers.Wait()
+	gWgServers.Wait()
 	log.Println("seal quit gracefully.")
 }

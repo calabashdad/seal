@@ -10,6 +10,7 @@ type SetPeerBandWidthPacket struct {
 }
 
 func (pkt *SetPeerBandWidthPacket) Decode(data []uint8) (err error) {
+	//nothing
 	return
 }
 func (pkt *SetPeerBandWidthPacket) Encode() (data []uint8) {

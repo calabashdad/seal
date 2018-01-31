@@ -4,44 +4,44 @@ type CallPacket struct {
 	/**
 	 * Name of the remote procedure that is called.
 	 */
-	Command_name string
+	CommandName string
 	/**
 	 * If a response is expected we give a transaction Id. Else we pass a value of 0
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * If there exists any command info this
 	 * is set, else this is set to null type.
 	 */
-	Command_object  interface{}
-	Cmd_object_type uint8
+	CommandObject  interface{}
+	Cmd_objectType uint8
 	/**
 	 * Any optional arguments to be provided
 	 */
-	Arguments      interface{}
-	Arguments_type uint8
+	Arguments     interface{}
+	ArgumentsType uint8
 }
 
 func (pkt *CallPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Command_object = Amf0ReadAny(data, &pkt.Cmd_object_type, &offset)
+	err, pkt.CommandObject = Amf0ReadAny(data, &pkt.Cmd_objectType, &offset)
 	if err != nil {
 		return
 	}
 
 	if uint32(len(data))-offset > 0 {
-		err, pkt.Arguments = Amf0ReadAny(data, &pkt.Arguments_type, &offset)
+		err, pkt.Arguments = Amf0ReadAny(data, &pkt.ArgumentsType, &offset)
 		if err != nil {
 			return
 		}
@@ -51,11 +51,11 @@ func (pkt *CallPacket) Decode(data []uint8) (err error) {
 }
 
 func (pkt *CallPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.Command_name)...)
-	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteString(pkt.CommandName)...)
+	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
 
-	if nil != pkt.Command_object {
-		data = append(data, Amf0WriteAny(pkt.Command_object.(Amf0Object))...)
+	if nil != pkt.CommandObject {
+		data = append(data, Amf0WriteAny(pkt.CommandObject.(Amf0Object))...)
 	}
 
 	if nil != pkt.Arguments {

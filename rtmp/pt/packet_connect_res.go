@@ -11,12 +11,12 @@ type ConnectResPacket struct {
 	/**
 	 * _result or _error; indicates whether the response is result or error.
 	 */
-	Command_name string
+	CommandName string
 
 	/**
 	 * Transaction ID is 1 for call connect responses
 	 */
-	Transaction_id float64
+	TransactionId float64
 
 	/**
 	 * Name-value pairs that describe the properties(fmsver etc.) of the connection.
@@ -33,23 +33,23 @@ type ConnectResPacket struct {
 func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if pkt.Command_name != RTMP_AMF0_COMMAND_RESULT {
+	if pkt.CommandName != RTMP_AMF0_COMMAND_RESULT {
 		err = fmt.Errorf("decode connect res packet command name is error. actuall name=%s, should be %s",
-			pkt.Command_name, RTMP_AMF0_COMMAND_RESULT)
+			pkt.CommandName, RTMP_AMF0_COMMAND_RESULT)
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if pkt.Transaction_id != 1.0 {
+	if pkt.TransactionId != 1.0 {
 		err = fmt.Errorf("decode connect res packet transaction id != 1.0.")
 		return
 	}
@@ -69,8 +69,8 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 
 func (pkt *ConnectResPacket) Encode() (data []uint8) {
 
-	data = append(data, Amf0WriteString(pkt.Command_name)...)
-	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteString(pkt.CommandName)...)
+	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
 	data = append(data, Amf0WriteObject(pkt.Props)...)
 	data = append(data, Amf0WriteObject(pkt.Info)...)
 

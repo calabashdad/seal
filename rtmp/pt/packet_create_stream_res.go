@@ -8,28 +8,28 @@ type CreateStreamResPacket struct {
 	/**
 	 * _result or _error; indicates whether the response is result or error.
 	 */
-	Command_name string
+	CommandName string
 
 	/**
 	 * ID of the command that response belongs to.
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * If there exists any command info this is set, else this is set to null type.
 	 */
-	Command_object Amf0Object // null
+	CommandObject Amf0Object // null
 	/**
 	 * The return value is either a stream ID or an error information object.
 	 */
-	Stream_id float64
+	StreamId float64
 }
 
 func (pkt *CreateStreamResPacket) Encode() (data []uint8) {
 
-	data = append(data, Amf0WriteString(pkt.Command_name)...)
-	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteString(pkt.CommandName)...)
+	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
 	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteNumber(pkt.Stream_id)...)
+	data = append(data, Amf0WriteNumber(pkt.StreamId)...)
 
 	return
 }
@@ -38,17 +38,17 @@ func (pkt *CreateStreamResPacket) Decode(data []uint8) (err error) {
 
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_RESULT != pkt.Command_name {
+	if RTMP_AMF0_COMMAND_RESULT != pkt.CommandName {
 		err = fmt.Errorf("decode create stream res packet, command name is not result.")
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -58,7 +58,7 @@ func (pkt *CreateStreamResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}

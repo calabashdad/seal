@@ -1,4 +1,4 @@
-package conn
+package co
 
 const (
 	//RtmpMaxFmt0HeaderSize is the max rtmp header size:

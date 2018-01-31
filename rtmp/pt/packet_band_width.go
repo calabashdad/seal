@@ -10,11 +10,11 @@ type BandWidthPacket struct {
 	/**
 	 * Name of command.
 	 */
-	Command_name string
+	CommandName string
 	/**
 	 * Transaction ID set to 0.
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * Command information does not exist. Set to null type.
 	 */
@@ -27,10 +27,12 @@ type BandWidthPacket struct {
 }
 
 func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
+	//todo
 	return
 }
 
 func (pkt *BandWidthPacket) Encode() (data []uint8) {
+	//todo
 	return
 }
 

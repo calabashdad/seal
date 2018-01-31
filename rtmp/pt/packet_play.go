@@ -9,15 +9,15 @@ type PlayPacket struct {
 	/**
 	 * Name of the command. Set to “play”.
 	 */
-	Command_name string
+	CommandName string
 	/**
 	 * Transaction ID set to 0.
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * Command information does not exist. Set to null type.
 	 */
-	Command_object Amf0Object // null
+	CommandObject Amf0Object // null
 	/**
 	 * Name of the stream to play.
 	 * To play video (FLV) files, specify the name of the stream without a file
@@ -76,17 +76,17 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_PLAY != pkt.Command_name {
-		err = fmt.Errorf("decode play packet, command name is not play.actully=%s", pkt.Command_name)
+	if RTMP_AMF0_COMMAND_PLAY != pkt.CommandName {
+		err = fmt.Errorf("decode play packet, command name is not play.actully=%s", pkt.CommandName)
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -148,8 +148,8 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 }
 func (pkt *PlayPacket) Encode() (data []uint8) {
 
-	data = append(data, Amf0WriteString(pkt.Command_name)...)
-	data = append(data, Amf0WriteNumber(pkt.Transaction_id)...)
+	data = append(data, Amf0WriteString(pkt.CommandName)...)
+	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
 	data = append(data, Amf0WriteNull()...)
 	data = append(data, Amf0WriteString(pkt.StreamName)...)
 	data = append(data, Amf0WriteNumber(pkt.Start)...)

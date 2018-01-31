@@ -1,4 +1,4 @@
-package conn
+package co
 
 import (
 	"UtilsTools/identify_panic"
@@ -19,8 +19,8 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 	}
 
 	// ensure the basic header is 1bytes. make simple.
-	if msg.Header.Perfer_csid < 2 {
-		msg.Header.Perfer_csid = pt.RTMP_CID_ProtocolControl
+	if msg.Header.PerferCsid < 2 {
+		msg.Header.PerferCsid = pt.RTMP_CID_ProtocolControl
 	}
 
 	//current position of payload send.
@@ -37,7 +37,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 
 		if 0 == payloadOffset {
 			// write new chunk stream header, fmt is 0
-			header[headerOffset] = 0x00 | uint8(msg.Header.Perfer_csid&0x3f)
+			header[headerOffset] = 0x00 | uint8(msg.Header.PerferCsid&0x3f)
 			headerOffset++
 
 			// chunk message header, 11 bytes
@@ -69,11 +69,11 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 			headerOffset++
 
 			// message_type, 1bytes
-			header[headerOffset] = msg.Header.Message_type
+			header[headerOffset] = msg.Header.MessageType
 			headerOffset++
 
 			// stream id, 4 bytes, little-endian
-			binary.LittleEndian.PutUint32(header[headerOffset:headerOffset+4], msg.Header.Stream_id)
+			binary.LittleEndian.PutUint32(header[headerOffset:headerOffset+4], msg.Header.StreamId)
 			headerOffset += 4
 
 			// chunk extended timestamp header, 0 or 4 bytes, big-endian
@@ -88,7 +88,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 			// rollback to 1B chunk header.
 
 			// fmt is 3
-			header[headerOffset] = 0xc0 | uint8(msg.Header.Perfer_csid&0x3f)
+			header[headerOffset] = 0xc0 | uint8(msg.Header.PerferCsid&0x3f)
 			headerOffset++
 
 			// chunk extended timestamp header, 0 or 4 bytes, big-endian

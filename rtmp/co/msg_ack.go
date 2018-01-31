@@ -1,18 +1,22 @@
-package conn
+package co
 
 import (
 	"UtilsTools/identify_panic"
 	"log"
+	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) DoFlashPublisherCycle() (err error) {
+func (rc *RtmpConn) MsgAck(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
 		}
 	}()
 
-	log.Println("new flash publisher come in. stream=", rc.StreamName)
+	log.Println("MsgAck")
+
+	p := pt.AcknowlegementPacket{}
+	err = p.Decode(msg.Payload)
 
 	return
 }

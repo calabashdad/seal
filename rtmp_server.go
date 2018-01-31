@@ -6,20 +6,20 @@ import (
 	"net"
 	"seal/conf"
 	"seal/kernel"
-	"seal/rtmp/conn"
+	"seal/rtmp/co"
 	"seal/rtmp/pt"
 )
 
 type RtmpServer struct {
 }
 
-func (rtmp_server *RtmpServer) Start() {
+func (rs *RtmpServer) Start() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
 		}
 
-		gWGServers.Done()
+		gWgServers.Done()
 	}()
 
 	listener, err := net.Listen("tcp", ":"+conf.GlobalConfInfo.Rtmp.Listen)
@@ -30,22 +30,22 @@ func (rtmp_server *RtmpServer) Start() {
 	log.Println("rtmp server start liste at :" + conf.GlobalConfInfo.Rtmp.Listen)
 
 	for {
-		net_conn, err := listener.Accept()
+		netConn, err := listener.Accept()
 		if err != nil {
 			log.Println("rtmp server, listen accept failed, err=", err)
 			break
 		}
 
-		log.Println("one rtmp connection come in, remote=", net_conn.RemoteAddr())
+		log.Println("one rtmp connection come in, remote=", netConn.RemoteAddr())
 
-		rtmp_conn := rtmp_server.NewRtmpConnection(net_conn)
+		rtmpConn := rs.NewRtmpConnection(netConn)
 
-		go rtmp_conn.Cycle()
+		go rtmpConn.Cycle()
 	}
 }
 
-func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
-	return &conn.RtmpConn{
+func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
+	return &co.RtmpConn{
 		TcpConn: &kernel.TcpSock{
 			Conn:    c,
 			TimeOut: conf.GlobalConfInfo.Rtmp.TimeOut,
@@ -54,13 +54,13 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *conn.RtmpConn {
 		InChunkSize:  pt.RTMP_DEFAULT_CHUNK_SIZE,
 		OutChunkSize: pt.RTMP_DEFAULT_CHUNK_SIZE,
 		Pool:         kernel.NewMemPool(),
-		AckWindow: conn.AckWindowSizeS{
+		AckWindow: co.AckWindowSizeS{
 			AckWindowSize: 250000,
 		},
 		Requests:        make(map[float64]string),
-		Role:            conn.RtmpRoleUnknown,
+		Role:            co.RtmpRoleUnknown,
 		DefaultStreamId: 1.0,
-		ConnectInfo: &conn.ConnectInfoS{
+		ConnectInfo: &co.ConnectInfoS{
 			ObjectEncoding: pt.RTMP_SIG_AMF0_VER,
 		},
 	}

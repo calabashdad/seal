@@ -8,43 +8,43 @@ type PausePacket struct {
 	/**
 	 * Name of the command, set to “pause”.
 	 */
-	Command_name string
+	CommandName string
 	/**
 	 * There is no transaction ID for this command. Set to 0.
 	 */
-	Transaction_id float64
+	TransactionId float64
 	/**
 	 * Command information object does not exist. Set to null type.
 	 */
-	Command_object Amf0Object // null
+	CommandObject Amf0Object // null
 	/**
 	 * true or false, to indicate pausing or resuming play
 	 */
-	Is_pause bool
+	IsPause bool
 	/**
 	 * Number of milliseconds at which the the stream is paused or play resumed.
 	 * This is the current stream time at the Client when stream was paused. When the
 	 * playback is resumed, the server will only send messages with timestamps
 	 * greater than this value.
 	 */
-	Time_ms float64
+	TimeMs float64
 }
 
 func (pkt *PausePacket) Decode(data []uint8) (err error) {
 
 	var offset uint32
 
-	err, pkt.Command_name = Amf0ReadString(data, &offset)
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_PAUSE == pkt.Command_name {
-		err = fmt.Errorf("decode pause packet command name is error.actully=%s", pkt.Command_name)
+	if RTMP_AMF0_COMMAND_PAUSE == pkt.CommandName {
+		err = fmt.Errorf("decode pause packet command name is error.actully=%s", pkt.CommandName)
 		return
 	}
 
-	err, pkt.Transaction_id = Amf0ReadNumber(data, &offset)
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -54,12 +54,12 @@ func (pkt *PausePacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Is_pause = Amf0ReadBool(data, &offset)
+	err, pkt.IsPause = Amf0ReadBool(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Time_ms = Amf0ReadNumber(data, &offset)
+	err, pkt.TimeMs = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}

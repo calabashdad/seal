@@ -1,4 +1,4 @@
-package conn
+package co
 
 import (
 	"sync"

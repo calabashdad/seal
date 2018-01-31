@@ -8,7 +8,7 @@ type MessageHeader struct {
 	 * The 4 bytes are packed in the big-endian order.
 	 * @remark, only used for decoding message from chunk stream.
 	 */
-	Timestamp_delta uint32
+	TimestampDelta uint32
 	/**
 	 * 3bytes.
 	 * Three-byte field that represents the size of the payload in bytes.
@@ -20,13 +20,13 @@ type MessageHeader struct {
 	 * One byte field to represent the message type. A range of type IDs
 	 * (1-7) are reserved for protocol control messages.
 	 */
-	Message_type uint8
+	MessageType uint8
 	/**
 	 * 4bytes.
 	 * Four-byte field that identifies the stream of the message. These
 	 * bytes are set in big-endian format.
 	 */
-	Stream_id uint32
+	StreamId uint32
 
 	/**
 	 * Four-byte field that contains a Timestamp of the message.
@@ -41,96 +41,96 @@ type MessageHeader struct {
 	 * set at decoding, and canbe used for directly send message,
 	 * for example, dispatch to all connections.
 	 */
-	Perfer_csid uint32
+	PerferCsid uint32
 }
 
 func (h *MessageHeader) Is_audio() bool {
-	return RTMP_MSG_AudioMessage == h.Message_type
+	return RTMP_MSG_AudioMessage == h.MessageType
 }
 func (h *MessageHeader) Is_video() bool {
-	return RTMP_MSG_VideoMessage == h.Message_type
+	return RTMP_MSG_VideoMessage == h.MessageType
 
 }
 func (h *MessageHeader) IsAmf0Command() bool {
-	return RTMP_MSG_AMF0CommandMessage == h.Message_type
+	return RTMP_MSG_AMF0CommandMessage == h.MessageType
 
 }
 func (h *MessageHeader) IsAmf0Data() bool {
-	return RTMP_MSG_AMF0DataMessage == h.Message_type
+	return RTMP_MSG_AMF0DataMessage == h.MessageType
 
 }
 func (h *MessageHeader) IsAmf3Command() bool {
-	return RTMP_MSG_AMF3CommandMessage == h.Message_type
+	return RTMP_MSG_AMF3CommandMessage == h.MessageType
 
 }
 func (h *MessageHeader) IsAmf3Data() bool {
-	return RTMP_MSG_AMF3DataMessage == h.Message_type
+	return RTMP_MSG_AMF3DataMessage == h.MessageType
 
 }
 func (h *MessageHeader) IsWindowAckledgementSize() bool {
-	return RTMP_MSG_WindowAcknowledgementSize == h.Message_type
+	return RTMP_MSG_WindowAcknowledgementSize == h.MessageType
 
 }
 func (h *MessageHeader) IsAckledgement() bool {
-	return RTMP_MSG_Acknowledgement == h.Message_type
+	return RTMP_MSG_Acknowledgement == h.MessageType
 
 }
 func (h *MessageHeader) IsSetChunkSize() bool {
-	return RTMP_MSG_SetChunkSize == h.Message_type
+	return RTMP_MSG_SetChunkSize == h.MessageType
 
 }
 func (h *MessageHeader) IsUserControlMessage() bool {
-	return RTMP_MSG_UserControlMessage == h.Message_type
+	return RTMP_MSG_UserControlMessage == h.MessageType
 
 }
 func (h *MessageHeader) IsSetPeerBandwidth() bool {
-	return RTMP_MSG_SetPeerBandwidth == h.Message_type
+	return RTMP_MSG_SetPeerBandwidth == h.MessageType
 
 }
 func (h *MessageHeader) IsAggregate() bool {
-	return RTMP_MSG_AggregateMessage == h.Message_type
+	return RTMP_MSG_AggregateMessage == h.MessageType
 }
 
 /**
  * create a amf0 script header, set the size and stream_id.
  */
 func (h *MessageHeader) InitializeAmf0Script(payload_len uint32, stream_id uint32) {
-	h.Message_type = RTMP_MSG_AMF0DataMessage
+	h.MessageType = RTMP_MSG_AMF0DataMessage
 	h.PayloadLength = payload_len
-	h.Timestamp_delta = 0
+	h.TimestampDelta = 0
 	h.Timestamp = 0
-	h.Stream_id = stream_id
+	h.StreamId = stream_id
 
 	// amf0 script use connection2 chunk-id
-	h.Perfer_csid = RTMP_CID_OverConnection2
+	h.PerferCsid = RTMP_CID_OverConnection2
 }
 
 /**
  * create a audio header, set the size, timestamp and stream_id.
  */
 func (h *MessageHeader) InitializeAudio(payload_size uint32, time uint32, stream_id uint32) {
-	h.Message_type = RTMP_MSG_AudioMessage
+	h.MessageType = RTMP_MSG_AudioMessage
 	h.PayloadLength = payload_size
-	h.Timestamp_delta = time
+	h.TimestampDelta = time
 	h.Timestamp = uint64(time)
-	h.Stream_id = stream_id
+	h.StreamId = stream_id
 
 	// audio chunk-id
-	h.Perfer_csid = RTMP_CID_Audio
+	h.PerferCsid = RTMP_CID_Audio
 }
 
 /**
  * create a video header, set the size, timestamp and stream_id.
  */
 func (h *MessageHeader) InitializeVideo(payloadSize uint32, time uint32, streamId uint32) {
-	h.Message_type = RTMP_MSG_VideoMessage
+	h.MessageType = RTMP_MSG_VideoMessage
 	h.PayloadLength = payloadSize
-	h.Timestamp_delta = time
+	h.TimestampDelta = time
 	h.Timestamp = uint64(time)
-	h.Stream_id = streamId
+	h.StreamId = streamId
 
 	// video chunk-id
-	h.Perfer_csid = RTMP_CID_Video
+	h.PerferCsid = RTMP_CID_Video
 }
 
 /* message is raw data RTMP message, bytes oriented*/

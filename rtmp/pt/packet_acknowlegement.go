@@ -10,7 +10,7 @@ import (
 * receiving bytes equal to the window size.
  */
 type AcknowlegementPacket struct {
-	Sequence_number uint32
+	SequenceNumber uint32
 }
 
 func (pkt *AcknowlegementPacket) Decode(data []uint8) (err error) {
@@ -21,7 +21,7 @@ func (pkt *AcknowlegementPacket) Decode(data []uint8) (err error) {
 func (pkt *AcknowlegementPacket) Encode() (data []uint8) {
 
 	data = make([]uint8, 4)
-	binary.BigEndian.PutUint32(data[:], pkt.Sequence_number)
+	binary.BigEndian.PutUint32(data[:], pkt.SequenceNumber)
 
 	return
 }
