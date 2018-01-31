@@ -5,8 +5,13 @@ import (
 	"fmt"
 )
 
+/**
+* 5.5. Window Acknowledgement Size (5)
+* The client or the server sends this message to inform the peer which
+* window size to use when sending acknowledgment.
+ */
 type SetWindowAckSizePacket struct {
-	Ackowledgement_window_size uint32
+	AckowledgementWindowSize uint32
 }
 
 func (pkt *SetWindowAckSizePacket) Decode(data []uint8) (err error) {
@@ -16,7 +21,7 @@ func (pkt *SetWindowAckSizePacket) Decode(data []uint8) (err error) {
 	}
 
 	var offset uint32
-	pkt.Ackowledgement_window_size = binary.BigEndian.Uint32(data[offset : offset+4])
+	pkt.AckowledgementWindowSize = binary.BigEndian.Uint32(data[offset : offset+4])
 	offset += 4
 
 	return
@@ -26,7 +31,7 @@ func (pkt *SetWindowAckSizePacket) Encode() (data []uint8) {
 	data = make([]uint8, 4)
 
 	var offset uint32
-	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.Ackowledgement_window_size)
+	binary.BigEndian.PutUint32(data[offset:offset+4], pkt.AckowledgementWindowSize)
 	offset += 4
 
 	return

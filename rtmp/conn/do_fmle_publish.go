@@ -212,6 +212,7 @@ func (rc *RtmpConn) Publishing() (err error) {
 func (rc *RtmpConn) processPublishMessage(msg *pt.Message) (err error) {
 
 	log.Println("msg type=", msg.Header.Message_type, ",perferCsid=", msg.Header.Perfer_csid,
+		",stream id=", msg.Header.Stream_id,
 		", payload=", msg.Header.PayloadLength, ",timestamp=", msg.Header.Timestamp)
 
 	return

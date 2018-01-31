@@ -14,7 +14,7 @@ func (rc *RtmpConn) SetWindowAckSize(ackSize uint32) (err error) {
 	}()
 
 	var pkt pt.SetWindowAckSizePacket
-	pkt.Ackowledgement_window_size = ackSize
+	pkt.AckowledgementWindowSize = ackSize
 
 	err = rc.SendPacket(&pkt, 0)
 	if err != nil {

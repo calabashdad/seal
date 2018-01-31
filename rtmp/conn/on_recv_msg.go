@@ -49,7 +49,7 @@ func (rc *RtmpConn) OnRecvMsg(msg **pt.Message) (err error) {
 			err = rc.ResponsePingMsg(pkt.(*pt.UserControlPacket).Event_data)
 		}
 	case pt.RTMP_MSG_WindowAcknowledgementSize:
-		ack_size := pkt.(*pt.SetWindowAckSizePacket).Ackowledgement_window_size
+		ack_size := pkt.(*pt.SetWindowAckSizePacket).AckowledgementWindowSize
 		if ack_size > 0 {
 			rc.AckWindow.AckWindowSize = ack_size
 		}
