@@ -1,10 +1,10 @@
 package co
 
 import (
-	"seal/conf"
 	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
+	"seal/conf"
 	"seal/rtmp/pt"
 )
 
@@ -488,7 +488,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	if err != nil {
 		return
 	}
-	log.Println("send request, set chunk size to ",pkt.ChunkSize)
+	log.Println("send request, set chunk size to ", pkt.ChunkSize)
 
 	return
 }
@@ -607,6 +607,27 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		return
 	}
 	log.Println("decode meta data success, meta=", p)
+
+	//add server info to metadata
+	if pt.RTMP_AMF0_Object == p.Marker {
+		p.Metadata = append(p.Metadata.([]pt.Amf0Object), pt.Amf0Object{
+			PropertyName: "server",
+			Value:        "seal rtmp server",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		p.Metadata = append(p.Metadata.([]pt.Amf0Object), pt.Amf0Object{
+			PropertyName: "primary",
+			Value:        "YangKai",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+		p.Metadata = append(p.Metadata.([]pt.Amf0Object), pt.Amf0Object{
+			PropertyName: "author",
+			Value:        "YangKai",
+			ValueType:    pt.RTMP_AMF0_String,
+		})
+	} else if pt.RTMP_AMF0_EcmaArray == p.Marker {
+		
+	}
 
 	return
 }

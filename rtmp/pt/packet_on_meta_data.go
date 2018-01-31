@@ -56,3 +56,7 @@ func (pkt *OnMetaDataPacket) GetMessageType() uint8 {
 func (pkt *OnMetaDataPacket) GetPreferCsId() uint32 {
 	return RTMP_CID_OverConnection2
 }
+
+func (pkt *OnMetaDataPacket) AddObject(Amf0Object) {
+
+}
