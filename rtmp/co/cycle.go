@@ -59,15 +59,14 @@ func (rc *RtmpConn) Cycle() {
 	log.Println("rtmp handshake success.")
 
 	for {
+		//notice that the payload has not alloced at init.
+		//one msg allock once, and do not copy.
 		msg := &pt.Message{}
 
-		var csid uint32
-		err = rc.RecvMsg(&csid)
+		err = rc.RecvMsg(&msg.Header, &msg.Payload)
 		if err != nil {
 			break
 		}
-
-		*msg = rc.ChunkStreams[csid].Msg
 
 		err = rc.onRecvMsg(msg)
 		if err != nil {

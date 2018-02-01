@@ -9,7 +9,7 @@ import (
 )
 
 //RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.
-func (rc *RtmpConn) RecvMsg(chunkStreamID *uint32) (err error) {
+func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -50,7 +50,7 @@ func (rc *RtmpConn) RecvMsg(chunkStreamID *uint32) (err error) {
 
 		chunk.Fmt = chunkFmt
 		chunk.CsId = csid
-		chunk.Msg.Header.PerferCsid = csid
+		chunk.MsgHeader.PerferCsid = csid
 
 		//read message header
 		if 0 == chunk.MsgCount && chunk.Fmt != pt.RTMP_FMT_TYPE0 {
@@ -69,7 +69,7 @@ func (rc *RtmpConn) RecvMsg(chunkStreamID *uint32) (err error) {
 			}
 		}
 
-		if chunk.Msg.Payload.SizeTmp > 0 && pt.RTMP_FMT_TYPE0 == chunk.Fmt {
+		if payload.SizeTmp > 0 && pt.RTMP_FMT_TYPE0 == chunk.Fmt {
 			err = fmt.Errorf("when msg count > 0, chunk fmt is not allowed to be RTMP_FMT_TYPE0.")
 			break
 		}
@@ -100,55 +100,55 @@ func (rc *RtmpConn) RecvMsg(chunkStreamID *uint32) (err error) {
 		//*   4bytes: stream id,          fmt=0
 		switch chunk.Fmt {
 		case pt.RTMP_FMT_TYPE0:
-			chunk.Msg.Header.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
-			if chunk.Msg.Header.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
+			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
+			if chunk.MsgHeader.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
 				chunk.HasExtendedTimestamp = true
 			} else {
 				chunk.HasExtendedTimestamp = false
 				// For a type-0 chunk, the absolute timestamp of the message is sent here.
-				chunk.Msg.Header.Timestamp = uint64(chunk.Msg.Header.TimestampDelta)
+				chunk.MsgHeader.Timestamp = uint64(chunk.MsgHeader.TimestampDelta)
 			}
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
-			if chunk.Msg.Payload.SizeTmp > 0 && payloadLength != chunk.Msg.Header.PayloadLength {
+			if payload.SizeTmp > 0 && payloadLength != chunk.MsgHeader.PayloadLength {
 				err = fmt.Errorf("RTMP_FMT_TYPE0: msg has in chunk, msg size can not change.")
 				break
 			}
 
-			chunk.Msg.Header.PayloadLength = payloadLength
-			chunk.Msg.Header.MessageType = msgHeader[6]
-			chunk.Msg.Header.StreamId = binary.LittleEndian.Uint32(msgHeader[7:11])
+			chunk.MsgHeader.PayloadLength = payloadLength
+			chunk.MsgHeader.MessageType = msgHeader[6]
+			chunk.MsgHeader.StreamId = binary.LittleEndian.Uint32(msgHeader[7:11])
 
 		case pt.RTMP_FMT_TYPE1:
-			chunk.Msg.Header.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
-			if chunk.Msg.Header.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
+			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
+			if chunk.MsgHeader.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
 				chunk.HasExtendedTimestamp = true
 			} else {
 				chunk.HasExtendedTimestamp = false
-				chunk.Msg.Header.Timestamp += uint64(chunk.Msg.Header.TimestampDelta)
+				chunk.MsgHeader.Timestamp += uint64(chunk.MsgHeader.TimestampDelta)
 			}
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
-			if chunk.Msg.Payload.SizeTmp > 0 && payloadLength != chunk.Msg.Header.PayloadLength {
+			if payload.SizeTmp > 0 && payloadLength != chunk.MsgHeader.PayloadLength {
 				err = fmt.Errorf("RTMP_FMT_TYPE1: msg has in chunk, msg size can not change.")
 				break
 			}
 
-			chunk.Msg.Header.PayloadLength = payloadLength
-			chunk.Msg.Header.MessageType = msgHeader[6]
+			chunk.MsgHeader.PayloadLength = payloadLength
+			chunk.MsgHeader.MessageType = msgHeader[6]
 
 		case pt.RTMP_FMT_TYPE2:
-			chunk.Msg.Header.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
-			if chunk.Msg.Header.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
+			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
+			if chunk.MsgHeader.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
 				chunk.HasExtendedTimestamp = true
 			} else {
 				chunk.HasExtendedTimestamp = false
-				chunk.Msg.Header.Timestamp += uint64(chunk.Msg.Header.TimestampDelta)
+				chunk.MsgHeader.Timestamp += uint64(chunk.MsgHeader.TimestampDelta)
 			}
 		case pt.RTMP_FMT_TYPE3:
 			// update the timestamp even fmt=3 for first chunk packet. the same with previous.
-			if 0 == chunk.Msg.Payload.SizeTmp && !chunk.HasExtendedTimestamp {
-				chunk.Msg.Header.Timestamp += uint64(chunk.Msg.Header.TimestampDelta)
+			if 0 == payload.SizeTmp && !chunk.HasExtendedTimestamp {
+				chunk.MsgHeader.Timestamp += uint64(chunk.MsgHeader.TimestampDelta)
 			}
 		}
 
@@ -169,42 +169,43 @@ func (rc *RtmpConn) RecvMsg(chunkStreamID *uint32) (err error) {
 			// always use 31bits timestamp, for some server may use 32bits extended timestamp.
 			extendTimeStamp &= 0x7fffffff
 
-			chunkTimeStamp := chunk.Msg.Header.Timestamp
-			if 0 == chunk.Msg.Payload.SizeTmp || 0 == chunkTimeStamp {
-				chunk.Msg.Header.Timestamp = uint64(extendTimeStamp)
+			chunkTimeStamp := chunk.MsgHeader.Timestamp
+			if 0 == payload.SizeTmp || 0 == chunkTimeStamp {
+				chunk.MsgHeader.Timestamp = uint64(extendTimeStamp)
 			}
 
 			//because of the flv file format is lower 24bits, and higher 8bit is SI32, so timestamp is
 			//31bit.
-			chunk.Msg.Header.Timestamp &= 0x7fffffff
+			chunk.MsgHeader.Timestamp &= 0x7fffffff
 
 		}
 
 		chunk.MsgCount++
 
 		//make cache of msg
-		if uint32(len(chunk.Msg.Payload.Payload)) < chunk.Msg.Header.PayloadLength {
-			chunk.Msg.Payload.Payload = make([]uint8, chunk.Msg.Header.PayloadLength)
+		if uint32(len(payload.Payload)) < chunk.MsgHeader.PayloadLength {
+			payload.Payload = make([]uint8, chunk.MsgHeader.PayloadLength)
 		}
 
 		//read chunk data
-		remainPayloadSize := chunk.Msg.Header.PayloadLength - chunk.Msg.Payload.SizeTmp
+		remainPayloadSize := chunk.MsgHeader.PayloadLength - payload.SizeTmp
 
 		if remainPayloadSize >= rc.InChunkSize {
 			remainPayloadSize = rc.InChunkSize
 		}
 
-		err = rc.TcpConn.ExpectBytesFull(chunk.Msg.Payload.Payload[chunk.Msg.Payload.SizeTmp:chunk.Msg.Payload.SizeTmp+remainPayloadSize], remainPayloadSize)
+		err = rc.TcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize)
 		if err != nil {
 			break
 		} else {
-			chunk.Msg.Payload.SizeTmp += remainPayloadSize
-			if chunk.Msg.Payload.SizeTmp == chunk.Msg.Header.PayloadLength {
+			payload.SizeTmp += remainPayloadSize
+			if payload.SizeTmp == chunk.MsgHeader.PayloadLength {
 
-				*chunkStreamID = csid
+				*header = chunk.MsgHeader
+
 				//has recv entire rtmp message.
 				//reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
-				chunk.Msg.Payload.SizeTmp = 0
+				payload.SizeTmp = 0
 
 				break
 			}

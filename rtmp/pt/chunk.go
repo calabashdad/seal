@@ -24,10 +24,6 @@ type ChunkStream struct {
 	 */
 	HasExtendedTimestamp bool
 	/**
-	 * partially read message.
-	 */
-	Msg Message
-	/**
 	 * decoded msg count, to identify whether the chunk stream is fresh.
 	 */
 	MsgCount uint64
