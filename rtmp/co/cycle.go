@@ -19,8 +19,11 @@ type ConnectInfoS struct {
 }
 
 type SourceInfoS struct {
-	sampleRate float64 //the sample rate of audio in metadata
-	frameRate  float64 //the video frame rate in metadata
+	sampleRate float64 // the sample rate of audio in metadata
+	frameRate  float64 // the video frame rate in metadata
+	atc        bool    // atc whether atc(use absolute time and donot adjust time),
+	// directly use msg time and donot adjust if atc is true,
+	// otherwise, adjust msg time to start from 0 to make flash happy.
 }
 
 type RtmpConn struct {

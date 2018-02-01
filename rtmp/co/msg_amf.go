@@ -635,7 +635,16 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		rc.SourceInfo.frameRate = v.(float64)
 	}
 
-	log.Println("after add property, metadata=", p)
+	log.Println(p)
+
+	rc.SourceInfo.atc = conf.GlobalConfInfo.Rtmp.Atc
+	if v := p.GetProperty("bravo_atc"); v != nil {
+		if conf.GlobalConfInfo.Rtmp.AtcAuto {
+			rc.SourceInfo.atc = true
+		}
+	}
+
+	log.Println("atc ctrol is ", rc.SourceInfo.atc)
 
 	return
 }
