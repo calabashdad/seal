@@ -102,7 +102,7 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 		return
 	}
 
-	req_command_name := rc.Requests[transaction_id]
+	req_command_name := rc.CmdRequests[transaction_id]
 	if 0 == len(req_command_name) {
 		err = fmt.Errorf("can not find request command name.")
 		return
@@ -609,25 +609,33 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	log.Println("decode meta data success, meta=", p)
 
 	//add server info to metadata
-	if pt.RTMP_AMF0_Object == p.Marker {
-		p.Metadata = append(p.Metadata.([]pt.Amf0Object), pt.Amf0Object{
-			PropertyName: "server",
-			Value:        "seal rtmp server",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-		p.Metadata = append(p.Metadata.([]pt.Amf0Object), pt.Amf0Object{
-			PropertyName: "primary",
-			Value:        "YangKai",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-		p.Metadata = append(p.Metadata.([]pt.Amf0Object), pt.Amf0Object{
-			PropertyName: "author",
-			Value:        "YangKai",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-	} else if pt.RTMP_AMF0_EcmaArray == p.Marker {
-		
+	p.AddObject(pt.Amf0Object{
+		PropertyName: "server",
+		Value:        "seal rtmp server",
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+
+	p.AddObject(pt.Amf0Object{
+		PropertyName: "primary",
+		Value:        "YangKai",
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+
+	p.AddObject(pt.Amf0Object{
+		PropertyName: "author",
+		Value:        "YangKai",
+		ValueType:    pt.RTMP_AMF0_String,
+	})
+
+	if v := p.GetProperty("audiosamplerate"); v != nil {
+		rc.SourceInfo.sampleRate = v.(float64)
 	}
+
+	if v := p.GetProperty("framerate"); v != nil {
+		rc.SourceInfo.frameRate = v.(float64)
+	}
+
+	log.Println("after add property, metadata=", p)
 
 	return
 }

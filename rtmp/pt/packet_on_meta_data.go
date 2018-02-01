@@ -57,6 +57,32 @@ func (pkt *OnMetaDataPacket) GetPreferCsId() uint32 {
 	return RTMP_CID_OverConnection2
 }
 
-func (pkt *OnMetaDataPacket) AddObject(Amf0Object) {
+func (pkt *OnMetaDataPacket) AddObject(obj Amf0Object) {
+	if RTMP_AMF0_Object == pkt.Marker {
+		pkt.Metadata = append(pkt.Metadata.([]Amf0Object), obj)
+	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
+		v := pkt.Metadata.(Amf0EcmaArray)
+		v.addObject(obj)
 
+		pkt.Metadata = v
+	}
+}
+
+func (pkt *OnMetaDataPacket) GetProperty(name string) interface{} {
+
+	if RTMP_AMF0_Object == pkt.Marker {
+		for _, v := range pkt.Metadata.([]Amf0Object) {
+			if name == v.PropertyName {
+				return v.Value
+			}
+		}
+	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
+		for _, v := range (pkt.Metadata.(Amf0EcmaArray)).anyObject {
+			if name == v.PropertyName {
+				return v.Value
+			}
+		}
+	}
+
+	return nil
 }

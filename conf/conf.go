@@ -14,6 +14,7 @@ type RtmpConfInfo struct {
 	Listen    string `yaml:"listen"`
 	TimeOut   uint32 `yaml:"timeout"`
 	ChunkSize uint32 `yaml:"chunk_size"`
+	Atc       bool   `yaml:"atc"`
 }
 
 type ConfInfo struct {
@@ -54,4 +55,5 @@ func (c *ConfInfo) Default() {
 	c.Rtmp.Listen = "1935"
 	c.Rtmp.TimeOut = 30
 	c.Rtmp.ChunkSize = 6000
+	c.Rtmp.Atc = false
 }

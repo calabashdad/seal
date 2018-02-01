@@ -18,20 +18,25 @@ type ConnectInfoS struct {
 	ObjectEncoding float64
 }
 
+type SourceInfoS struct {
+	sampleRate float64 //the sample rate of audio in metadata
+	frameRate  float64 //the video frame rate in metadata
+}
+
 type RtmpConn struct {
 	TcpConn         *kernel.TcpSock
 	ChunkStreams    map[uint32]*pt.ChunkStream //key:cs id
 	InChunkSize     uint32                     //default 128, set by peer
 	OutChunkSize    uint32                     //default 128, set by config file.
-	Pool            *kernel.MemPool
 	AckWindow       AckWindowSizeS
-	Requests        map[float64]string //key: transactin id, value:command name
+	CmdRequests     map[float64]string //command requests.key: transactin id, value:command name
 	Role            uint8              //publisher or player.
 	StreamName      string
 	TokenStr        string        //token str for authentication. it's optional.
 	Duration        float64       //for player.used to specified the stop when exceed the duration.
 	DefaultStreamId float64       //default stream id for request.
 	ConnectInfo     *ConnectInfoS //connect info.
+	SourceInfo      *SourceInfoS  //data source info.
 }
 
 func (rc *RtmpConn) Cycle() {

@@ -24,6 +24,11 @@ type Amf0StrictArray struct {
 	anyObject []interface{}
 }
 
+func (array *Amf0EcmaArray) addObject(obj Amf0Object) {
+	array.anyObject = append(array.anyObject, obj)
+	array.count++
+}
+
 //this function do not affect the offset parsed in data.
 func Amf0ObjectEof(data []uint8, offset *uint32) (res bool) {
 	if len(data) < 3 {

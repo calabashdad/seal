@@ -1,7 +1,13 @@
 ---
 rtmp:
   listen: 1935
-  #defalut is 30 seonds.
+  # defalut is 30 seonds.
   timeout: 30 
-  #chunk size. [128, 65535]
+  # chunk size. [128, 65535]
+  # recommand is 60000
   chunk_size: 60000
+  #  atc whether atc(use absolute time and donot adjust time),
+  #  directly use msg time and donot adjust if atc is true,
+  #  otherwise, adjust msg time to start from 0 to make flash happy.
+  #  recommand is false.
+  atc: false

@@ -53,15 +53,17 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
 		ChunkStreams: make(map[uint32]*pt.ChunkStream),
 		InChunkSize:  pt.RTMP_DEFAULT_CHUNK_SIZE,
 		OutChunkSize: pt.RTMP_DEFAULT_CHUNK_SIZE,
-		Pool:         kernel.NewMemPool(),
 		AckWindow: co.AckWindowSizeS{
 			AckWindowSize: 250000,
 		},
-		Requests:        make(map[float64]string),
+		CmdRequests:     make(map[float64]string),
 		Role:            co.RtmpRoleUnknown,
 		DefaultStreamId: 1.0,
 		ConnectInfo: &co.ConnectInfoS{
 			ObjectEncoding: pt.RTMP_SIG_AMF0_VER,
+		},
+		SourceInfo: &co.SourceInfoS {
+
 		},
 	}
 }
