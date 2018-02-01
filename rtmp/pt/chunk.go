@@ -32,7 +32,3 @@ type ChunkStream struct {
 	 */
 	MsgCount uint64
 }
-
-func (chunk *ChunkStream) GotEntireMsg() bool {
-	return (chunk.Msg.Header.PayloadLength == chunk.Msg.SizeTmp)
-}

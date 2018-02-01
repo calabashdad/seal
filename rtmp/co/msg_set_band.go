@@ -16,7 +16,7 @@ func (rc *RtmpConn) msgSetBand(msg *pt.Message) (err error) {
 	log.Println("MsgSetBand")
 
 	p := pt.SetPeerBandWidthPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 
 	return
 }

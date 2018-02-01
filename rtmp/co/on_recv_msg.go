@@ -2,12 +2,11 @@ package co
 
 import (
 	"UtilsTools/identify_panic"
-	"fmt"
 	"log"
 	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) onRecvMsg(csid uint32) (err error) {
+func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -19,28 +18,27 @@ func (rc *RtmpConn) onRecvMsg(csid uint32) (err error) {
 		return
 	}
 
-	chunk := rc.ChunkStreams[csid]
-	if nil == chunk {
-		err = fmt.Errorf("on recv msg can not find the csid.")
+	if nil == msg {
+
 		return
 	}
 
-	switch chunk.Msg.Header.MessageType {
+	switch msg.Header.MessageType {
 	case pt.RTMP_MSG_AMF3CommandMessage, pt.RTMP_MSG_AMF0CommandMessage,
 		pt.RTMP_MSG_AMF0DataMessage, pt.RTMP_MSG_AMF3DataMessage:
-		err = rc.msgAmf(&chunk.Msg)
+		err = rc.msgAmf(msg)
 	case pt.RTMP_MSG_UserControlMessage:
-		err = rc.msgUserCtrl(&chunk.Msg)
+		err = rc.msgUserCtrl(msg)
 	case pt.RTMP_MSG_WindowAcknowledgementSize:
-		err = rc.msgSetAck(&chunk.Msg)
+		err = rc.msgSetAck(msg)
 	case pt.RTMP_MSG_SetChunkSize:
-		err = rc.msgSetChunk(&chunk.Msg)
+		err = rc.msgSetChunk(msg)
 	case pt.RTMP_MSG_SetPeerBandwidth:
-		err = rc.msgSetBand(&chunk.Msg)
+		err = rc.msgSetBand(msg)
 	case pt.RTMP_MSG_Acknowledgement:
-		err = rc.msgAck(&chunk.Msg)
+		err = rc.msgAck(msg)
 	case pt.RTMP_MSG_AbortMessage:
-		err = rc.msgAbort(&chunk.Msg)
+		err = rc.msgAbort(msg)
 	case pt.RTMP_MSG_EdgeAndOriginServerCommand:
 		//todo
 	case pt.RTMP_MSG_AMF3SharedObject:
@@ -48,13 +46,13 @@ func (rc *RtmpConn) onRecvMsg(csid uint32) (err error) {
 	case pt.RTMP_MSG_AMF0SharedObject:
 		//todo
 	case pt.RTMP_MSG_AudioMessage:
-		err = rc.msgAudio(&chunk.Msg)
+		err = rc.msgAudio(msg)
 	case pt.RTMP_MSG_VideoMessage:
-		err = rc.msgVideo(&chunk.Msg)
+		err = rc.msgVideo(msg)
 	case pt.RTMP_MSG_AggregateMessage:
-		err = rc.msgAggregate(&chunk.Msg)
+		err = rc.msgAggregate(msg)
 	default:
-		log.Println("on recv msg unknown msg typeid=", chunk.Msg.Header.MessageType)
+		log.Println("on recv msg unknown msg typeid=", msg.Header.MessageType)
 	}
 
 	if err != nil {

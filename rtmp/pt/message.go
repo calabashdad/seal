@@ -133,9 +133,7 @@ func (h *MessageHeader) InitializeVideo(payloadSize uint32, time uint32, streamI
 	h.PerferCsid = RTMP_CID_Video
 }
 
-/* message is raw data RTMP message, bytes oriented*/
-type Message struct {
-	Header MessageHeader
+type MessagePayload struct {
 	/**
 	 * current message parsed SizeTmp,
 	 *       SizeTmp <= header.payload_length
@@ -150,4 +148,10 @@ type Message struct {
 	 *       video/audio packet use raw bytes, no video/audio packet.
 	 */
 	Payload []uint8
+}
+
+/* message is raw data RTMP message, bytes oriented*/
+type Message struct {
+	Header  MessageHeader
+	Payload MessagePayload
 }

@@ -59,13 +59,17 @@ func (rc *RtmpConn) Cycle() {
 	log.Println("rtmp handshake success.")
 
 	for {
+		msg := &pt.Message{}
+
 		var csid uint32
 		err = rc.RecvMsg(&csid)
 		if err != nil {
 			break
 		}
 
-		err = rc.onRecvMsg(csid)
+		*msg = rc.ChunkStreams[csid].Msg
+
+		err = rc.onRecvMsg(msg)
 		if err != nil {
 			break
 		}

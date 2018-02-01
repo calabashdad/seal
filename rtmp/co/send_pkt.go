@@ -18,15 +18,15 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32) (err error) {
 
 	var msg pt.Message
 
-	msg.Payload = pkt.Encode()
-	msg.SizeTmp = uint32(len(msg.Payload))
+	msg.Payload.Payload = pkt.Encode()
+	msg.Payload.SizeTmp = uint32(len(msg.Payload.Payload))
 
-	if uint32(len(msg.Payload)) <= 0 {
+	if uint32(len(msg.Payload.Payload)) <= 0 {
 		//ignore empty msg.
 		return
 	}
 
-	msg.Header.PayloadLength = uint32(len(msg.Payload))
+	msg.Header.PayloadLength = uint32(len(msg.Payload.Payload))
 	msg.Header.MessageType = pkt.GetMessageType()
 	msg.Header.PerferCsid = pkt.GetPreferCsId()
 	msg.Header.StreamId = streamID

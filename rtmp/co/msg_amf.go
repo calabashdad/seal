@@ -23,7 +23,7 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	}
 
 	//read the command name.
-	err, command := pt.Amf0ReadString(msg.Payload, &offset)
+	err, command := pt.Amf0ReadString(msg.Payload.Payload, &offset)
 	if err != nil {
 		return
 	}
@@ -96,7 +96,7 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 	var offset uint32
 
 	var transaction_id float64
-	err, transaction_id = pt.Amf0ReadNumber(msg.Payload, &offset)
+	err, transaction_id = pt.Amf0ReadNumber(msg.Payload.Payload, &offset)
 	if err != nil {
 		log.Println("read transaction id failed when decode msg.")
 		return
@@ -110,15 +110,15 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 	switch req_command_name {
 	case pt.RTMP_AMF0_COMMAND_CONNECT:
 		p := pt.ConnectResPacket{}
-		err = p.Decode(msg.Payload)
+		err = p.Decode(msg.Payload.Payload)
 	case pt.RTMP_AMF0_COMMAND_CREATE_STREAM:
 		p := pt.CreateStreamResPacket{}
-		err = p.Decode(msg.Payload)
+		err = p.Decode(msg.Payload.Payload)
 	case pt.RTMP_AMF0_COMMAND_RELEASE_STREAM,
 		pt.RTMP_AMF0_COMMAND_FC_PUBLISH,
 		pt.RTMP_AMF0_COMMAND_UNPUBLISH:
 		p := pt.FmleStartResPacket{}
-		err = p.Decode(msg.Payload)
+		err = p.Decode(msg.Payload.Payload)
 	default:
 		log.Println("result/error: unknown request command name=", req_command_name)
 	}
@@ -141,7 +141,7 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	log.Println("Amf0Connect")
 
 	p := pt.ConnectPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		log.Println("decode conncet pkt faile.err=", err)
 		return
@@ -268,7 +268,7 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 	log.Println("Amf0CreateStream")
 
 	p := pt.CreateStreamPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if nil != err {
 		log.Println("decode create stream failed.")
 		return
@@ -300,7 +300,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	log.Println("Amf0Play")
 
 	p := pt.PlayPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -449,7 +449,7 @@ func (rc *RtmpConn) amf0Pause(msg *pt.Message) (err error) {
 	log.Println("Amf0Pause")
 
 	p := pt.PausePacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -467,7 +467,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	log.Println("Amf0ReleaseStream")
 
 	p := pt.FmleStartPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -503,7 +503,7 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 	log.Println("Amf0FcPublish")
 
 	p := pt.FmleStartPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -530,7 +530,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	log.Println("Amf0Publish")
 
 	p := pt.PublishPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -575,7 +575,7 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 	log.Println("Amf0UnPublish")
 
 	p := pt.FmleStartPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -602,7 +602,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	log.Println("Amf0Meta")
 
 	p := pt.OnMetaDataPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -659,7 +659,7 @@ func (rc *RtmpConn) amf0OnCustom(msg *pt.Message) (err error) {
 	log.Println("Amf0OnCustom")
 
 	p := pt.OnCustomDataPakcet{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
@@ -677,7 +677,7 @@ func (rc *RtmpConn) amf0CloseStream(msg *pt.Message) (err error) {
 	log.Println("Amf0CloseStream")
 
 	p := pt.CloseStreamPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}

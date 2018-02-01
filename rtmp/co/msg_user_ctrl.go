@@ -16,7 +16,7 @@ func (rc *RtmpConn) msgUserCtrl(msg *pt.Message) (err error) {
 	log.Println("MsgUserCtrl")
 
 	p := pt.UserControlPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}

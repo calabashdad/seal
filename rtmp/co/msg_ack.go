@@ -16,7 +16,7 @@ func (rc *RtmpConn) msgAck(msg *pt.Message) (err error) {
 	log.Println("MsgAck")
 
 	p := pt.AcknowlegementPacket{}
-	err = p.Decode(msg.Payload)
+	err = p.Decode(msg.Payload.Payload)
 
 	return
 }

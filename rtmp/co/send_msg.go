@@ -122,7 +122,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 			payloadSize = rc.OutChunkSize
 		}
 
-		err = rc.TcpConn.SendBytes(msg.Payload[payloadOffset : payloadOffset+payloadSize])
+		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize])
 		if err != nil {
 			log.Println("send msg payload failed.")
 			return
