@@ -1,11 +1,16 @@
 ---
 rtmp:
+  #rtmp server listen port.
+  #recommand is 1935
   listen: 1935
+
   # defalut is 30 seonds.
   timeout: 30 
+
   # chunk size. [128, 65535]
   # recommand is 60000
   chunkSize: 60000
+
   #  atc whether atc(use absolute time and donot adjust time),
   #  directly use msg time and donot adjust if atc is true,
   #  otherwise, adjust msg time to start from 0 to make flash happy.
