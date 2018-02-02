@@ -305,6 +305,14 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		return
 	}
 
+	source := sourcesHub.findSourceToPlay(rc.StreamName)
+	if nil == source {
+		err = fmt.Errorf("stream=%s can not play because has not published.", rc.StreamName)
+		return
+	}
+
+	rc.source = source
+
 	//response start play.
 	// StreamBegin
 	if true {
@@ -537,6 +545,14 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 		return
 	}
 
+	source := sourcesHub.findSourceToPublish(rc.StreamName)
+	if nil == source {
+		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.StreamName)
+		return
+	}
+
+	rc.source = source
+
 	rc.Role = RtmpRoleFMLEPublisher
 	log.Println("a new publisher come in, stream name=", rc.StreamName)
 
@@ -624,33 +640,26 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		ValueType:    pt.RTMP_AMF0_String,
 	})
 
-	//find a source to publish.
-	source := sourcesPublishHub.findSourceToPublish(rc.StreamName)
-	if nil == source {
-		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.StreamName)
-		return
-	}
-
-	rc.SourceInfo = source
+	//cache meta data
 
 	if v := p.GetProperty("audiosamplerate"); v != nil {
-		rc.SourceInfo.sampleRate = v.(float64)
+		rc.source.sampleRate = v.(float64)
 	}
 
 	if v := p.GetProperty("framerate"); v != nil {
-		rc.SourceInfo.frameRate = v.(float64)
+		rc.source.frameRate = v.(float64)
 	}
 
 	log.Println(p)
 
-	rc.SourceInfo.atc = conf.GlobalConfInfo.Rtmp.Atc
+	rc.source.atc = conf.GlobalConfInfo.Rtmp.Atc
 	if v := p.GetProperty("bravo_atc"); v != nil {
 		if conf.GlobalConfInfo.Rtmp.AtcAuto {
-			rc.SourceInfo.atc = true
+			rc.source.atc = true
 		}
 	}
 
-	log.Println("atc ctrol is ", rc.SourceInfo.atc)
+	log.Println("atc ctrol is ", rc.source.atc)
 
 	return
 }

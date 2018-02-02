@@ -27,11 +27,11 @@ type RtmpConn struct {
 	CmdRequests     map[float64]string //command requests.key: transactin id, value:command name
 	Role            uint8              //publisher or player.
 	StreamName      string
-	TokenStr        string          //token str for authentication. it's optional.
-	Duration        float64         //for player.used to specified the stop when exceed the duration.
-	DefaultStreamId float64         //default stream id for request.
-	ConnectInfo     *ConnectInfoS   //connect info.
-	SourceInfo      *SourcePublishS //data source info.
+	TokenStr        string        //token str for authentication. it's optional.
+	Duration        float64       //for player.used to specified the stop when exceed the duration.
+	DefaultStreamId float64       //default stream id for request.
+	ConnectInfo     *ConnectInfoS //connect info.
+	source          *Source       //data source info.
 }
 
 func (rc *RtmpConn) Cycle() {
@@ -82,7 +82,7 @@ func (rc *RtmpConn) clean() {
 	log.Println("close socket err=", err)
 
 	if RtmpRoleFlashPublisher == rc.Role || RtmpRoleFMLEPublisher == rc.Role {
-		if nil != rc.SourceInfo {
+		if nil != rc.source {
 			rc.DeletePublishStream(rc.StreamName)
 			log.Println("delete publisher stream=", rc.StreamName)
 		}
@@ -90,5 +90,5 @@ func (rc *RtmpConn) clean() {
 }
 
 func (rc *RtmpConn) DeletePublishStream(streamName string) {
-	sourcesPublishHub.deleteSource(streamName)
+	sourcesHub.deleteSource(streamName)
 }

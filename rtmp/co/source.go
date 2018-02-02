@@ -5,18 +5,18 @@ import (
 	"sync"
 )
 
-type SourcePublishHub struct {
+type SourceHub struct {
 	//key: streamName
-	hub  map[string]*SourcePublishS
+	hub  map[string]*Source
 	lock sync.RWMutex
 }
 
-var sourcesPublishHub = &SourcePublishHub{
-	hub: make(map[string]*SourcePublishS),
+var sourcesHub = &SourceHub{
+	hub: make(map[string]*Source),
 }
 
 //data source info.
-type SourcePublishS struct {
+type Source struct {
 	sampleRate float64 // the sample rate of audio in metadata
 	frameRate  float64 // the video frame rate in metadata
 	atc        bool    // atc whether atc(use absolute time and donot adjust time),
@@ -25,7 +25,7 @@ type SourcePublishS struct {
 
 }
 
-func (sh *SourcePublishHub) findSourceToPublish(k string) (s *SourcePublishS) {
+func (sh *SourceHub) findSourceToPublish(k string) (s *Source) {
 
 	sh.lock.Lock()
 	defer sh.lock.Unlock()
@@ -37,19 +37,26 @@ func (sh *SourcePublishHub) findSourceToPublish(k string) (s *SourcePublishS) {
 	}
 
 	//can publish. new a source
-	sh.hub[k] = &SourcePublishS{}
+	sh.hub[k] = &Source{}
 
 	return sh.hub[k]
 }
 
-func (sh *SourcePublishHub) findSourceToPlay(k string) (s *SourcePublishS) {
+func (sh *SourceHub) findSourceToPlay(k string) (s *Source) {
 	sh.lock.Lock()
 	defer sh.lock.Unlock()
+
+	res := sh.hub[k]
+	if nil != res {
+		return res
+	}
+
+	log.Println("stream ", k, " can not play, because has not published.")
 
 	return nil
 }
 
-func (sh *SourcePublishHub) deleteSource(streamName string) {
+func (sh *SourceHub) deleteSource(streamName string) {
 	sh.lock.Lock()
 	defer sh.lock.Unlock()
 
