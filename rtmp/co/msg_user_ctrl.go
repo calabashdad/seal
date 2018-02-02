@@ -21,6 +21,8 @@ func (rc *RtmpConn) msgUserCtrl(msg *pt.Message) (err error) {
 		return
 	}
 
+	log.Println("MsgUserCtrl event type=", p.EventType)	
+
 	switch p.EventType {
 	case pt.SrcPCUCStreamBegin:
 	case pt.SrcPCUCStreamEOF:

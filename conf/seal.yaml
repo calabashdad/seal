@@ -1,7 +1,7 @@
 ---
 rtmp:
-  #rtmp server listen port.
-  #recommand is 1935
+  # rtmp server listen port.
+  # recommand is 1935
   listen: 1935
 
   # defalut is 30 seonds.
@@ -11,12 +11,19 @@ rtmp:
   # recommand is 60000
   chunkSize: 60000
 
-  #  atc whether atc(use absolute time and donot adjust time),
-  #  directly use msg time and donot adjust if atc is true,
-  #  otherwise, adjust msg time to start from 0 to make flash happy.
-  #  recommand is false.
+  # atc whether atc(use absolute time and donot adjust time),
+  # directly use msg time and donot adjust if atc is true,
+  # otherwise, adjust msg time to start from 0 to make flash happy.
+  # recommand is false.
   atc: false
 
   # atcAuto if bravo-atc find in metadata, open atc.
   # recommand is true.
   atcAuto: true
+
+  # the time jitter algorithm:
+  # 1. full, to ensure stream start at zero, and ensure stream monotonically increasing.
+  # 2. zero, only ensure sttream start at zero, ignore timestamp jitter.
+  # 3. off, disable the time jitter algorithm, like atc.
+  # recommand is 1 (full)
+  timeJitter: 1

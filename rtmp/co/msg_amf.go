@@ -305,6 +305,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		return
 	}
 
+	//response start play.
 	// StreamBegin
 	if true {
 		var pp pt.UserControlPacket
@@ -314,6 +315,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		if err != nil {
 			return
 		}
+		log.Println("send play stream begin pkt success.")
 	}
 
 	// onStatus(NetStream.Play.Reset)
@@ -351,7 +353,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		if err != nil {
 			return
 		}
-
+		log.Println("send play onStatus(NetStream.Play.Reset) success.")
 	}
 
 	// onStatus(NetStream.Play.Start)

@@ -17,3 +17,9 @@ const (
 	RtmpRoleFlashPublisher = 2
 	RtmpRolePlayer         = 3
 )
+
+const (
+	RtmpTimeJitterFull = 0x01
+	RtmpTimeJitterZero = 0x02
+	RtmpTimeJitterOff  = 0x03
+)
