@@ -13,10 +13,10 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 		}
 	}()
 
-	log.Println("audio data, csid=", msg.Header.PerferCsid,
-		",stream id=", msg.Header.StreamId,
-		", payload len=", len(msg.Payload.Payload),
-		",timestamp=", msg.Header.Timestamp)
+	// log.Println("audio data, csid=", msg.Header.PerferCsid,
+	// 	",stream id=", msg.Header.StreamId,
+	// 	", payload len=", len(msg.Payload.Payload),
+	// 	",timestamp=", msg.Header.Timestamp)
 
 	return
 }

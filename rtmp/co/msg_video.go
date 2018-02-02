@@ -13,9 +13,9 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 		}
 	}()
 
-	log.Println("video data, csid=", msg.Header.PerferCsid,
-		",stream id=", msg.Header.StreamId,
-		", payload len=", len(msg.Payload.Payload),
-		",timestamp=", msg.Header.Timestamp)
+	// log.Println("video data, csid=", msg.Header.PerferCsid,
+	// 	",stream id=", msg.Header.StreamId,
+	// 	", payload len=", len(msg.Payload.Payload),
+	// 	",timestamp=", msg.Header.Timestamp)
 	return
 }

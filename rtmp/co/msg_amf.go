@@ -625,7 +625,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	})
 
 	//find a source to publish.
-	source := sourcesHub.findSourceToPublish(rc.StreamName)
+	source := sourcesPublishHub.findSourceToPublish(rc.StreamName)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.StreamName)
 		return
