@@ -7,10 +7,10 @@ import (
 
 //Consumer is the consumer of source
 type Consumer struct {
-	queueSizeMs uint32
-	avStartTime int64
-	avEndTime   int64
-	msgs        chan *pt.Message
+	queueSizeMills uint32
+	avStartTime    int64
+	avEndTime      int64
+	msgs           chan *pt.Message
 }
 
 // atc whether atc, donot use jitter correct if true
@@ -39,7 +39,7 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 
 	//shrink
 	for {
-		if uint32(c.avEndTime-c.avStartTime) < c.queueSizeMs {
+		if uint32(c.avEndTime-c.avStartTime) < c.queueSizeMills {
 			break
 		}
 

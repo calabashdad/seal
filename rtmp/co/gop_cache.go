@@ -62,3 +62,21 @@ func (g *GopCache) pureAudio() bool {
 func (g *GopCache) clear() {
 	g.msgs = make([]*pt.Message, 1)
 }
+
+func (g *GopCache) empty() bool {
+	return nil == g.msgs[0]
+}
+
+func (g *GopCache) startTime() uint64 {
+	if nil != g.msgs[0] {
+		return g.msgs[0].Header.Timestamp
+	}
+
+	return 0
+}
+
+func (g *GopCache) dump(c *Consumer, atc bool, tba float64, tbv float64, timeJitter uint32) {
+	for _, v := range g.msgs {
+		c.enquene(v, atc, tba, tbv, timeJitter)
+	}
+}

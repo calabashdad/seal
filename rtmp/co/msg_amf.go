@@ -446,12 +446,44 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		log.Println("send NetStream.Data.Start success.")
 	}
 
-	rc.source.CreateConsumer(&Consumer{
-		queueSizeMs: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
-		avStartTime: -1,
-		avEndTime:   -1,
-		msgs:        make(chan *pt.Message, conf.GlobalConfInfo.Rtmp.ConsumerQueueSize),
-	})
+	consumer := &Consumer{
+		queueSizeMills: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
+		avStartTime:    -1,
+		avEndTime:      -1,
+		msgs:           make(chan *pt.Message, conf.GlobalConfInfo.Rtmp.ConsumerQueueSize*1000),
+	}
+
+	rc.source.CreateConsumer(consumer)
+
+	if rc.source.atc && !rc.source.gopCache.empty() {
+		if nil != rc.source.cacheMetaData {
+			rc.source.cacheMetaData.Header.Timestamp = rc.source.gopCache.startTime()
+		}
+		if nil != rc.source.cacheVideoSequenceHeader {
+			rc.source.cacheVideoSequenceHeader.Header.Timestamp = rc.source.gopCache.startTime()
+		}
+		if nil != rc.source.cacheAudioSequenceHeader {
+			rc.source.cacheAudioSequenceHeader.Header.Timestamp = rc.source.gopCache.startTime()
+		}
+	}
+
+	//cache meta data
+	if nil != rc.source.cacheMetaData {
+		consumer.enquene(rc.source.cacheMetaData, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	}
+
+	//cache video data
+	if nil != rc.source.cacheVideoSequenceHeader {
+		consumer.enquene(rc.source.cacheVideoSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	}
+
+	//cache audio data
+	if nil != rc.source.cacheAudioSequenceHeader {
+		consumer.enquene(rc.source.cacheAudioSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	}
+
+	//dump gop cache to client
+	rc.source.gopCache.dump(consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 
 	return
 }
