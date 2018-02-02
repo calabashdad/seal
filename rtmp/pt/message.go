@@ -44,10 +44,10 @@ type MessageHeader struct {
 	PerferCsid uint32
 }
 
-func (h *MessageHeader) Is_audio() bool {
+func (h *MessageHeader) IsAudio() bool {
 	return RTMP_MSG_AudioMessage == h.MessageType
 }
-func (h *MessageHeader) Is_video() bool {
+func (h *MessageHeader) IsVideo() bool {
 	return RTMP_MSG_VideoMessage == h.MessageType
 
 }

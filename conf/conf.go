@@ -11,12 +11,13 @@ import (
 var GlobalConfInfo ConfInfo
 
 type RtmpConfInfo struct {
-	Listen     string `yaml:"listen"`
-	TimeOut    uint32 `yaml:"timeout"`
-	ChunkSize  uint32 `yaml:"chunkSize"`
-	Atc        bool   `yaml:"atc"`
-	AtcAuto    bool   `yaml:"atcAuto"`
-	TimeJitter uint32 `yaml:"timeJitter"`
+	Listen            string `yaml:"listen"`
+	TimeOut           uint32 `yaml:"timeout"`
+	ChunkSize         uint32 `yaml:"chunkSize"`
+	Atc               bool   `yaml:"atc"`
+	AtcAuto           bool   `yaml:"atcAuto"`
+	TimeJitter        uint32 `yaml:"timeJitter"`
+	ConsumerQueueSize uint32 `yaml:"consumerQueueSize"`
 }
 
 type ConfInfo struct {
@@ -60,4 +61,5 @@ func (c *ConfInfo) Default() {
 	c.Rtmp.Atc = false
 	c.Rtmp.AtcAuto = true
 	c.Rtmp.TimeJitter = 1
+	c.Rtmp.ConsumerQueueSize = 30
 }

@@ -27,3 +27,8 @@ rtmp:
   # 3. off, disable the time jitter algorithm, like atc.
   # recommand is 1 (full)
   timeJitter: 1
+
+  # the message queue size for the consumer, like player.
+  # limit the size in seconds, and drop the old msg if full.
+  # recommand is 30
+  consumerQueueSize: 30

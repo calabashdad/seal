@@ -446,6 +446,13 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		log.Println("send NetStream.Data.Start success.")
 	}
 
+	rc.source.CreateConsumer(&Consumer{
+		queueSizeMs: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
+		avStartTime: -1,
+		avEndTime:   -1,
+		msgs:        make(chan *pt.Message, conf.GlobalConfInfo.Rtmp.ConsumerQueueSize),
+	})
+
 	return
 }
 
@@ -640,8 +647,6 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		ValueType:    pt.RTMP_AMF0_String,
 	})
 
-	//cache meta data
-
 	if v := p.GetProperty("audiosamplerate"); v != nil {
 		rc.source.sampleRate = v.(float64)
 	}
@@ -650,8 +655,6 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		rc.source.frameRate = v.(float64)
 	}
 
-	log.Println(p)
-
 	rc.source.atc = conf.GlobalConfInfo.Rtmp.Atc
 	if v := p.GetProperty("bravo_atc"); v != nil {
 		if conf.GlobalConfInfo.Rtmp.AtcAuto {
@@ -659,7 +662,15 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		}
 	}
 
-	log.Println("atc ctrol is ", rc.source.atc)
+	log.Println("meta data is ", p)
+
+	//cache meta data
+	if nil != rc.source {
+		rc.source.cacheMetaData = msg
+	}
+
+	//copy to all consumers
+	rc.source.copyToAllConsumers(msg)
 
 	return
 }

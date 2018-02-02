@@ -2,6 +2,8 @@ package co
 
 import (
 	"log"
+	"seal/conf"
+	"seal/rtmp/pt"
 	"sync"
 )
 
@@ -17,36 +19,92 @@ var sourcesHub = &SourceHub{
 
 //data source info.
 type Source struct {
-	sampleRate float64 // the sample rate of audio in metadata
-	frameRate  float64 // the video frame rate in metadata
-	atc        bool    // atc whether atc(use absolute time and donot adjust time),
+	// the sample rate of audio in metadata
+	sampleRate float64
+	// the video frame rate in metadata
+	frameRate float64
+	// atc whether atc(use absolute time and donot adjust time),
 	// directly use msg time and donot adjust if atc is true,
 	// otherwise, adjust msg time to start from 0 to make flash happy.
+	atc bool
+	//time jitter algrithem
+	timeJitter uint32
+	//cached meta data
+	cacheMetaData *pt.Message
+	//cached video sequence header
+	cacheVideoSequenceHeader *pt.Message
+	//cached aideo sequence header
+	cacheAudioSequenceHeader *pt.Message
+
+	//consumers
+	consumers map[*Consumer]*Consumer
+	//lock for consumers.
+	consumerLock sync.RWMutex
+
+	//gop cache
+	gopCache *GopCache
+}
+
+func (s *Source) CreateConsumer(c *Consumer) {
+	if nil == c {
+		log.Println("when registe consumer, nil == consumer")
+		return
+	}
+
+	s.consumerLock.Lock()
+	defer s.consumerLock.Unlock()
+
+	s.consumers[c] = c
 
 }
 
-func (sh *SourceHub) findSourceToPublish(k string) (s *Source) {
+func (s *Source) DestroyConsumer(c *Consumer) {
+	if nil == c {
+		log.Println("when destroy consumer, nil == consummer")
+		return
+	}
 
-	sh.lock.Lock()
-	defer sh.lock.Unlock()
+	s.consumerLock.Lock()
+	defer s.consumerLock.Unlock()
 
-	res := sh.hub[k]
+	delete(s.consumers, c)
+
+}
+
+func (s *Source) copyToAllConsumers(msg *pt.Message) {
+	s.consumerLock.Lock()
+	defer s.consumerLock.Unlock()
+
+	for _, v := range s.consumers {
+		v.enquene(msg, s.atc, s.sampleRate, s.frameRate, s.timeJitter)
+	}
+}
+
+func (s *SourceHub) findSourceToPublish(k string) *Source {
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	res := s.hub[k]
 	if nil != res {
 		log.Println("stream ", k, " can not publish, because has already publishing....")
 		return nil
 	}
 
 	//can publish. new a source
-	sh.hub[k] = &Source{}
+	s.hub[k] = &Source{
+		timeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
+		gopCache:   &GopCache{},
+	}
 
-	return sh.hub[k]
+	return s.hub[k]
 }
 
-func (sh *SourceHub) findSourceToPlay(k string) (s *Source) {
-	sh.lock.Lock()
-	defer sh.lock.Unlock()
+func (s *SourceHub) findSourceToPlay(k string) *Source {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 
-	res := sh.hub[k]
+	res := s.hub[k]
 	if nil != res {
 		return res
 	}
@@ -56,9 +114,9 @@ func (sh *SourceHub) findSourceToPlay(k string) (s *Source) {
 	return nil
 }
 
-func (sh *SourceHub) deleteSource(streamName string) {
-	sh.lock.Lock()
-	defer sh.lock.Unlock()
+func (s *SourceHub) deleteSource(streamName string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 
-	delete(sh.hub, streamName)
+	delete(s.hub, streamName)
 }

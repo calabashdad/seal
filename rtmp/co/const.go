@@ -23,3 +23,9 @@ const (
 	RtmpTimeJitterZero = 0x02
 	RtmpTimeJitterOff  = 0x03
 )
+
+// for 26ms per audio packet,
+// 115 packets is 3s.
+const (
+	PURE_AUDIO_GUESS_COUNT = 115
+)
