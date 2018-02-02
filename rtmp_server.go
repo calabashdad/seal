@@ -62,8 +62,5 @@ func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
 		ConnectInfo: &co.ConnectInfoS{
 			ObjectEncoding: pt.RTMP_SIG_AMF0_VER,
 		},
-		SourceInfo: &co.SourceInfoS {
-
-		},
 	}
 }

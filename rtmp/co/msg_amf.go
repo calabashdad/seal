@@ -537,11 +537,6 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 		return
 	}
 
-	if !rc.CheckStreamCanPublish(rc.StreamName) {
-		err = fmt.Errorf("stream=%s can not publish, has publishing now", rc.StreamName)
-		return
-	}
-
 	rc.Role = RtmpRoleFMLEPublisher
 	log.Println("a new publisher come in, stream name=", rc.StreamName)
 
@@ -628,6 +623,15 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		Value:        "YangKai",
 		ValueType:    pt.RTMP_AMF0_String,
 	})
+
+	//find a source to publish.
+	source := sourcesHub.findSourceToPublish(rc.StreamName)
+	if nil == source {
+		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.StreamName)
+		return
+	}
+
+	rc.SourceInfo = source
 
 	if v := p.GetProperty("audiosamplerate"); v != nil {
 		rc.SourceInfo.sampleRate = v.(float64)

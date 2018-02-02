@@ -88,3 +88,7 @@ func (rc *RtmpConn) clean() {
 
 	log.Println("publisher quit finish, stream=", rc.StreamName)
 }
+
+func (rc *RtmpConn) DeletePublishStream(streamName string) {
+	sourcesHub.deleteSource(streamName)
+}
