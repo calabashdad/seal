@@ -23,16 +23,54 @@ type BandWidthPacket struct {
 	 * Name-value pairs that describe the response from the server.
 	 * ‘code’,‘level’, ‘description’ are names of few among such information.
 	 */
-	Data Amf0Object
+	Data []Amf0Object
 }
 
 func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
-	//todo
+	var offset uint32
+
+	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	if err != nil {
+		return
+	}
+
+	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	if err != nil {
+		return
+	}
+
+	err = Amf0ReadNull(data, &offset)
+	if err != nil {
+		return
+	}
+
+	if pkt.isStopPlay() || pkt.isStopPublish() || pkt.isFinish() {
+		err, pkt.Data = Amf0ReadObject(data, &offset)
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }
 
+func (pkt *BandWidthPacket) isStopPlay() bool {
+	return SRS_BW_CHECK_STOP_PLAY == pkt.CommandName
+}
+
+func (pkt *BandWidthPacket) isStopPublish() bool {
+	return SRS_BW_CHECK_START_PUBLISH == pkt.CommandName
+}
+
+func (pkt *BandWidthPacket) isFinish() bool {
+	return SRS_BW_CHECK_FINISHED == pkt.CommandName
+}
 func (pkt *BandWidthPacket) Encode() (data []uint8) {
-	//todo
+	data = append(data, Amf0WriteString(pkt.CommandName)...)
+	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, Amf0WriteNull()...)
+	data = append(data, Amf0WriteObject(pkt.Data)...)
+
 	return
 }
 
