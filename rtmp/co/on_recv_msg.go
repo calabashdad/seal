@@ -40,11 +40,8 @@ func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 	case pt.RTMP_MSG_AbortMessage:
 		err = rc.msgAbort(msg)
 	case pt.RTMP_MSG_EdgeAndOriginServerCommand:
-		//todo
 	case pt.RTMP_MSG_AMF3SharedObject:
-		//todo
 	case pt.RTMP_MSG_AMF0SharedObject:
-		//todo
 	case pt.RTMP_MSG_AudioMessage:
 		err = rc.msgAudio(msg)
 	case pt.RTMP_MSG_VideoMessage:

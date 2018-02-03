@@ -9,7 +9,7 @@ import (
 /**
 * SendPacket the function has call the message
  */
-func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32) (err error) {
+func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32, timeOutUs uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -31,7 +31,7 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32) (err error) {
 	msg.Header.PerferCsid = pkt.GetPreferCsId()
 	msg.Header.StreamId = streamID
 
-	err = rc.SendMsg(&msg)
+	err = rc.SendMsg(&msg, timeOutUs)
 	if err != nil {
 		return
 	}

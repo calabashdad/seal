@@ -9,7 +9,7 @@ import (
 )
 
 //RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.
-func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload) (err error) {
+func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload, timeOut uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -19,7 +19,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 	for {
 		//read basic header
 		var buf [3]uint8
-		err = rc.TcpConn.ExpectBytesFull(buf[:1], 1)
+		err = rc.TcpConn.ExpectBytesFull(buf[:1], 1, timeOut)
 		if err != nil {
 			return
 		}
@@ -30,11 +30,11 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		switch csid {
 		case 0:
 			//csId 2 bytes. 64-319
-			err = rc.TcpConn.ExpectBytesFull(buf[1:2], 1)
+			err = rc.TcpConn.ExpectBytesFull(buf[1:2], 1, timeOut)
 			csid = uint32(64 + buf[1])
 		case 1:
 			//csId 3 bytes. 64-65599
-			err = rc.TcpConn.ExpectBytesFull(buf[1:3], 2)
+			err = rc.TcpConn.ExpectBytesFull(buf[1:3], 2, timeOut)
 			csid = uint32(64) + uint32(buf[1]) + uint32(buf[2])*256
 		}
 
@@ -88,7 +88,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		}
 
 		var msgHeader [11]uint8 //max is 11
-		err = rc.TcpConn.ExpectBytesFull(msgHeader[:], msgHeaderSize)
+		err = rc.TcpConn.ExpectBytesFull(msgHeader[:], msgHeaderSize, timeOut)
 		if err != nil {
 			break
 		}
@@ -159,7 +159,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		//read extend timestamp
 		if chunk.HasExtendedTimestamp {
 			var buf [4]uint8
-			err = rc.TcpConn.ExpectBytesFull(buf[:], 4)
+			err = rc.TcpConn.ExpectBytesFull(buf[:], 4, timeOut)
 			if err != nil {
 				break
 			}
@@ -194,7 +194,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 			remainPayloadSize = rc.InChunkSize
 		}
 
-		err = rc.TcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize)
+		err = rc.TcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize, timeOut)
 		if err != nil {
 			break
 		} else {

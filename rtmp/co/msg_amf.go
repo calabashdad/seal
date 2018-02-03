@@ -55,9 +55,7 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	case pt.RTMP_AMF0_COMMAND_UNPUBLISH:
 		err = rc.amf0UnPublish(msg)
 	case pt.RTMP_AMF0_COMMAND_KEEPLIVE:
-		//todo.
 	case pt.RTMP_AMF0_COMMAND_ENABLEVIDEO:
-		//todo.
 	case pt.RTMP_AMF0_DATA_SET_DATAFRAME, pt.RTMP_AMF0_DATA_ON_METADATA:
 		err = rc.amf0Meta(msg)
 	case pt.RTMP_AMF0_DATA_ON_CUSTOMDATA:
@@ -71,7 +69,6 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	case pt.RTMP_AMF0_COMMAND_GET_STREAM_LENGTH:
 		err = rc.amf0GetStreamLen(msg)
 	case pt.RTMP_AMF0_COMMAND_INSERT_KEYFREAME:
-		//todo
 	case pt.RTMP_AMF0_DATA_SAMPLE_ACCESS:
 		err = rc.amf0SampleAccess(msg)
 	default:
@@ -247,7 +244,7 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 		ValueType:    pt.RTMP_AMF0_String,
 	})
 
-	err = rc.SendPacket(&pkt, 0)
+	err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		log.Println("response connect error.", err)
 		return
@@ -280,7 +277,7 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 	pkt.TransactionId = p.TransactionId
 	pkt.StreamId = rc.DefaultStreamId
 
-	err = rc.SendPacket(&pkt, 0)
+	err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		log.Println("send createStream response failed. err=", err)
 		return
@@ -319,7 +316,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCStreamBegin
 		pp.EventData = msg.Header.StreamId
-		err = rc.SendPacket(&pp, 0)
+		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			return
 		}
@@ -357,7 +354,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 			Value:        pt.RTMP_SIG_CLIENT_ID,
 			ValueType:    pt.RTMP_AMF0_String,
 		})
-		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId), conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			return
 		}
@@ -398,7 +395,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 			Value:        pt.RTMP_SIG_CLIENT_ID,
 			ValueType:    pt.RTMP_AMF0_String,
 		})
-		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId), conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			return
 		}
@@ -411,7 +408,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		pp.CommandName = pt.RTMP_AMF0_DATA_SAMPLE_ACCESS
 		pp.AudioSampleAccess = true
 		pp.VideoSampleAccess = true
-		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId), conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			return
 		}
@@ -439,7 +436,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 			Value:        "Started playing stream data.",
 			ValueType:    pt.RTMP_AMF0_String,
 		})
-		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+		err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId), conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			return
 		}
@@ -485,6 +482,10 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	//dump gop cache to client
 	rc.source.gopCache.dump(consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 
+	log.Println("now playing, stream=", rc.StreamName)
+
+	err = rc.playing(&p)
+
 	return
 }
 
@@ -524,7 +525,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
 	pp.TransactionId = p.TransactionId
-	err = rc.SendPacket(&pp, 0)
+	err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		return
 	}
@@ -533,7 +534,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	//set chunk size to peer.
 	var pkt pt.SetChunkSizePacket
 	pkt.ChunkSize = conf.GlobalConfInfo.Rtmp.ChunkSize
-	err = rc.SendPacket(&pkt, msg.Header.StreamId)
+	err = rc.SendPacket(&pkt, msg.Header.StreamId, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		return
 	}
@@ -560,7 +561,7 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
 	pp.TransactionId = p.TransactionId
-	err = rc.SendPacket(&pp, 0)
+	err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		return
 	}
@@ -607,7 +608,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 		Value:        "Started publishing stream.",
 		ValueType:    pt.RTMP_AMF0_String,
 	})
-	err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId))
+	err = rc.SendPacket(&pp, uint32(rc.DefaultStreamId), conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		return
 	}
@@ -635,7 +636,7 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
 	pp.TransactionId = p.TransactionId
-	err = rc.SendPacket(&pp, 0)
+	err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 	if err != nil {
 		return
 	}

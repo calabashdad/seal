@@ -1,6 +1,7 @@
 package co
 
 import (
+	"seal/conf"
 	"UtilsTools/identify_panic"
 	"log"
 	"seal/kernel"
@@ -55,7 +56,7 @@ func (rc *RtmpConn) Cycle() {
 		//one msg allock once, and do not copy.
 		msg := &pt.Message{}
 
-		err = rc.RecvMsg(&msg.Header, &msg.Payload)
+		err = rc.RecvMsg(&msg.Header, &msg.Payload, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			break
 		}

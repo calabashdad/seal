@@ -7,7 +7,7 @@ import (
 	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
+func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
@@ -110,7 +110,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 		}
 
 		//send header
-		err = rc.TcpConn.SendBytes(header[:headerOffset])
+		err = rc.TcpConn.SendBytes(header[:headerOffset], timeOutUs)
 		if err != nil {
 			log.Println("send msg header failed.")
 			return
@@ -122,7 +122,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message) (err error) {
 			payloadSize = rc.OutChunkSize
 		}
 
-		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize])
+		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize], timeOutUs)
 		if err != nil {
 			log.Println("send msg payload failed.")
 			return

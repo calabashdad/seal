@@ -1,6 +1,7 @@
 package co
 
 import (
+	"seal/conf"
 	"UtilsTools/identify_panic"
 	"log"
 	"seal/rtmp/pt"
@@ -53,7 +54,7 @@ func (rc *RtmpConn) ctrlPingRequest(p *pt.UserControlPacket) (err error) {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCPingResponse
 		pp.EventData = p.EventData
-		err = rc.SendPacket(&pp, 0)
+		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
 		if err != nil {
 			return
 		}

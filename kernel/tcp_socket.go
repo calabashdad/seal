@@ -13,9 +13,9 @@ type TcpSock struct {
 	RecvBytesSum uint64
 }
 
-func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32) (err error) {
+func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32, timeOutUs uint32) (err error) {
 
-	err = conn.SetDeadline(time.Now().Add(time.Duration(conn.TimeOut) * time.Second))
+	err = conn.SetDeadline(time.Now().Add(time.Duration(timeOutUs) * time.Microsecond))
 	if err != nil {
 		return
 	}
@@ -30,9 +30,9 @@ func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32) (err error) {
 	return
 }
 
-func (conn *TcpSock) SendBytes(buf []uint8) (err error) {
+func (conn *TcpSock) SendBytes(buf []uint8, timeOutUs uint32) (err error) {
 
-	err = conn.SetDeadline(time.Now().Add(time.Duration(conn.TimeOut) * time.Second))
+	err = conn.SetDeadline(time.Now().Add(time.Duration(timeOutUs) * time.Microsecond))
 	if err != nil {
 		return
 	}
