@@ -29,3 +29,8 @@ const (
 const (
 	PURE_AUDIO_GUESS_COUNT = 115
 )
+
+const (
+	CONST_MAX_JITTER_MS   = 500
+	DEFAULT_FRAME_TIME_MS = 40
+)
