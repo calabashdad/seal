@@ -15,6 +15,10 @@ func (rc *RtmpConn) msgSetChunk(msg *pt.Message) (err error) {
 
 	log.Println("set chunk size")
 
+	if nil == msg {
+		return
+	}
+	
 	p := pt.SetChunkSizePacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {

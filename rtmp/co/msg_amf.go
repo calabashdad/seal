@@ -15,6 +15,10 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 		}
 	}()
 
+	if nil == msg {
+		return
+	}
+
 	var offset uint32
 
 	// skip 1bytes to decode the amf3 command.
@@ -90,6 +94,10 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 
 	log.Println("Amf0ResultError")
 
+	if nil == msg {
+		return
+	}
+
 	var offset uint32
 
 	var transaction_id float64
@@ -136,6 +144,10 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0Connect")
+
+	if nil == msg {
+		return
+	}
 
 	p := pt.ConnectPacket{}
 	err = p.Decode(msg.Payload.Payload)
@@ -264,6 +276,10 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 
 	log.Println("Amf0CreateStream")
 
+	if nil == msg {
+		return
+	}
+
 	p := pt.CreateStreamPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if nil != err {
@@ -296,16 +312,26 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 
 	log.Println("Amf0Play")
 
+	if nil == msg {
+		return
+	}
+
 	p := pt.PlayPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
 
+	log.Println("a new player come in, play info=", p)
+
+	rc.StreamName = p.StreamName
+
 	source := sourcesHub.findSourceToPlay(rc.StreamName)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not play because has not published.", rc.StreamName)
 		return
+	} else {
+		log.Println("play success. stream name=", rc.StreamName)
 	}
 
 	rc.source = source
@@ -443,14 +469,14 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		log.Println("send NetStream.Data.Start success.")
 	}
 
-	consumer := &Consumer{
+	rc.consumer = &Consumer{
 		queueSizeMills: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
 		avStartTime:    -1,
 		avEndTime:      -1,
 		msgs:           make(chan *pt.Message, conf.GlobalConfInfo.Rtmp.ConsumerQueueSize*1000),
 	}
 
-	rc.source.CreateConsumer(consumer)
+	rc.source.CreateConsumer(rc.consumer)
 
 	if rc.source.atc && !rc.source.gopCache.empty() {
 		if nil != rc.source.cacheMetaData {
@@ -466,25 +492,25 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 
 	//cache meta data
 	if nil != rc.source.cacheMetaData {
-		consumer.enquene(rc.source.cacheMetaData, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+		rc.consumer.enquene(rc.source.cacheMetaData, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 	}
 
 	//cache video data
 	if nil != rc.source.cacheVideoSequenceHeader {
-		consumer.enquene(rc.source.cacheVideoSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+		rc.consumer.enquene(rc.source.cacheVideoSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 	}
 
 	//cache audio data
 	if nil != rc.source.cacheAudioSequenceHeader {
-		consumer.enquene(rc.source.cacheAudioSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+		rc.consumer.enquene(rc.source.cacheAudioSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 	}
 
 	//dump gop cache to client
-	rc.source.gopCache.dump(consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	rc.source.gopCache.dump(rc.consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 
 	log.Println("now playing, stream=", rc.StreamName)
 
-	err = rc.playing(&p, consumer)
+	err = rc.playing(&p)
 
 	return
 }
@@ -497,6 +523,10 @@ func (rc *RtmpConn) amf0Pause(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0Pause")
+
+	if nil == msg {
+		return
+	}
 
 	p := pt.PausePacket{}
 	err = p.Decode(msg.Payload.Payload)
@@ -515,6 +545,10 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0ReleaseStream")
+
+	if nil == msg {
+		return
+	}
 
 	p := pt.FmleStartPacket{}
 	err = p.Decode(msg.Payload.Payload)
@@ -552,6 +586,10 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 
 	log.Println("Amf0FcPublish")
 
+	if nil == msg {
+		return
+	}
+
 	p := pt.FmleStartPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
@@ -579,22 +617,29 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 
 	log.Println("Amf0Publish")
 
+	if nil == msg {
+		return
+	}
+
 	p := pt.PublishPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
 
+	log.Println("a new publisher come in, publish info=", p)
+
+	rc.StreamName = p.StreamName
 	source := sourcesHub.findSourceToPublish(rc.StreamName)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.StreamName)
 		return
+	} else {
+		log.Println("stream=", rc.StreamName, " published success.")
 	}
 
 	rc.source = source
-
 	rc.Role = RtmpRoleFMLEPublisher
-	log.Println("a new publisher come in, stream name=", rc.StreamName)
 
 	var pp pt.OnStatusCallPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
@@ -627,6 +672,10 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 
 	log.Println("Amf0UnPublish")
 
+	if nil == msg {
+		return
+	}
+
 	p := pt.FmleStartPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
@@ -653,6 +702,10 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0Meta")
+
+	if nil == msg {
+		return
+	}
 
 	p := pt.OnMetaDataPacket{}
 	err = p.Decode(msg.Payload.Payload)
@@ -717,6 +770,10 @@ func (rc *RtmpConn) amf0OnCustom(msg *pt.Message) (err error) {
 
 	log.Println("Amf0OnCustom")
 
+	if nil == msg {
+		return
+	}
+
 	p := pt.OnCustomDataPakcet{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
@@ -734,6 +791,10 @@ func (rc *RtmpConn) amf0CloseStream(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0CloseStream")
+
+	if nil == msg {
+		return
+	}
 
 	p := pt.CloseStreamPacket{}
 	err = p.Decode(msg.Payload.Payload)
@@ -753,6 +814,10 @@ func (rc *RtmpConn) amf0OnBwDone(msg *pt.Message) (err error) {
 
 	log.Println("Amf0OnBwDone")
 
+	if nil == msg {
+		return
+	}
+
 	return
 }
 
@@ -764,6 +829,10 @@ func (rc *RtmpConn) amf0OnStatus(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0Onstats")
+
+	if nil == msg {
+		return
+	}
 
 	return
 }
@@ -777,6 +846,10 @@ func (rc *RtmpConn) amf0GetStreamLen(msg *pt.Message) (err error) {
 
 	log.Println("Amf0GetStreamLen")
 
+	if nil == msg {
+		return
+	}
+
 	return
 }
 
@@ -788,6 +861,10 @@ func (rc *RtmpConn) amf0SampleAccess(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("Amf0SampleAccess")
+
+	if nil == msg {
+		return
+	}
 
 	return
 }

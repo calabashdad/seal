@@ -24,6 +24,10 @@ type GopCache struct {
 
 func (g *GopCache) cache(msg *pt.Message) {
 
+	if nil == msg {
+		return
+	}
+
 	if msg.Header.IsVideo() {
 		g.cachedVideoCount++
 		g.audioAfterLastVideoCount = 0

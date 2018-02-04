@@ -16,6 +16,10 @@ func (rc *RtmpConn) msgUserCtrl(msg *pt.Message) (err error) {
 
 	log.Println("MsgUserCtrl")
 
+	if nil == msg {
+		return
+	}
+	
 	p := pt.UserControlPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {

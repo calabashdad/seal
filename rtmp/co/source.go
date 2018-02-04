@@ -72,6 +72,11 @@ func (s *Source) DestroyConsumer(c *Consumer) {
 }
 
 func (s *Source) copyToAllConsumers(msg *pt.Message) {
+
+	if nil == msg {
+		return
+	}
+
 	s.consumerLock.Lock()
 	defer s.consumerLock.Unlock()
 
@@ -81,6 +86,11 @@ func (s *Source) copyToAllConsumers(msg *pt.Message) {
 }
 
 func (s *SourceHub) findSourceToPublish(k string) *Source {
+
+	if 0 == len(k) {
+		log.Println("find source to publish, nil == k")
+		return nil
+	}
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
@@ -95,6 +105,7 @@ func (s *SourceHub) findSourceToPublish(k string) *Source {
 	s.hub[k] = &Source{
 		timeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
 		gopCache:   &GopCache{},
+		consumers:  make(map[*Consumer]*Consumer),
 	}
 
 	return s.hub[k]

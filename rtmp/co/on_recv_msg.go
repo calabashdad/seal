@@ -13,6 +13,10 @@ func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 		}
 	}()
 
+	if nil == msg {
+		return
+	}
+	
 	err = rc.EstimateNeedSendAcknowlegement()
 	if err != nil {
 		return

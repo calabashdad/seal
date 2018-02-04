@@ -1,9 +1,9 @@
 package co
 
 import (
-	"seal/conf"
 	"UtilsTools/identify_panic"
 	"log"
+	"seal/conf"
 	"seal/kernel"
 	"seal/rtmp/pt"
 )
@@ -33,6 +33,7 @@ type RtmpConn struct {
 	DefaultStreamId float64       //default stream id for request.
 	ConnectInfo     *ConnectInfoS //connect info.
 	source          *Source       //data source info.
+	consumer        *Consumer     //for consumer, like player.
 }
 
 func (rc *RtmpConn) Cycle() {
@@ -56,7 +57,7 @@ func (rc *RtmpConn) Cycle() {
 		//one msg allock once, and do not copy.
 		msg := &pt.Message{}
 
-		err = rc.RecvMsg(&msg.Header, &msg.Payload, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
+		err = rc.RecvMsg(&msg.Header, &msg.Payload, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 		if err != nil {
 			break
 		}
@@ -86,6 +87,12 @@ func (rc *RtmpConn) clean() {
 		if nil != rc.source {
 			rc.DeletePublishStream(rc.StreamName)
 			log.Println("delete publisher stream=", rc.StreamName)
+		}
+	}
+
+	if RtmpRolePlayer == rc.Role {
+		if nil != rc.source {
+			rc.source.DestroyConsumer(rc.consumer)
 		}
 	}
 }

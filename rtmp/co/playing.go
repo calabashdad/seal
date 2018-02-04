@@ -7,7 +7,7 @@ import (
 	"seal/rtmp/pt"
 )
 
-func (rc *RtmpConn) playing(p *pt.PlayPacket, c *Consumer) (err error) {
+func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 
 	// userSpecifiedDurationToStop := p.Duration > 0
 	// var startTime int64 = -1
@@ -21,13 +21,13 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket, c *Consumer) (err error) {
 		_ = rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs)
 		if len(msg.Payload.Payload) > 0 {
 			//has recved play control.
-			err = rc.handlePlayData(&msg, c)
+			err = rc.handlePlayData(&msg)
 			if err != nil {
 				return
 			}
 		}
 
-		err, msgDump := c.dump()
+		err, msgDump := rc.consumer.dump()
 		if err != nil {
 			break
 		}
@@ -44,20 +44,29 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket, c *Consumer) (err error) {
 	return
 }
 
-func (rc *RtmpConn) handlePlayData(msg *pt.Message, c *Consumer) (err error) {
+func (rc *RtmpConn) handlePlayData(msg *pt.Message) (err error) {
+
+	if nil == msg {
+		return
+	}
 
 	if msg.Header.IsAmf0Data() || msg.Header.IsAmf3Data() {
 		log.Println("play data: has not handled play data amf data. ")
 		//todo.
 	} else {
 		//process user control
-		rc.handlePlayUserControl(msg, c)
+		rc.handlePlayUserControl(msg)
 	}
 
 	return
 }
 
-func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message, c *Consumer) (err error) {
+func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
+	
+	if nil == msg {
+		return
+	}
+
 	if msg.Header.IsAmf0Command() || msg.Header.IsAmf3Command() {
 		//ignore
 		log.Println("ignore amf cmd when handle play user control.")
@@ -116,7 +125,7 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message, c *Consumer) (err err
 				return
 			}
 
-			err = c.onPlayPause(p.IsPause)
+			err = rc.consumer.onPlayPause(p.IsPause)
 			if err != nil {
 				log.Println("consumer on play pause error.err=", err)
 				return

@@ -15,5 +15,9 @@ func (rc *RtmpConn) msgAbort(msg *pt.Message) (err error) {
 
 	log.Println("MsgAbort")
 
+	if nil == msg {
+		return
+	}
+	
 	return
 }

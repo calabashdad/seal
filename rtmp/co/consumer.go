@@ -25,6 +25,10 @@ type Consumer struct {
 // tbv timebase of video. used to calc the video time delta if time-jitter detected.
 func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, timeJitter uint32) {
 
+	if nil == msg {
+		return
+	}
+
 	if !atc {
 		c.timeJittrCorrect(msg, tba, tbv, timeJitter)
 	}
@@ -71,6 +75,10 @@ func (c *Consumer) dump() (err error, msg *pt.Message) {
 }
 
 func (c *Consumer) timeJittrCorrect(msg *pt.Message, tba float64, tbv float64, timeJitter uint32) {
+
+	if nil == msg {
+		return
+	}
 
 	if RtmpTimeJitterFull != timeJitter {
 		// all jitter correct features is disabled, ignore.

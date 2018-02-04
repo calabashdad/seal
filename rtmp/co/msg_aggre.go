@@ -14,6 +14,9 @@ func (rc *RtmpConn) msgAggregate(msg *pt.Message) (err error) {
 	}()
 
 	log.Println("aggregate")
-
+	if nil == msg {
+		return
+	}
+	
 	return
 }

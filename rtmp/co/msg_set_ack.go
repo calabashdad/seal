@@ -15,6 +15,10 @@ func (rc *RtmpConn) msgSetAck(msg *pt.Message) (err error) {
 
 	log.Println("MsgSetChunk")
 
+	if nil == msg {
+		return
+	}
+	
 	p := pt.SetWindowAckSizePacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {

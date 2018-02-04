@@ -14,6 +14,10 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 		}
 	}()
 
+	if nil == msg {
+		return
+	}
+	
 	// log.Println("video data, csid=", msg.Header.PerferCsid,
 	// 	",stream id=", msg.Header.StreamId,
 	// 	", payload len=", len(msg.Payload.Payload),
