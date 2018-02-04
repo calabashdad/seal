@@ -9,10 +9,10 @@ import (
 
 func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 
-	// userSpecifiedDurationToStop := p.Duration > 0
-	// var startTime int64 = -1
+	userSpecifiedDurationToStop := p.Duration > 0
+	var startTime int64 = -1
 
-	const timeOutUs = 200 * 1000 //ms
+	const timeOutUs = 1 * 1000 //ms
 
 	for {
 		//read from client. use short time out. 200 ms
@@ -34,12 +34,23 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			break
 		}
 
+		// only when user specifies the duration,
+		// we start to collect the durations for each message.
+		if userSpecifiedDurationToStop {
+			if startTime < 0 || startTime > int64(msgDump.Header.Timestamp) {
+				startTime = int64(msgDump.Header.Timestamp)
+			}
+
+			rc.consumer.Duration += (float64(msgDump.Header.Timestamp) - float64(startTime))
+			startTime = int64(msgDump.Header.Timestamp)
+		}
+
 		err = rc.SendMsg(msgDump, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 		if err != nil {
 			break
 		}
 
-		log.Println("send msg to player, timestamp=", msgDump.Header.Timestamp,
+		log.Println("send msg to player, type=", msgDump.Header.MessageType, ",timestamp=", msgDump.Header.Timestamp,
 			"msg payload=", len(msgDump.Payload.Payload))
 	}
 
@@ -80,7 +91,6 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 		p := pt.CloseStreamPacket{}
 		_ = p.Decode(msg.Payload.Payload)
 		if 0 == len(p.CommandName) {
-			log.Println("decode close stream packet failed when handle play user control.")
 			//it's ok, not an error
 			return
 		} else {

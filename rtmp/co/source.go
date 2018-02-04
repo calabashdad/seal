@@ -55,6 +55,7 @@ func (s *Source) CreateConsumer(c *Consumer) {
 	defer s.consumerLock.Unlock()
 
 	s.consumers[c] = c
+	log.Println("a consumer created.consumer=", c)
 
 }
 
@@ -68,7 +69,7 @@ func (s *Source) DestroyConsumer(c *Consumer) {
 	defer s.consumerLock.Unlock()
 
 	delete(s.consumers, c)
-
+	log.Println("a consumer destroyed.consumer=", c)
 }
 
 func (s *Source) copyToAllConsumers(msg *pt.Message) {

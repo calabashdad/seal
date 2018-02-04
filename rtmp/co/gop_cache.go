@@ -1,6 +1,7 @@
 package co
 
 import (
+	"log"
 	"seal/rtmp/flv"
 	"seal/rtmp/pt"
 )
@@ -81,6 +82,13 @@ func (g *GopCache) startTime() uint64 {
 
 func (g *GopCache) dump(c *Consumer, atc bool, tba float64, tbv float64, timeJitter uint32) {
 	for _, v := range g.msgs {
+		if nil == v {
+			continue
+		}
+		
 		c.enquene(v, atc, tba, tbv, timeJitter)
+		log.Println("gop cache, dump msg, type=", v.Header.MessageType,
+			",timestamp=", v.Header.Timestamp,
+			",payload=", len(v.Payload.Payload))
 	}
 }
