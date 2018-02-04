@@ -1,6 +1,8 @@
 package co
 
 import (
+	"fmt"
+	"log"
 	"seal/rtmp/pt"
 	"time"
 )
@@ -15,6 +17,7 @@ type Consumer struct {
 		lastPktTime        int64
 		lastPktCorrectTime int64
 	}
+	paused bool
 }
 
 // atc whether atc, donot use jitter correct if true
@@ -52,6 +55,19 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 		c.avStartTime = int64(v.Header.Timestamp)
 
 	}
+}
+
+func (c *Consumer) dump() (err error, msg *pt.Message) {
+
+	select {
+	case <-time.After(time.Duration(5) * time.Second):
+		err = fmt.Errorf("wait 3 seconds, the source is dry")
+		return
+	case msg = <-c.msgs:
+		return
+	}
+
+	return
 }
 
 func (c *Consumer) timeJittrCorrect(msg *pt.Message, tba float64, tbv float64, timeJitter uint32) {
@@ -127,4 +143,10 @@ func (c *Consumer) timeJittrCorrect(msg *pt.Message, tba float64, tbv float64, t
 	msg.Header.Timestamp = uint64(c.jitter.lastPktCorrectTime)
 	c.jitter.lastPktCorrectTime = int64(timeLocal)
 
+}
+
+func (c *Consumer) onPlayPause(isPause bool) (err error) {
+	c.paused = true
+	log.Println("consumer changed pause status to ", isPause)
+	return
 }
