@@ -17,13 +17,15 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 	for {
 		//read from client. use short time out. 200 ms
 		//if recv failed, it's ok, not an error.
-		var msg pt.Message
-		_ = rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs)
-		if len(msg.Payload.Payload) > 0 {
-			//has recved play control.
-			err = rc.handlePlayData(&msg)
-			if err != nil {
-				return
+		if true {
+			var msg pt.Message
+			_ = rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs)
+			if len(msg.Payload.Payload) > 0 {
+				//has recved play control.
+				err = rc.handlePlayData(&msg)
+				if err != nil {
+					return
+				}
 			}
 		}
 
@@ -37,8 +39,8 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			break
 		}
 
-		log.Println("send msg to player, timestamp=", msg.Header.Timestamp,
-			"msg payload=", len(msg.Payload.Payload))
+		log.Println("send msg to player, timestamp=", msgDump.Header.Timestamp,
+			"msg payload=", len(msgDump.Payload.Payload))
 	}
 
 	return
@@ -62,7 +64,7 @@ func (rc *RtmpConn) handlePlayData(msg *pt.Message) (err error) {
 }
 
 func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
-	
+
 	if nil == msg {
 		return
 	}

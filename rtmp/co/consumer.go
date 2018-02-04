@@ -44,8 +44,10 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 	//push into chan
 	select {
 	//add timeout in case block there
-	case <-time.After(2 * time.Millisecond):
+	case <-time.After(200 * time.Millisecond):
 	case c.msgs <- msg:
+		log.Println("a msg has put into chans, type=", msg.Header.MessageType,
+			",timestamp=", msg.Header.Timestamp, ",payload len=", len(msg.Payload.Payload))
 	}
 
 	//shrink
@@ -65,7 +67,7 @@ func (c *Consumer) dump() (err error, msg *pt.Message) {
 
 	select {
 	case <-time.After(time.Duration(5) * time.Second):
-		err = fmt.Errorf("wait 3 seconds, the source is dry")
+		err = fmt.Errorf("wait 5 seconds, the source is dry")
 		return
 	case msg = <-c.msgs:
 		return

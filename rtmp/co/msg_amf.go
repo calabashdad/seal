@@ -335,6 +335,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	}
 
 	rc.source = source
+	rc.Role = RtmpRolePlayer
 
 	//response start play.
 	// StreamBegin

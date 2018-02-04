@@ -17,15 +17,11 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 	if nil == msg {
 		return
 	}
-	
+
 	// log.Println("audio data, csid=", msg.Header.PerferCsid,
 	// 	",stream id=", msg.Header.StreamId,
 	// 	", payload len=", len(msg.Payload.Payload),
 	// 	",timestamp=", msg.Header.Timestamp)
-
-
-	//copy to all consumers
-	rc.source.copyToAllConsumers(msg)
 
 	//cache the sequence.
 	if flv.AudioIsSequenceHeader(msg.Payload.Payload) {
@@ -36,13 +32,16 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 
 	if rc.source.atc {
 		if nil != rc.source.cacheAudioSequenceHeader {
-			rc.source.cacheAudioSequenceHeader.Header.Timestamp = msg.Header.Timestamp			
+			rc.source.cacheAudioSequenceHeader.Header.Timestamp = msg.Header.Timestamp
 		}
 
 		if nil != rc.source.cacheMetaData {
 			rc.source.cacheMetaData.Header.Timestamp = msg.Header.Timestamp
 		}
 	}
+
+	//copy to all consumers
+	rc.source.copyToAllConsumers(msg)
 
 	return
 }
