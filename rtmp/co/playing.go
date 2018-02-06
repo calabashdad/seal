@@ -12,7 +12,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 	userSpecifiedDurationToStop := p.Duration > 0
 	var startTime int64 = -1
 
-	const timeOutUs = 1 * 1000 //ms
+	const timeOutUs = 2 * 1000 //ms
 
 	for {
 		//read from client. use short time out. 200 ms
@@ -29,29 +29,36 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			}
 		}
 
-		err, msgDump := rc.consumer.dump()
+		err, msgDumps := rc.consumer.dump()
 		if err != nil {
 			break
 		}
 
-		// only when user specifies the duration,
-		// we start to collect the durations for each message.
-		if userSpecifiedDurationToStop {
-			if startTime < 0 || startTime > int64(msgDump.Header.Timestamp) {
-				startTime = int64(msgDump.Header.Timestamp)
+		for i := 0; i < len(msgDumps); i++ {
+			// only when user specifies the duration,
+			// we start to collect the durations for each message.
+			if userSpecifiedDurationToStop {
+				if startTime < 0 || startTime > int64(msgDumps[i].Header.Timestamp) {
+					startTime = int64(msgDumps[i].Header.Timestamp)
+				}
+
+				rc.consumer.Duration += (float64(msgDumps[i].Header.Timestamp) - float64(startTime))
+				startTime = int64(msgDumps[i].Header.Timestamp)
 			}
 
-			rc.consumer.Duration += (float64(msgDump.Header.Timestamp) - float64(startTime))
-			startTime = int64(msgDump.Header.Timestamp)
-		}
+			log.Println("dump one msg, type=", msgDumps[i].Header.MessageType,
+				",timestamp=", msgDumps[i].Header.Timestamp,
+				"msg payload=", len(msgDumps[i].Payload.Payload))
 
-		err = rc.SendMsg(msgDump, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-		if err != nil {
-			break
-		}
+			err = rc.SendMsg(msgDumps[i], conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+			if err != nil {
+				break
+			}
 
-		log.Println("send msg to player, type=", msgDump.Header.MessageType, ",timestamp=", msgDump.Header.Timestamp,
-			"msg payload=", len(msgDump.Payload.Payload))
+			log.Println("send msg success, type=", msgDumps[i].Header.MessageType,
+				",timestamp=", msgDumps[i].Header.Timestamp,
+				"msg payload=", len(msgDumps[i].Payload.Payload))
+		}
 	}
 
 	return

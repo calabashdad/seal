@@ -474,7 +474,6 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		queueSizeMills: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
 		avStartTime:    -1,
 		avEndTime:      -1,
-		msgs:           make(chan *pt.Message, conf.GlobalConfInfo.Rtmp.ConsumerQueueSize*1000),
 	}
 
 	rc.source.CreateConsumer(rc.consumer)
