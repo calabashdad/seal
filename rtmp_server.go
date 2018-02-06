@@ -1,13 +1,13 @@
 package main
 
 import (
-	"UtilsTools/identify_panic"
 	"log"
 	"net"
 	"seal/conf"
 	"seal/kernel"
 	"seal/rtmp/co"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 type RtmpServer struct {
@@ -16,7 +16,7 @@ type RtmpServer struct {
 func (rs *RtmpServer) Start() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 
 		gWgServers.Done()

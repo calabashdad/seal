@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"utiltools"
 
 	"github.com/yaml"
 )
@@ -27,7 +28,7 @@ type ConfInfo struct {
 func (t *ConfInfo) Loads(c string) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err)
+			log.Println(utiltools.PanicTrace())
 		}
 
 	}()

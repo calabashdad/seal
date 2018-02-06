@@ -1,17 +1,17 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"fmt"
 	"log"
 	"seal/conf"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -88,7 +88,7 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -139,7 +139,7 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -270,7 +270,7 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -306,7 +306,7 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -526,7 +526,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0Pause(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -548,7 +548,7 @@ func (rc *RtmpConn) amf0Pause(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -588,7 +588,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -619,7 +619,7 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -674,7 +674,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -705,7 +705,7 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -772,7 +772,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0OnCustom(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -794,7 +794,7 @@ func (rc *RtmpConn) amf0OnCustom(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0CloseStream(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -816,7 +816,7 @@ func (rc *RtmpConn) amf0CloseStream(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0OnBwDone(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -832,7 +832,7 @@ func (rc *RtmpConn) amf0OnBwDone(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0OnStatus(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -848,7 +848,7 @@ func (rc *RtmpConn) amf0OnStatus(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0GetStreamLen(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -864,7 +864,7 @@ func (rc *RtmpConn) amf0GetStreamLen(msg *pt.Message) (err error) {
 func (rc *RtmpConn) amf0SampleAccess(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 

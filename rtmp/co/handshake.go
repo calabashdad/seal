@@ -1,18 +1,18 @@
 package co
 
 import (
-	"seal/conf"
-	"UtilsTools/identify_panic"
 	"encoding/binary"
 	"fmt"
 	"log"
+	"seal/conf"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) handShake() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -30,7 +30,7 @@ func (rc *RtmpConn) handShake() (err error) {
 	s0s1s2 := handshakeData[3073:6146]
 
 	//recv c0c1
-	err = rc.TcpConn.ExpectBytesFull(c0c1, 1537, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
+	err = rc.TcpConn.ExpectBytesFull(c0c1, 1537, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 	if err != nil {
 		return
 	}
@@ -60,13 +60,13 @@ func (rc *RtmpConn) handShake() (err error) {
 	}
 
 	//send s0s1s2
-	err = rc.TcpConn.SendBytes(s0s1s2, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
+	err = rc.TcpConn.SendBytes(s0s1s2, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 	if err != nil {
 		return
 	}
 
 	//recv c2
-	err = rc.TcpConn.ExpectBytesFull(c2, uint32(len(c2)), conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
+	err = rc.TcpConn.ExpectBytesFull(c2, uint32(len(c2)), conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 	if err != nil {
 		return
 	}

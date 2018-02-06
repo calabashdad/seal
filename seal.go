@@ -1,13 +1,13 @@
 package main
 
 import (
-	"UtilsTools/identify_panic"
 	"flag"
 	"log"
 	"os"
 	"seal/conf"
 	"sync"
 	"time"
+	"utiltools"
 )
 
 const SealVersion = "seal: 1.0.0"
@@ -29,7 +29,7 @@ func init() {
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 			time.Sleep(1 * time.Second)
 		}
 	}()

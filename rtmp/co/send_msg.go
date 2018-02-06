@@ -1,16 +1,16 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"encoding/binary"
 	"log"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -122,7 +122,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			payloadSize = rc.OutChunkSize
 		}
 
-		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize], timeOutUs)
+		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset:payloadOffset+payloadSize], timeOutUs)
 		if err != nil {
 			log.Println("send msg payload failed.")
 			return

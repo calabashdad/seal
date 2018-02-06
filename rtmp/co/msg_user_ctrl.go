@@ -1,16 +1,16 @@
 package co
 
 import (
-	"seal/conf"
-	"UtilsTools/identify_panic"
 	"log"
+	"seal/conf"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) msgUserCtrl(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -19,14 +19,14 @@ func (rc *RtmpConn) msgUserCtrl(msg *pt.Message) (err error) {
 	if nil == msg {
 		return
 	}
-	
+
 	p := pt.UserControlPacket{}
 	err = p.Decode(msg.Payload.Payload)
 	if err != nil {
 		return
 	}
 
-	log.Println("MsgUserCtrl event type=", p.EventType)	
+	log.Println("MsgUserCtrl event type=", p.EventType)
 
 	switch p.EventType {
 	case pt.SrcPCUCStreamBegin:
@@ -58,7 +58,7 @@ func (rc *RtmpConn) ctrlPingRequest(p *pt.UserControlPacket) (err error) {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCPingResponse
 		pp.EventData = p.EventData
-		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
+		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 		if err != nil {
 			return
 		}

@@ -1,9 +1,9 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"log"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 /**
@@ -12,7 +12,7 @@ import (
 func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32, timeOutUs uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 

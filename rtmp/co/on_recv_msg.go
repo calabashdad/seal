@@ -1,22 +1,22 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"log"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
 	if nil == msg {
 		return
 	}
-	
+
 	err = rc.EstimateNeedSendAcknowlegement()
 	if err != nil {
 		return

@@ -1,11 +1,11 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"log"
 	"seal/conf"
 	"seal/kernel"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 type AckWindowSizeS struct {
@@ -39,7 +39,7 @@ type RtmpConn struct {
 func (rc *RtmpConn) Cycle() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 

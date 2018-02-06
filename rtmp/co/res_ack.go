@@ -1,16 +1,16 @@
 package co
 
 import (
-	"seal/conf"
-	"UtilsTools/identify_panic"
 	"log"
+	"seal/conf"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -18,7 +18,7 @@ func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
 
 	pkt.SequenceNumber = uint32(rc.TcpConn.RecvBytesSum)
 
-	err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut * 1000000)
+	err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 	if err != nil {
 		return
 	}

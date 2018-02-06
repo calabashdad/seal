@@ -1,18 +1,18 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"encoding/binary"
 	"fmt"
 	"log"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 //RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.
 func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload, timeOutUs uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 

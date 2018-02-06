@@ -1,15 +1,15 @@
 package co
 
 import (
-	"UtilsTools/identify_panic"
 	"log"
 	"seal/rtmp/pt"
+	"utiltools"
 )
 
 func (rc *RtmpConn) msgSetBand(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err, ",panic at ", identify_panic.IdentifyPanic())
+			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
@@ -18,7 +18,7 @@ func (rc *RtmpConn) msgSetBand(msg *pt.Message) (err error) {
 	if nil == msg {
 		return
 	}
-	
+
 	p := pt.SetPeerBandWidthPacket{}
 	err = p.Decode(msg.Payload.Payload)
 
