@@ -2,68 +2,16 @@ package co
 
 import (
 	"log"
-	"seal/rtmp/flv"
 	"seal/rtmp/pt"
-	"sync"
+	"time"
 )
-
-type messagesQuene struct {
-	msgs []*pt.Message
-	mu   sync.RWMutex
-}
-
-func (q *messagesQuene) queue(msg *pt.Message) {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-
-	q.msgs = append(q.msgs, msg)
-}
-
-func (c *Consumer) shink() {
-
-	c.msgQuene.mu.Lock()
-	defer c.msgQuene.mu.Unlock()
-
-	var iFrameIndex int = -1
-	for i := 1; i < len(c.msgQuene.msgs); i++ {
-
-		if uint32(c.avEndTime-c.avStartTime) < c.queueSizeMills {
-			break
-		}
-
-		if c.msgQuene.msgs[i].Header.IsVideo() {
-			if flv.VideoH264IsSpspps(c.msgQuene.msgs[i].Payload.Payload) {
-				//the max iframe index to remove
-				iFrameIndex = i
-
-				// set the start time, we will remove until this frame.
-				c.avStartTime = int64(c.msgQuene.msgs[i].Header.Timestamp)
-
-				break
-			}
-		}
-
-		c.avStartTime = int64(c.msgQuene.msgs[i].Header.Timestamp)
-	}
-
-	// no iframe, for audio, clear the queue.
-	// it is ok to clear for audio, for the shrink tell us the queue is full.
-	// for video, we clear util the I-Frame, for the decoding must start from I-frame,
-	// for audio, it's ok to clear any data, also we can clear the whole queue.
-	if iFrameIndex < 0 {
-		//clear
-		c.msgQuene.msgs = c.msgQuene.msgs[:0]
-	} else {
-		c.msgQuene.msgs = append(c.msgQuene.msgs[:iFrameIndex], c.msgQuene.msgs[iFrameIndex:]...)
-	}
-}
 
 //Consumer is the consumer of source
 type Consumer struct {
 	queueSizeMills uint32
 	avStartTime    int64
 	avEndTime      int64
-	msgQuene       messagesQuene
+	msgQuene       chan *pt.Message
 	jitter         struct {
 		lastPktTime        int64
 		lastPktCorrectTime int64
@@ -93,42 +41,31 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 		c.avEndTime = int64(msg.Header.Timestamp)
 	}
 
-	c.msgQuene.queue(msg)
+	// log.Println("equene an msg, msg type=", msg.Header.MessageType,
+	// 	",stream id =", msg.Header.StreamId,
+	// 	",timestamp=", msg.Header.Timestamp,
+	// 	",payload=", len(msg.Payload.Payload))
 
-	log.Println("equene an msg, msg type=", msg.Header.MessageType,
-		",stream id =", msg.Header.StreamId,
-		",timestamp=", msg.Header.Timestamp,
-		",payload=", len(msg.Payload.Payload))
-
-	c.shink()
+	select {
+	//incase block, and influence others.
+	case <-time.After(time.Duration(3) * time.Millisecond):
+		break
+	case c.msgQuene <- msg:
+		break
+	}
 }
 
-func (c *Consumer) dump() (err error, msg []*pt.Message) {
-
-	c.msgQuene.mu.Lock()
-	defer c.msgQuene.mu.Unlock()
+func (c *Consumer) dump() (msg *pt.Message) {
 
 	if c.paused {
 		return
 	}
 
-	if 0 == len(c.msgQuene.msgs) {
-		return
+	select {
+	//in case block
+	case <-time.After(time.Duration(3) * time.Millisecond):
+	case msg = <-c.msgQuene:
 	}
-
-	var countOnceDump int = -1
-
-	if len(c.msgQuene.msgs) > 30 {
-		countOnceDump = 30
-	} else {
-		countOnceDump = len(c.msgQuene.msgs)
-	}
-
-	for i := 0; i < countOnceDump; i++ {
-		msg = append(msg, c.msgQuene.msgs[i])
-	}
-
-	c.msgQuene.msgs = append(c.msgQuene.msgs[:countOnceDump], c.msgQuene.msgs[countOnceDump:]...)
 
 	return
 }

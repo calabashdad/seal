@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"seal/conf"
+	"seal/rtmp/flv"
 	"seal/rtmp/pt"
 )
 
@@ -12,7 +13,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 	userSpecifiedDurationToStop := p.Duration > 0
 	var startTime int64 = -1
 
-	const timeOutUs = 2 * 1000 //ms
+	const timeOutUs = 1 * 1000 //ms
 
 	for {
 		//read from client. use short time out. 200 ms
@@ -29,35 +30,52 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			}
 		}
 
-		err, msgDumps := rc.consumer.dump()
-		if err != nil {
-			break
+		var ifSend bool
+
+		msg := rc.consumer.dump()
+		//can not dump msg now, wait and try again.
+		if nil == msg {
+			continue
+		} else {
+			//do shrink
+			if uint32(rc.consumer.avEndTime-rc.consumer.avStartTime) > rc.consumer.queueSizeMills {
+				//when frame type is key frame, do not shrink it.
+				if msg.Header.IsVideo() {
+					if flv.VideoH264IsSpspps(msg.Payload.Payload) {
+						// set the start time, we will remove until this frame.
+						rc.consumer.avStartTime = int64(msg.Header.Timestamp)
+						ifSend = true
+					}
+				}
+
+				rc.consumer.avStartTime = int64(msg.Header.Timestamp)
+			} else {
+				ifSend = true
+			}
 		}
 
-		for i := 0; i < len(msgDumps); i++ {
+		//send to remote
+		if ifSend {
 			// only when user specifies the duration,
 			// we start to collect the durations for each message.
 			if userSpecifiedDurationToStop {
-				if startTime < 0 || startTime > int64(msgDumps[i].Header.Timestamp) {
-					startTime = int64(msgDumps[i].Header.Timestamp)
+				if startTime < 0 || startTime > int64(msg.Header.Timestamp) {
+					startTime = int64(msg.Header.Timestamp)
 				}
 
-				rc.consumer.Duration += (float64(msgDumps[i].Header.Timestamp) - float64(startTime))
-				startTime = int64(msgDumps[i].Header.Timestamp)
+				rc.consumer.Duration += (float64(msg.Header.Timestamp) - float64(startTime))
+				startTime = int64(msg.Header.Timestamp)
 			}
 
-			log.Println("dump one msg, type=", msgDumps[i].Header.MessageType,
-				",timestamp=", msgDumps[i].Header.Timestamp,
-				"msg payload=", len(msgDumps[i].Payload.Payload))
-
-			err = rc.SendMsg(msgDumps[i], conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+			err = rc.SendMsg(msg, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 			if err != nil {
 				break
 			}
 
-			log.Println("send msg success, type=", msgDumps[i].Header.MessageType,
-				",timestamp=", msgDumps[i].Header.Timestamp,
-				"msg payload=", len(msgDumps[i].Payload.Payload))
+			log.Println("send msg success, type=", msg.Header.MessageType,
+				",stream id=", msg.Header.StreamId,
+				",timestamp=", msg.Header.Timestamp,
+				"msg payload=", len(msg.Payload.Payload))
 		}
 	}
 
