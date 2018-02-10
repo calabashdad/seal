@@ -64,7 +64,8 @@ func (g *GopCache) pureAudio() bool {
 }
 
 func (g *GopCache) clear() {
-	g.msgs = make([]*pt.Message, 1)
+	var tmp []*pt.Message
+	g.msgs = tmp
 }
 
 func (g *GopCache) empty() bool {

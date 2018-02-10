@@ -513,8 +513,8 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 			",payload=", len(rc.source.cacheAudioSequenceHeader.Payload.Payload))
 	}
 
-	//dump gop cache to client
-	rc.source.gopCache.dump(rc.consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	//dump gop cache to client. todo.
+	// rc.source.gopCache.dump(rc.consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 
 	log.Println("now playing, stream=", rc.StreamName)
 

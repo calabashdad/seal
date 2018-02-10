@@ -18,11 +18,6 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 		return
 	}
 
-	// log.Println("video data, csid=", msg.Header.PerferCsid,
-	// 	",stream id=", msg.Header.StreamId,
-	// 	", payload len=", len(msg.Payload.Payload),
-	// 	",timestamp=", msg.Header.Timestamp)
-
 	//copy to all consumers
 	rc.source.copyToAllConsumers(msg)
 
@@ -31,7 +26,7 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 		rc.source.cacheVideoSequenceHeader = msg
 	}
 
-	rc.source.gopCache.cache(msg)
+	// rc.source.gopCache.cache(msg) todo.
 
 	if rc.source.atc {
 		if nil != rc.source.cacheAudioSequenceHeader {

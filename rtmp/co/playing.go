@@ -16,7 +16,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 	const timeOutUs = 1 * 1000 //ms
 
 	for {
-		//read from client. use short time out. 200 ms
+		//read from client. use short time out.
 		//if recv failed, it's ok, not an error.
 		if true {
 			var msg pt.Message
@@ -25,6 +25,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 				//has recved play control.
 				err = rc.handlePlayData(&msg)
 				if err != nil {
+					log.Println("playing... handle play data faield.err=", err)
 					return
 				}
 			}
@@ -69,6 +70,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 
 			err = rc.SendMsg(msg, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 			if err != nil {
+				log.Println("playing... send to remote failed.err=", err)
 				break
 			}
 
@@ -76,6 +78,9 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 				",stream id=", msg.Header.StreamId,
 				",timestamp=", msg.Header.Timestamp,
 				"msg payload=", len(msg.Payload.Payload))
+		} else {
+			log.Println("this msg can not send to remote, too old. time stamp=", msg.Header.Timestamp,
+				",msg type=", msg.Header.MessageType)
 		}
 	}
 

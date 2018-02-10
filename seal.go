@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	log.SetFlags(log.Lshortfile | log.Ldate |log.Lmicroseconds)
 	flag.Parse()
 }
 

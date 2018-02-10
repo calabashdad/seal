@@ -41,11 +41,6 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 		c.avEndTime = int64(msg.Header.Timestamp)
 	}
 
-	// log.Println("equene an msg, msg type=", msg.Header.MessageType,
-	// 	",stream id =", msg.Header.StreamId,
-	// 	",timestamp=", msg.Header.Timestamp,
-	// 	",payload=", len(msg.Payload.Payload))
-
 	select {
 	//incase block, and influence others.
 	case <-time.After(time.Duration(3) * time.Millisecond):
@@ -58,12 +53,14 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 func (c *Consumer) dump() (msg *pt.Message) {
 
 	if c.paused {
+		log.Println("client paused now")
 		return
 	}
 
 	select {
 	//in case block
 	case <-time.After(time.Duration(3) * time.Millisecond):
+		log.Println("time out, source is dry.")
 	case msg = <-c.msgQuene:
 	}
 
