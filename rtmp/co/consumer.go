@@ -52,6 +52,8 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 
 func (c *Consumer) dump() (msg *pt.Message) {
 
+	log.Println("consumer dump come in...")
+
 	if c.paused {
 		log.Println("client paused now")
 		return
@@ -64,6 +66,8 @@ func (c *Consumer) dump() (msg *pt.Message) {
 	case msg = <-c.msgQuene:
 	}
 
+	log.Println("consumer dump come out...")
+	
 	return
 }
 

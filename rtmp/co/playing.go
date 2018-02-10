@@ -16,11 +16,15 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 	const timeOutUs = 1 * 1000 //ms
 
 	for {
+		log.Println("playing cycle...")
 		//read from client. use short time out.
 		//if recv failed, it's ok, not an error.
 		if true {
 			var msg pt.Message
-			_ = rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs)
+			localErr := rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs)
+			if nil != localErr {
+				log.Println("playing recv msg, local error=", localErr)
+			}
 			if len(msg.Payload.Payload) > 0 {
 				//has recved play control.
 				err = rc.handlePlayData(&msg)
