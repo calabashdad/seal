@@ -19,11 +19,13 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 	}
 
 	//cache the sequence.
+	// do not cache the sequence header to gop cache, return here
 	if flv.AudioIsSequenceHeader(msg.Payload.Payload) {
 		rc.source.cacheAudioSequenceHeader = msg
+		return
 	}
 
-	// rc.source.gopCache.cache(msg) todo.
+	rc.source.gopCache.cache(msg)
 
 	if rc.source.atc {
 		if nil != rc.source.cacheAudioSequenceHeader {

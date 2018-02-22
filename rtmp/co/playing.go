@@ -13,17 +13,15 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 	userSpecifiedDurationToStop := p.Duration > 0
 	var startTime int64 = -1
 
-	const timeOutUs = 1 * 1000 //ms
-
 	for {
-		log.Println("playing cycle...")
 		//read from client. use short time out.
 		//if recv failed, it's ok, not an error.
 		if true {
+			const timeOutUs = 10 * 1000 //ms
+
 			var msg pt.Message
-			localErr := rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs)
-			if nil != localErr {
-				log.Println("playing recv msg, local error=", localErr)
+			if localErr := rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs); localErr != nil {
+				// do nothing, it's ok
 			}
 			if len(msg.Payload.Payload) > 0 {
 				//has recved play control.
@@ -59,6 +57,9 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			}
 		}
 
+		//todo. just for test fast out picture
+		ifSend = true
+
 		//send to remote
 		if ifSend {
 			// only when user specifies the duration,
@@ -78,10 +79,10 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 				break
 			}
 
-			log.Println("send msg success, type=", msg.Header.MessageType,
-				",stream id=", msg.Header.StreamId,
-				",timestamp=", msg.Header.Timestamp,
-				"msg payload=", len(msg.Payload.Payload))
+			// log.Println("send msg success, type=", msg.Header.MessageType,
+			// 	",stream id=", msg.Header.StreamId,
+			// 	",timestamp=", msg.Header.Timestamp,
+			// 	"msg payload=", len(msg.Payload.Payload))
 		} else {
 			log.Println("this msg can not send to remote, too old. time stamp=", msg.Header.Timestamp,
 				",msg type=", msg.Header.MessageType)
@@ -127,10 +128,12 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 		if 0 == len(p.CommandName) {
 			//it's ok, not an error
 			return
-		} else {
-			err = fmt.Errorf("player ask to close stream,remote=%s", rc.TcpConn.RemoteAddr())
-			return
 		}
+
+		err = fmt.Errorf("player ask to close stream,remote=%s", rc.TcpConn.RemoteAddr())
+
+		return
+
 	}
 
 	// call msg,

@@ -63,7 +63,7 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	case pt.RTMP_AMF0_DATA_SET_DATAFRAME, pt.RTMP_AMF0_DATA_ON_METADATA:
 		err = rc.amf0Meta(msg)
 	case pt.RTMP_AMF0_DATA_ON_CUSTOMDATA:
-		err = rc.amf0OnCustom(msg)
+		err = rc.amf0OnCustomer(msg)
 	case pt.RTMP_AMF0_COMMAND_CLOSE_STREAM:
 		err = rc.amf0CloseStream(msg)
 	case pt.RTMP_AMF0_COMMAND_ON_BW_DONE:
@@ -328,11 +328,11 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 
 	source := sourcesHub.findSourceToPlay(rc.StreamName)
 	if nil == source {
-		err = fmt.Errorf("stream=%s can not play because has not published.", rc.StreamName)
+		err = fmt.Errorf("stream=%s can not play because has not published", rc.StreamName)
 		return
-	} else {
-		log.Println("play success. stream name=", rc.StreamName)
 	}
+
+	log.Println("play success. stream name=", rc.StreamName)
 
 	rc.source = source
 	rc.Role = RtmpRolePlayer
@@ -474,7 +474,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		queueSizeMills: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
 		avStartTime:    -1,
 		avEndTime:      -1,
-		msgQuene:       make(chan *pt.Message, 1000),
+		msgQuene:       make(chan *pt.Message, 1024),
 	}
 
 	rc.source.CreateConsumer(rc.consumer)
@@ -513,12 +513,14 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 			",payload=", len(rc.source.cacheAudioSequenceHeader.Payload.Payload))
 	}
 
-	//dump gop cache to client. todo.
-	// rc.source.gopCache.dump(rc.consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	//dump gop cache to client.
+	rc.source.gopCache.dump(rc.consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
 
 	log.Println("now playing, stream=", rc.StreamName)
 
 	err = rc.playing(&p)
+
+	log.Println("playing over, stream=", rc.StreamName)
 
 	return
 }
@@ -758,6 +760,10 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 
 	log.Println("meta data is ", p)
 
+	//todo.
+	// msg.Payload.Payload = p.Encode()
+	// msg.Header.PayloadLength = uint32(len(msg.Payload.Payload))
+
 	//cache meta data
 	if nil != rc.source {
 		rc.source.cacheMetaData = msg
@@ -769,14 +775,14 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) amf0OnCustom(msg *pt.Message) (err error) {
+func (rc *RtmpConn) amf0OnCustomer(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
-	log.Println("Amf0OnCustom")
+	log.Println("Amf0OnCustomer")
 
 	if nil == msg {
 		return

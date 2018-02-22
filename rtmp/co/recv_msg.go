@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"seal/conf"
 	"seal/rtmp/pt"
 	"utiltools"
 )
@@ -23,6 +24,15 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		if err != nil {
 			return
 		}
+
+		// once we got the chunk message header
+		// that is there is a real message in cache,
+		// set the socket timeout
+		// when in the playing loop, we set timeout to 100ms
+		// when we got a chunkk header, means that has an entire message.
+		// reset the timeout to normal
+		// otherwise will timeout and the client disconnected.
+		timeOutUs = conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000
 
 		chunkFmt := (buf[0] & 0xc0) >> 6
 		csid := uint32(buf[0] & 0x3f)
@@ -70,7 +80,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		}
 
 		if payload.SizeTmp > 0 && pt.RTMP_FMT_TYPE0 == chunk.Fmt {
-			err = fmt.Errorf("when msg count > 0, chunk fmt is not allowed to be RTMP_FMT_TYPE0.")
+			err = fmt.Errorf("when msg count > 0, chunk fmt is not allowed to be RTMP_FMT_TYPE0")
 			break
 		}
 

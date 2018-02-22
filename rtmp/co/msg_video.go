@@ -22,14 +22,16 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 	rc.source.copyToAllConsumers(msg)
 
 	//cache the key frame
+	// do not cache the sequence header to gop cache, return here
 	if flv.VideoH264IsSequenceHeaderAndKeyFrame(msg.Payload.Payload) {
 		rc.source.cacheVideoSequenceHeader = msg
+		return
 	}
 
-	// rc.source.gopCache.cache(msg) todo.
+	rc.source.gopCache.cache(msg)
 
 	if rc.source.atc {
-		if nil != rc.source.cacheAudioSequenceHeader {
+		if nil != rc.source.cacheVideoSequenceHeader {
 			rc.source.cacheVideoSequenceHeader.Header.Timestamp = msg.Header.Timestamp
 		}
 

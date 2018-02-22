@@ -52,22 +52,19 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 
 func (c *Consumer) dump() (msg *pt.Message) {
 
-	log.Println("consumer dump come in...")
-
 	if c.paused {
 		log.Println("client paused now")
 		return
 	}
 
 	select {
-	//in case block
-	case <-time.After(time.Duration(3) * time.Millisecond):
-		log.Println("time out, source is dry.")
+	case <-time.After(time.Duration(5) * time.Millisecond):
+		// in case block
+		break
 	case msg = <-c.msgQuene:
+		break
 	}
 
-	log.Println("consumer dump come out...")
-	
 	return
 }
 
