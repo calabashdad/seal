@@ -751,11 +751,14 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		}
 	}
 
-	log.Println("meta data is ", p)
+	msg.Payload.Payload = p.Encode()
+	msg.Header.PayloadLength = uint32(len(msg.Payload.Payload))
 
-	//todo.
-	// msg.Payload.Payload = p.Encode()
-	// msg.Header.PayloadLength = uint32(len(msg.Payload.Payload))
+	// decode again and print
+	if err = p.Decode(msg.Payload.Payload); err != nil {
+		return
+	}
+	log.Println("meta data is ", p)
 
 	//cache meta data
 	if nil != rc.source {
@@ -763,7 +766,6 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 		log.Println("cache metadata")
 	}
 
-	//copy to all consumers
 	rc.source.copyToAllConsumers(msg)
 
 	return

@@ -37,7 +37,7 @@ func (pkt *OnCustomDataPakcet) Encode() (data []uint8) {
 	if RTMP_AMF0_Object == pkt.Marker {
 		data = append(data, Amf0WriteObject(pkt.Customdata.([]Amf0Object))...)
 	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
-		data = append(data, Amf0WriteEcmaArray(pkt.Customdata.([]Amf0Object))...)
+		data = append(data, Amf0WriteEcmaArray(pkt.Customdata.(Amf0EcmaArray))...)
 	}
 
 	return

@@ -147,7 +147,7 @@ func Amf0WriteAny(any Amf0Object) (data []uint8) {
 	case RTMP_AMF0_LongString:
 		data = Amf0WriteLongString(any.Value.(string))
 	case RTMP_AMF0_EcmaArray:
-		data = Amf0WriteEcmaArray(any.Value.([]Amf0Object))
+		data = Amf0WriteEcmaArray(any.Value.(Amf0EcmaArray))
 	case RTMP_AMF0_StrictArray:
 		data = Amf0WriteStrictArray(any.Value.([]Amf0Object))
 	default:
@@ -258,8 +258,7 @@ func Amf0ReadObject(data []uint8, offset *uint32) (err error, amf0objects []Amf0
 			break
 		}
 
-		var marker_local uint8
-		err, amf0object.Value = Amf0ReadAny(data, &marker_local, offset)
+		err, amf0object.Value = Amf0ReadAny(data, &amf0object.ValueType, offset)
 		if err != nil {
 			break
 		}
@@ -468,8 +467,7 @@ func Amf0ReadEcmaArray(data []uint8, offset *uint32) (err error, value Amf0EcmaA
 			break
 		}
 
-		var marker_local uint8
-		err, amf.Value = Amf0ReadAny(data, &marker_local, offset)
+		err, amf.Value = Amf0ReadAny(data, &amf.ValueType, offset)
 		if err != nil {
 			break
 		}
@@ -480,7 +478,7 @@ func Amf0ReadEcmaArray(data []uint8, offset *uint32) (err error, value Amf0EcmaA
 	return
 }
 
-func Amf0WriteEcmaArray(objs []Amf0Object) (data []uint8) {
+func Amf0WriteEcmaArray(arr Amf0EcmaArray) (data []uint8) {
 	data = make([]uint8, 1+4)
 
 	var offset uint32
@@ -488,11 +486,10 @@ func Amf0WriteEcmaArray(objs []Amf0Object) (data []uint8) {
 	data[offset] = RTMP_AMF0_EcmaArray
 	offset += 1
 
-	count := len(objs)
-	binary.BigEndian.PutUint32(data[offset:offset+4], uint32(count))
+	binary.BigEndian.PutUint32(data[offset:offset+4], uint32(arr.count))
 	offset += 4
 
-	for _, v := range objs {
+	for _, v := range arr.anyObject {
 		data = append(data, Amf0WriteUtf8(v.PropertyName)...)
 		data = append(data, Amf0WriteAny(v)...)
 	}

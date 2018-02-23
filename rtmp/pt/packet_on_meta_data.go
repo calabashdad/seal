@@ -45,7 +45,7 @@ func (pkt *OnMetaDataPacket) Encode() (data []uint8) {
 	if RTMP_AMF0_Object == pkt.Marker {
 		data = append(data, Amf0WriteObject(pkt.Metadata.([]Amf0Object))...)
 	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
-		data = append(data, Amf0WriteEcmaArray(pkt.Metadata.([]Amf0Object))...)
+		data = append(data, Amf0WriteEcmaArray(pkt.Metadata.(Amf0EcmaArray))...)
 	}
 
 	return
