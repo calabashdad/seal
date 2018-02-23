@@ -76,7 +76,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -86,7 +86,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -97,7 +97,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 	}
 
 	var streamNameLocal string
-	err, streamNameLocal = Amf0ReadString(data, &offset)
+	streamNameLocal, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -111,14 +111,14 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 	}
 
 	if maxOffset-offset > (1 + 8) { // number need at least 1(marker) + 8(number)
-		err, pkt.Start = Amf0ReadNumber(data, &offset)
+		pkt.Start, err = Amf0ReadNumber(data, &offset)
 		if err != nil {
 			return
 		}
 	}
 
 	if maxOffset-offset > (1 + 8) {
-		err, pkt.Duration = Amf0ReadNumber(data, &offset)
+		pkt.Duration, err = Amf0ReadNumber(data, &offset)
 		if err != nil {
 			return
 		}
@@ -132,7 +132,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 
 		var v interface{}
 		var marker uint8
-		err, v = Amf0ReadAny(data, &marker, &offset)
+		v, err = Amf0ReadAny(data, &marker, &offset)
 		if err != nil {
 			return
 		}

@@ -10,7 +10,7 @@ import (
 	"utiltools"
 )
 
-const SealVersion = "seal: 1.0.0"
+const sealVersion = "seal: 1.0.0"
 
 var (
 	configFile  = flag.String("c", "./seal.yaml", "configure filename")
@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile | log.Ldate |log.Lmicroseconds)
+	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
 	flag.Parse()
 }
 
@@ -40,19 +40,17 @@ func main() {
 	}
 
 	if *showVersion {
-		log.Println(SealVersion)
+		log.Println(sealVersion)
 		return
 	}
 
 	err := conf.GlobalConfInfo.Loads(*configFile)
 	if err != nil {
 		log.Println("conf loads failed.err=", err)
-
-		//load conf file failed. use default config.
-		conf.GlobalConfInfo.Default()
-	} else {
-		log.Println("load conf file success, conf=", conf.GlobalConfInfo)
+		return
 	}
+
+	log.Println("load conf file success, conf=", conf.GlobalConfInfo)
 
 	gWgServers.Add(1)
 	if true {

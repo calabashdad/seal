@@ -20,12 +20,12 @@ type OnCustomDataPakcet struct {
 func (pkt *OnCustomDataPakcet) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Name = Amf0ReadString(data, &offset)
+	pkt.Name, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Customdata = Amf0ReadAny(data, &pkt.Marker, &offset)
+	pkt.Customdata, err = Amf0ReadAny(data, &pkt.Marker, &offset)
 	if err != nil {
 		return
 	}

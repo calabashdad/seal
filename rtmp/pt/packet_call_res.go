@@ -30,24 +30,24 @@ type CallResPacket struct {
 func (pkt *CallResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.CommandObject = Amf0ReadAny(data, &pkt.CommandObjectMarker, &offset)
+	pkt.CommandObject, err = Amf0ReadAny(data, &pkt.CommandObjectMarker, &offset)
 	if err != nil {
 		return
 	}
 
 	maxOffset := uint32(len(data)) - 1
 	if maxOffset-offset > 0 {
-		err, pkt.Response = Amf0ReadAny(data, &pkt.ResponseMarker, &offset)
+		pkt.Response, err = Amf0ReadAny(data, &pkt.ResponseMarker, &offset)
 		if err != nil {
 			return
 		}

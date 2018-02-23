@@ -46,7 +46,7 @@ type PublishPacket struct {
 func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -56,7 +56,7 @@ func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -67,7 +67,7 @@ func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 	}
 
 	var streamNameLocal string
-	err, streamNameLocal = Amf0ReadString(data, &offset)
+	streamNameLocal, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (pkt *PublishPacket) Decode(data []uint8) (err error) {
 	}
 
 	if uint32(len(data))-offset > 0 {
-		err, pkt.Type = Amf0ReadString(data, &offset)
+		pkt.Type, err = Amf0ReadString(data, &offset)
 		if err != nil {
 			return
 		}

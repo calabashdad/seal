@@ -35,7 +35,7 @@ type FmleStartPacket struct {
 func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -47,7 +47,7 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -58,7 +58,7 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 	}
 
 	var streamNameLocal string
-	err, streamNameLocal = Amf0ReadString(data, &offset)
+	streamNameLocal, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}

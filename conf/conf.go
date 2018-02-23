@@ -54,13 +54,3 @@ func (t *ConfInfo) Loads(c string) (err error) {
 
 	return nil
 }
-
-func (c *ConfInfo) Default() {
-	c.Rtmp.Listen = "1935"
-	c.Rtmp.TimeOut = 30
-	c.Rtmp.ChunkSize = 6000
-	c.Rtmp.Atc = false
-	c.Rtmp.AtcAuto = true
-	c.Rtmp.TimeJitter = 1
-	c.Rtmp.ConsumerQueueSize = 30
-}

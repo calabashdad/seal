@@ -42,7 +42,7 @@ func (pkt *ConnectPacket) GetObjectProperty(name string) (value interface{}) {
 func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -62,7 +62,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.CommandObject = Amf0ReadObject(data, &offset)
+	pkt.CommandObject, err = Amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
@@ -70,7 +70,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	if uint32(len(data))-offset > 0 {
 		var marker uint8
 		var v interface{}
-		err, v = Amf0ReadAny(data, &marker, &offset)
+		v, err = Amf0ReadAny(data, &marker, &offset)
 		if err != nil {
 			return
 		}

@@ -25,23 +25,23 @@ type CallPacket struct {
 func (pkt *CallPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.CommandObject = Amf0ReadAny(data, &pkt.Cmd_objectType, &offset)
+	pkt.CommandObject, err = Amf0ReadAny(data, &pkt.Cmd_objectType, &offset)
 	if err != nil {
 		return
 	}
 
 	if uint32(len(data))-offset > 0 {
-		err, pkt.Arguments = Amf0ReadAny(data, &pkt.ArgumentsType, &offset)
+		pkt.Arguments, err = Amf0ReadAny(data, &pkt.ArgumentsType, &offset)
 		if err != nil {
 			return
 		}

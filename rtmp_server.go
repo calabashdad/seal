@@ -30,17 +30,14 @@ func (rs *RtmpServer) Start() {
 	log.Println("rtmp server start liste at :" + conf.GlobalConfInfo.Rtmp.Listen)
 
 	for {
-		netConn, err := listener.Accept()
-		if err != nil {
+		if netConn, err := listener.Accept(); err != nil {
 			log.Println("rtmp server, listen accept failed, err=", err)
 			break
+		} else {
+			log.Println("one rtmp connection come in, remote=", netConn.RemoteAddr())
+			rtmpConn := rs.NewRtmpConnection(netConn)
+			go rtmpConn.Cycle()
 		}
-
-		log.Println("one rtmp connection come in, remote=", netConn.RemoteAddr())
-
-		rtmpConn := rs.NewRtmpConnection(netConn)
-
-		go rtmpConn.Cycle()
 	}
 }
 

@@ -27,7 +27,8 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	}
 
 	//read the command name.
-	err, command := pt.Amf0ReadString(msg.Payload.Payload, &offset)
+	var command string
+	command, err = pt.Amf0ReadString(msg.Payload.Payload, &offset)
 	if err != nil {
 		return
 	}
@@ -101,7 +102,7 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 	var offset uint32
 
 	var transaction_id float64
-	err, transaction_id = pt.Amf0ReadNumber(msg.Payload.Payload, &offset)
+	transaction_id, err = pt.Amf0ReadNumber(msg.Payload.Payload, &offset)
 	if err != nil {
 		log.Println("read transaction id failed when decode msg.")
 		return

@@ -33,7 +33,7 @@ type ConnectResPacket struct {
 func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -54,12 +54,12 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.Props = Amf0ReadObject(data, &offset)
+	pkt.Props, err = Amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.Info = Amf0ReadObject(data, &offset)
+	pkt.Info, err = Amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}

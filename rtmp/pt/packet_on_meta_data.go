@@ -21,19 +21,19 @@ type OnMetaDataPacket struct {
 func (pkt *OnMetaDataPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.Name = Amf0ReadString(data, &offset)
+	pkt.Name, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
 	if RTMP_AMF0_DATA_SET_DATAFRAME == pkt.Name {
-		err, pkt.Name = Amf0ReadString(data, &offset)
+		pkt.Name, err = Amf0ReadString(data, &offset)
 		if err != nil {
 			return
 		}
 	}
 
-	err, pkt.Metadata = Amf0ReadAny(data, &pkt.Marker, &offset)
+	pkt.Metadata, err = Amf0ReadAny(data, &pkt.Marker, &offset)
 	if err != nil {
 		return
 	}

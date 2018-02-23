@@ -34,7 +34,7 @@ func (pkt *PausePacket) Decode(data []uint8) (err error) {
 
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func (pkt *PausePacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -54,12 +54,12 @@ func (pkt *PausePacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err, pkt.IsPause = Amf0ReadBool(data, &offset)
+	pkt.IsPause, err = Amf0ReadBool(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.TimeMs = Amf0ReadNumber(data, &offset)
+	pkt.TimeMs, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}

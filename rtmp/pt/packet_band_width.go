@@ -29,12 +29,12 @@ type BandWidthPacket struct {
 func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	err, pkt.CommandName = Amf0ReadString(data, &offset)
+	pkt.CommandName, err = Amf0ReadString(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err, pkt.TransactionId = Amf0ReadNumber(data, &offset)
+	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
 	if err != nil {
 		return
 	}
@@ -45,7 +45,7 @@ func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
 	}
 
 	if pkt.isStopPlay() || pkt.isStopPublish() || pkt.isFinish() {
-		err, pkt.Data = Amf0ReadObject(data, &offset)
+		pkt.Data, err = Amf0ReadObject(data, &offset)
 		if err != nil {
 			return
 		}
