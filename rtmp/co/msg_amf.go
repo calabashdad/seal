@@ -494,23 +494,16 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	//cache meta data
 	if nil != rc.source.cacheMetaData {
 		rc.consumer.enquene(rc.source.cacheMetaData, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
-		log.Println("cache meta data has enquene to consumer")
 	}
 
 	//cache video data
 	if nil != rc.source.cacheVideoSequenceHeader {
 		rc.consumer.enquene(rc.source.cacheVideoSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
-		log.Println("cache video data has enquene to consumer. type=", rc.source.cacheVideoSequenceHeader.Header.MessageType,
-			",timestamp=", rc.source.cacheVideoSequenceHeader.Header.Timestamp,
-			",payload=", len(rc.source.cacheVideoSequenceHeader.Payload.Payload))
 	}
 
 	//cache audio data
 	if nil != rc.source.cacheAudioSequenceHeader {
 		rc.consumer.enquene(rc.source.cacheAudioSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
-		log.Println("cache audio data has enquene to consumer. type=", rc.source.cacheAudioSequenceHeader.Header.MessageType,
-			",timestamp=", rc.source.cacheAudioSequenceHeader.Header.Timestamp,
-			",payload=", len(rc.source.cacheAudioSequenceHeader.Payload.Payload))
 	}
 
 	//dump gop cache to client.
@@ -767,6 +760,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	//cache meta data
 	if nil != rc.source {
 		rc.source.cacheMetaData = msg
+		log.Println("cache metadata")
 	}
 
 	//copy to all consumers

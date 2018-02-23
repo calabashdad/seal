@@ -64,16 +64,15 @@ func (g *GopCache) pureAudio() bool {
 }
 
 func (g *GopCache) clear() {
-	var tmp []*pt.Message
-	g.msgs = tmp
+	g.msgs = nil
 }
 
 func (g *GopCache) empty() bool {
-	return nil == g.msgs[0]
+	return nil == g.msgs
 }
 
 func (g *GopCache) startTime() uint64 {
-	if nil != g.msgs[0] {
+	if nil != g.msgs && nil != g.msgs[0] {
 		return g.msgs[0].Header.Timestamp
 	}
 

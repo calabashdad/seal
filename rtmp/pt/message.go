@@ -49,8 +49,8 @@ func (h *MessageHeader) IsAudio() bool {
 }
 func (h *MessageHeader) IsVideo() bool {
 	return RTMP_MSG_VideoMessage == h.MessageType
-
 }
+
 func (h *MessageHeader) IsAmf0Command() bool {
 	return RTMP_MSG_AMF0CommandMessage == h.MessageType
 

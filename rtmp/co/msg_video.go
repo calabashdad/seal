@@ -25,6 +25,7 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 	// do not cache the sequence header to gop cache, return here
 	if flv.VideoH264IsSequenceHeaderAndKeyFrame(msg.Payload.Payload) {
 		rc.source.cacheVideoSequenceHeader = msg
+		log.Println("cache video sequence")
 		return
 	}
 

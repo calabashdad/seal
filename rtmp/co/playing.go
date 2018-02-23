@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"seal/conf"
-	"seal/rtmp/flv"
 	"seal/rtmp/pt"
 )
 
@@ -33,35 +32,12 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			}
 		}
 
-		var ifSend bool
-
 		msg := rc.consumer.dump()
-		//can not dump msg now, wait and try again.
 		if nil == msg {
+			// wait and try again.
 			continue
 		} else {
-			//do shrink
-			if uint32(rc.consumer.avEndTime-rc.consumer.avStartTime) > rc.consumer.queueSizeMills {
-				//when frame type is key frame, do not shrink it.
-				if msg.Header.IsVideo() {
-					if flv.VideoH264IsSpspps(msg.Payload.Payload) {
-						// set the start time, we will remove until this frame.
-						rc.consumer.avStartTime = int64(msg.Header.Timestamp)
-						ifSend = true
-					}
-				}
-
-				rc.consumer.avStartTime = int64(msg.Header.Timestamp)
-			} else {
-				ifSend = true
-			}
-		}
-
-		//todo. just for test fast out picture
-		ifSend = true
-
-		//send to remote
-		if ifSend {
+			//send to remote
 			// only when user specifies the duration,
 			// we start to collect the durations for each message.
 			if userSpecifiedDurationToStop {
@@ -79,13 +55,6 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 				break
 			}
 
-			// log.Println("send msg success, type=", msg.Header.MessageType,
-			// 	",stream id=", msg.Header.StreamId,
-			// 	",timestamp=", msg.Header.Timestamp,
-			// 	"msg payload=", len(msg.Payload.Payload))
-		} else {
-			log.Println("this msg can not send to remote, too old. time stamp=", msg.Header.Timestamp,
-				",msg type=", msg.Header.MessageType)
 		}
 	}
 
