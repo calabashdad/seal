@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"seal/conf"
 	"seal/rtmp/pt"
 	"utiltools"
 )
@@ -30,14 +29,14 @@ func (rc *RtmpConn) handShake() (err error) {
 	s0s1s2 := handshakeData[3073:6146]
 
 	//recv c0c1
-	err = rc.TcpConn.ExpectBytesFull(c0c1, 1537, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+	err = rc.TcpConn.ExpectBytesFull(c0c1, 1537)
 	if err != nil {
 		return
 	}
 
 	//parse c0
 	if c0[0] != 3 {
-		err = fmt.Errorf("client c0 is not 3.")
+		err = fmt.Errorf("client c0 is not 3")
 		return
 	}
 
@@ -60,13 +59,13 @@ func (rc *RtmpConn) handShake() (err error) {
 	}
 
 	//send s0s1s2
-	err = rc.TcpConn.SendBytes(s0s1s2, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+	err = rc.TcpConn.SendBytes(s0s1s2)
 	if err != nil {
 		return
 	}
 
 	//recv c2
-	err = rc.TcpConn.ExpectBytesFull(c2, uint32(len(c2)), conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+	err = rc.TcpConn.ExpectBytesFull(c2, uint32(len(c2)))
 	if err != nil {
 		return
 	}

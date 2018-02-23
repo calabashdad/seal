@@ -17,9 +17,10 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 		//if recv failed, it's ok, not an error.
 		if true {
 			const timeOutUs = 10 * 1000 //ms
+			rc.TcpConn.SetRecvTimeout(timeOutUs)
 
 			var msg pt.Message
-			if localErr := rc.RecvMsg(&msg.Header, &msg.Payload, timeOutUs); localErr != nil {
+			if localErr := rc.RecvMsg(&msg.Header, &msg.Payload); localErr != nil {
 				// do nothing, it's ok
 			}
 			if len(msg.Payload.Payload) > 0 {
@@ -31,6 +32,10 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 				}
 			}
 		}
+
+		// reset the socket send and recv timeout
+		rc.TcpConn.SetRecvTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
+		rc.TcpConn.SetSendTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
 
 		msg := rc.consumer.dump()
 		if nil == msg {

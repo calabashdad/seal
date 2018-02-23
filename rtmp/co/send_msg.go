@@ -110,7 +110,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 		}
 
 		//send header
-		err = rc.TcpConn.SendBytes(header[:headerOffset], timeOutUs)
+		err = rc.TcpConn.SendBytes(header[:headerOffset])
 		if err != nil {
 			log.Println("send msg header failed.")
 			return
@@ -122,7 +122,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			payloadSize = rc.OutChunkSize
 		}
 
-		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset:payloadOffset+payloadSize], timeOutUs)
+		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset:payloadOffset+payloadSize])
 		if err != nil {
 			log.Println("send msg payload failed.")
 			return

@@ -4,13 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"seal/conf"
 	"seal/rtmp/pt"
 	"utiltools"
 )
 
 //RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.
-func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload, timeOutUs uint32) (err error) {
+func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
@@ -20,19 +19,10 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 	for {
 		//read basic header
 		var buf [3]uint8
-		err = rc.TcpConn.ExpectBytesFull(buf[:1], 1, timeOutUs)
+		err = rc.TcpConn.ExpectBytesFull(buf[:1], 1)
 		if err != nil {
 			return
 		}
-
-		// once we got the chunk message header
-		// that is there is a real message in cache,
-		// set the socket timeout
-		// when in the playing loop, we set timeout to 100ms
-		// when we got a chunkk header, means that has an entire message.
-		// reset the timeout to normal
-		// otherwise will timeout and the client disconnected.
-		timeOutUs = conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000
 
 		chunkFmt := (buf[0] & 0xc0) >> 6
 		csid := uint32(buf[0] & 0x3f)
@@ -40,11 +30,11 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		switch csid {
 		case 0:
 			//csId 2 bytes. 64-319
-			err = rc.TcpConn.ExpectBytesFull(buf[1:2], 1, timeOutUs)
+			err = rc.TcpConn.ExpectBytesFull(buf[1:2], 1)
 			csid = uint32(64 + buf[1])
 		case 1:
 			//csId 3 bytes. 64-65599
-			err = rc.TcpConn.ExpectBytesFull(buf[1:3], 2, timeOutUs)
+			err = rc.TcpConn.ExpectBytesFull(buf[1:3], 2)
 			csid = uint32(64) + uint32(buf[1]) + uint32(buf[2])*256
 		}
 
@@ -98,7 +88,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		}
 
 		var msgHeader [11]uint8 //max is 11
-		err = rc.TcpConn.ExpectBytesFull(msgHeader[:], msgHeaderSize, timeOutUs)
+		err = rc.TcpConn.ExpectBytesFull(msgHeader[:], msgHeaderSize)
 		if err != nil {
 			break
 		}
@@ -121,7 +111,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
 			if payload.SizeTmp > 0 && payloadLength != chunk.MsgHeader.PayloadLength {
-				err = fmt.Errorf("RTMP_FMT_TYPE0: msg has in chunk, msg size can not change.")
+				err = fmt.Errorf("RTMP_FMT_TYPE0: msg has in chunk, msg size can not change")
 				break
 			}
 
@@ -140,7 +130,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 
 			payloadLength := uint32(msgHeader[3])<<16 + uint32(msgHeader[4])<<8 + uint32(msgHeader[5])
 			if payload.SizeTmp > 0 && payloadLength != chunk.MsgHeader.PayloadLength {
-				err = fmt.Errorf("RTMP_FMT_TYPE1: msg has in chunk, msg size can not change.")
+				err = fmt.Errorf("RTMP_FMT_TYPE1: msg has in chunk, msg size can not change")
 				break
 			}
 
@@ -169,7 +159,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		//read extend timestamp
 		if chunk.HasExtendedTimestamp {
 			var buf [4]uint8
-			err = rc.TcpConn.ExpectBytesFull(buf[:], 4, timeOutUs)
+			err = rc.TcpConn.ExpectBytesFull(buf[:], 4)
 			if err != nil {
 				break
 			}
@@ -204,7 +194,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 			remainPayloadSize = rc.InChunkSize
 		}
 
-		err = rc.TcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize, timeOutUs)
+		err = rc.TcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize)
 		if err != nil {
 			break
 		} else {

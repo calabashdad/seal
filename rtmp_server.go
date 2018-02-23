@@ -47,8 +47,7 @@ func (rs *RtmpServer) Start() {
 func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
 	return &co.RtmpConn{
 		TcpConn: &kernel.TcpSock{
-			Conn:    c,
-			TimeOut: conf.GlobalConfInfo.Rtmp.TimeOut,
+			Conn: c,
 		},
 		ChunkStreams: make(map[uint32]*pt.ChunkStream),
 		InChunkSize:  pt.RTMP_DEFAULT_CHUNK_SIZE,

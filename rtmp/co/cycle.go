@@ -43,6 +43,9 @@ func (rc *RtmpConn) Cycle() {
 		}
 	}()
 
+	rc.TcpConn.SetRecvTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
+	rc.TcpConn.SetSendTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
+
 	var err error
 
 	err = rc.handShake()
@@ -57,7 +60,7 @@ func (rc *RtmpConn) Cycle() {
 		//one msg allock once, and do not copy.
 		msg := &pt.Message{}
 
-		err = rc.RecvMsg(&msg.Header, &msg.Payload, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+		err = rc.RecvMsg(&msg.Header, &msg.Payload)
 		if err != nil {
 			break
 		}

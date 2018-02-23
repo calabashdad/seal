@@ -7,15 +7,25 @@ import (
 	"time"
 )
 
+// TcpSock socket
 type TcpSock struct {
 	net.Conn
-	TimeOut      uint32
+	recvTimeOut  uint32
+	sendTimeOut  uint32
 	RecvBytesSum uint64
 }
 
-func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32, timeOutUs uint32) (err error) {
+func (conn *TcpSock) SetRecvTimeout(timeoutUs uint32) {
+	conn.recvTimeOut = timeoutUs
+}
 
-	err = conn.SetDeadline(time.Now().Add(time.Duration(timeOutUs) * time.Microsecond))
+func (conn *TcpSock) SetSendTimeout(timeoutUs uint32) {
+	conn.sendTimeOut = timeoutUs
+}
+
+func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32) (err error) {
+
+	err = conn.SetDeadline(time.Now().Add(time.Duration(conn.recvTimeOut) * time.Microsecond))
 	if err != nil {
 		return
 	}
@@ -30,9 +40,9 @@ func (conn *TcpSock) ExpectBytesFull(buf []uint8, size uint32, timeOutUs uint32)
 	return
 }
 
-func (conn *TcpSock) SendBytes(buf []uint8, timeOutUs uint32) (err error) {
+func (conn *TcpSock) SendBytes(buf []uint8) (err error) {
 
-	err = conn.SetDeadline(time.Now().Add(time.Duration(timeOutUs) * time.Microsecond))
+	err = conn.SetDeadline(time.Now().Add(time.Duration(conn.sendTimeOut) * time.Microsecond))
 	if err != nil {
 		return
 	}
@@ -43,7 +53,7 @@ func (conn *TcpSock) SendBytes(buf []uint8, timeOutUs uint32) (err error) {
 	}
 
 	if n != len(buf) {
-		err = fmt.Errorf("tcp sock, send bytes error, need send ", len(buf), ",actually send ", n)
+		err = fmt.Errorf("tcp sock, send bytes error, need send %d, actually send %d", len(buf), n)
 		return
 	}
 
