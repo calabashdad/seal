@@ -49,12 +49,12 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		}
 
 		chunk.Fmt = chunkFmt
-		chunk.CsId = csid
+		chunk.CsID = csid
 		chunk.MsgHeader.PerferCsid = csid
 
 		//read message header
 		if 0 == chunk.MsgCount && chunk.Fmt != pt.RTMP_FMT_TYPE0 {
-			if pt.RTMP_CID_ProtocolControl == chunk.CsId && pt.RTMP_FMT_TYPE1 == chunk.Fmt {
+			if pt.RTMP_CID_ProtocolControl == chunk.CsID && pt.RTMP_FMT_TYPE1 == chunk.Fmt {
 				// for librtmp, if ping, it will send a fresh stream with fmt=1,
 				// 0x42             where: fmt=1, cid=2, protocol contorl user-control message
 				// 0x00 0x00 0x00   where: timestamp=0

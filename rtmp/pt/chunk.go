@@ -1,9 +1,7 @@
 package pt
 
-/**
-* incoming chunk stream maybe interlaced,
-* use the chunk stream to cache the input RTMP chunk streams.
- */
+// ChunkStream incoming chunk stream maybe interlaced,
+// use the chunk stream to cache the input RTMP chunk streams.
 type ChunkStream struct {
 	/**
 	 * represents the basic header fmt,
@@ -14,7 +12,7 @@ type ChunkStream struct {
 	 * represents the basic header cs_id,
 	 * which is the chunk stream id.
 	 */
-	CsId uint32
+	CsID uint32
 	/**
 	 * cached message header
 	 */

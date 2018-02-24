@@ -16,15 +16,22 @@ func (pkt *OnStatusDataPacket) Decode(data []uint8) (err error) {
 	//nothing
 	return
 }
+
 func (pkt *OnStatusDataPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
 	data = append(data, amf0WriteObject(pkt.Data)...)
 
 	return
 }
+
 func (pkt *OnStatusDataPacket) GetMessageType() uint8 {
 	return RTMP_MSG_AMF0DataMessage
 }
+
 func (pkt *OnStatusDataPacket) GetPreferCsId() uint32 {
 	return RTMP_CID_OverStream
+}
+
+func (pkt *OnStatusDataPacket) AddObj(obj *Amf0Object) {
+	pkt.Data = append(pkt.Data, *obj)
 }

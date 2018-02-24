@@ -24,6 +24,7 @@ func (pkt *OnStatusCallPacket) Decode(data []uint8) (err error) {
 	//nothing
 	return
 }
+
 func (pkt *OnStatusCallPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
 	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
@@ -32,9 +33,15 @@ func (pkt *OnStatusCallPacket) Encode() (data []uint8) {
 
 	return
 }
+
 func (pkt *OnStatusCallPacket) GetMessageType() uint8 {
 	return RTMP_MSG_AMF0CommandMessage
 }
+
 func (pkt *OnStatusCallPacket) GetPreferCsId() uint32 {
 	return RTMP_CID_OverStream
+}
+
+func (pkt *OnStatusCallPacket) AddObj(obj *Amf0Object) {
+	pkt.Data = append(pkt.Data, *obj)
 }

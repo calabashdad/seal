@@ -33,6 +33,7 @@ var (
 	handshakeServerPartialKey = handshakeServerFullKey[:36]
 )
 
+// ComplexHandShake complex handshake method
 func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) (err error) {
 
 	clientTime := binary.BigEndian.Uint32(c1[0:4])
@@ -48,11 +49,15 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) (err error
 		//failed try key-digest scheme
 		c1Digest764_2 := c1[8+764 : 8+764+764]
 		if ok2, digest2 := IsKeyDigestScheme(c1, c1Digest764_2); !ok2 {
-			err = fmt.Errorf("ComplexHandShake verify both digest-key scheme and key-digest failed.")
-			return
+			err = fmt.Errorf("ComplexHandShake verify both digest-key scheme and key-digest failed")
 		} else {
 			serverDigestForS2 = digest2
 		}
+
+		if nil != err {
+			return
+		}
+
 	} else {
 		serverDigestForS2 = digest
 	}
@@ -61,7 +66,7 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) (err error
 	s0[0] = 3
 
 	//create s1
-	CreateS1(s1, handshakeServerPartialKey)
+	createS1(s1, handshakeServerPartialKey)
 
 	//create s2.
 	CreateS2(s2, serverDigestForS2)
@@ -69,7 +74,7 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) (err error
 	return
 }
 
-func CreateS1(s1 []uint8, key []uint8) {
+func createS1(s1 []uint8, key []uint8) {
 
 	//create s1. time(4B) version(4B) [digest]{random} [key]{random}
 	var offset uint32

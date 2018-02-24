@@ -8,10 +8,20 @@ import (
 	"math"
 )
 
+// Amf0Object amf0object
 type Amf0Object struct {
-	PropertyName string
-	Value        interface{}
-	ValueType    uint8 //just for help known type.
+	propertyName string
+	value        interface{}
+	valueType    uint8 //just for help known type.
+}
+
+// NewAmf0Object create a new amf0Object
+func NewAmf0Object(propertyName string, value interface{}, valueType uint8) *Amf0Object {
+	return &Amf0Object{
+		propertyName: propertyName,
+		value:        value,
+		valueType:    valueType,
+	}
 }
 
 type amf0EcmaArray struct {
@@ -131,31 +141,32 @@ func amf0ReadAny(data []uint8, marker *uint8, offset *uint32) (value interface{}
 }
 
 func amf0WriteAny(any Amf0Object) (data []uint8) {
-	switch any.ValueType {
+	switch any.valueType {
 	case RTMP_AMF0_String:
-		data = amf0WriteString(any.Value.(string))
+		data = amf0WriteString(any.value.(string))
 	case RTMP_AMF0_Boolean:
-		data = amf0WriteBool(any.Value.(bool))
+		data = amf0WriteBool(any.value.(bool))
 	case RTMP_AMF0_Number:
-		data = amf0WriteNumber(any.Value.(float64))
+		data = amf0WriteNumber(any.value.(float64))
 	case RTMP_AMF0_Null:
 		data = amf0WriteNull()
 	case RTMP_AMF0_Undefined:
 		data = amf0WriteUndefined()
 	case RTMP_AMF0_Object:
-		data = amf0WriteObject(any.Value.([]Amf0Object))
+		data = amf0WriteObject(any.value.([]Amf0Object))
 	case RTMP_AMF0_LongString:
-		data = amf0WriteLongString(any.Value.(string))
+		data = amf0WriteLongString(any.value.(string))
 	case RTMP_AMF0_EcmaArray:
-		data = amf0WriteEcmaArray(any.Value.(amf0EcmaArray))
+		data = amf0WriteEcmaArray(any.value.(amf0EcmaArray))
 	case RTMP_AMF0_StrictArray:
-		data = amf0WriteStrictArray(any.Value.([]Amf0Object))
+		data = amf0WriteStrictArray(any.value.([]Amf0Object))
 	default:
-		log.Println("Amf0WriteAny: unknown type.", any.ValueType)
+		log.Println("Amf0WriteAny: unknown type.", any.valueType)
 	}
 	return
 }
 
+// Amf0ReadString read amf0 string
 func Amf0ReadString(data []uint8, offset *uint32) (value string, err error) {
 
 	if (uint32(len(data)) - *offset) < 1 {
@@ -164,7 +175,7 @@ func Amf0ReadString(data []uint8, offset *uint32) (value string, err error) {
 	}
 
 	marker := data[*offset]
-	*offset += 1
+	*offset++
 
 	if RTMP_AMF0_String != marker {
 		err = fmt.Errorf("Amf0ReadString: RTMP_AMF0_String != marker")
@@ -184,6 +195,7 @@ func amf0WriteString(value string) (data []uint8) {
 	return
 }
 
+// Amf0ReadNumber read amf0 number
 func Amf0ReadNumber(data []uint8, offset *uint32) (value float64, err error) {
 
 	if (uint32(len(data)) - *offset) < 1 {
@@ -192,7 +204,7 @@ func Amf0ReadNumber(data []uint8, offset *uint32) (value float64, err error) {
 	}
 
 	marker := data[*offset]
-	*offset += 1
+	*offset++
 
 	if RTMP_AMF0_Number != marker {
 		err = fmt.Errorf("Amf0ReadNumber: RTMP_AMF0_Number != marker")
@@ -204,10 +216,10 @@ func Amf0ReadNumber(data []uint8, offset *uint32) (value float64, err error) {
 		return
 	}
 
-	value_tmp := binary.BigEndian.Uint64(data[*offset : *offset+8])
+	valueTmp := binary.BigEndian.Uint64(data[*offset : *offset+8])
 	*offset += 8
 
-	value = math.Float64frombits(value_tmp)
+	value = math.Float64frombits(valueTmp)
 
 	return
 }
@@ -218,7 +230,7 @@ func amf0WriteNumber(value float64) (data []uint8) {
 	var offset uint32
 
 	data[offset] = RTMP_AMF0_Number
-	offset += 1
+	offset++
 
 	v2 := math.Float64bits(value)
 	binary.BigEndian.PutUint64(data[offset:offset+8], v2)
@@ -235,7 +247,7 @@ func amf0ReadObject(data []uint8, offset *uint32) (amf0objects []Amf0Object, err
 	}
 
 	marker := data[*offset]
-	*offset += 1
+	*offset++
 
 	if RTMP_AMF0_Object != marker {
 		err = fmt.Errorf("error: Amf0ReadObject:RTMP_AMF0_Object != marker")
@@ -253,12 +265,12 @@ func amf0ReadObject(data []uint8, offset *uint32) (amf0objects []Amf0Object, err
 
 		var amf0object Amf0Object
 
-		amf0object.PropertyName, err = amf0ReadUtf8(data, offset)
+		amf0object.propertyName, err = amf0ReadUtf8(data, offset)
 		if err != nil {
 			break
 		}
 
-		amf0object.Value, err = amf0ReadAny(data, &amf0object.ValueType, offset)
+		amf0object.value, err = amf0ReadAny(data, &amf0object.valueType, offset)
 		if err != nil {
 			break
 		}
@@ -274,7 +286,7 @@ func amf0WriteObject(amf0objects []Amf0Object) (data []uint8) {
 	data = append(data, RTMP_AMF0_Object)
 
 	for _, v := range amf0objects {
-		data = append(data, amf0WriteUtf8(v.PropertyName)...)
+		data = append(data, amf0WriteUtf8(v.propertyName)...)
 		data = append(data, amf0WriteAny(v)...)
 	}
 
@@ -467,12 +479,12 @@ func amf0ReadEcmaArray(data []uint8, offset *uint32) (value amf0EcmaArray, err e
 		}
 
 		var amf Amf0Object
-		amf.PropertyName, err = amf0ReadUtf8(data, offset)
+		amf.propertyName, err = amf0ReadUtf8(data, offset)
 		if err != nil {
 			break
 		}
 
-		amf.Value, err = amf0ReadAny(data, &amf.ValueType, offset)
+		amf.value, err = amf0ReadAny(data, &amf.valueType, offset)
 		if err != nil {
 			break
 		}
@@ -495,7 +507,7 @@ func amf0WriteEcmaArray(arr amf0EcmaArray) (data []uint8) {
 	offset += 4
 
 	for _, v := range arr.anyObject {
-		data = append(data, amf0WriteUtf8(v.PropertyName)...)
+		data = append(data, amf0WriteUtf8(v.propertyName)...)
 		data = append(data, amf0WriteAny(v)...)
 	}
 

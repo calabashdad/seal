@@ -84,3 +84,7 @@ func (pkt *ConnectResPacket) GetMessageType() uint8 {
 func (pkt *ConnectResPacket) GetPreferCsId() uint32 {
 	return RTMP_CID_OverConnection
 }
+
+func (pkt *ConnectResPacket) AddProsObj(obj *Amf0Object) {
+	pkt.Props = append(pkt.Props, *obj)
+}

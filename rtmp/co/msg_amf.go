@@ -178,83 +178,19 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	pkt.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
 	pkt.TransactionId = 1
 
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: "fmsVer",
-		Value:        "FMS/" + pt.FMS_VERSION,
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: "capabilities",
-		Value:        127.0,
-		ValueType:    pt.RTMP_AMF0_Number,
-	})
-
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: "mode",
-		Value:        1.0,
-		ValueType:    pt.RTMP_AMF0_Number,
-	})
-
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: pt.StatusLevel,
-		Value:        pt.StatusLevelStatus,
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: pt.StatusCode,
-		Value:        pt.StatusCodeConnectSuccess,
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: pt.StatusDescription,
-		Value:        "Connection succeeded",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Props = append(pkt.Props, pt.Amf0Object{
-		PropertyName: "objectEncoding",
-		Value:        rc.connectInfo.objectEncoding,
-		ValueType:    pt.RTMP_AMF0_Number,
-	})
-
-	pkt.Info = append(pkt.Info, pt.Amf0Object{
-		PropertyName: "version",
-		Value:        pt.FMS_VERSION,
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Info = append(pkt.Info, pt.Amf0Object{
-		PropertyName: "seal_license",
-		Value:        "The MIT License (MIT)",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Info = append(pkt.Info, pt.Amf0Object{
-		PropertyName: "seal_authors",
-		Value:        "YangKai",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Info = append(pkt.Info, pt.Amf0Object{
-		PropertyName: "seal_email",
-		Value:        "beyondyangkai@gmail.com",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Info = append(pkt.Info, pt.Amf0Object{
-		PropertyName: "seal_copyright",
-		Value:        "Copyright (c) 2018 YangKai",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	pkt.Info = append(pkt.Info, pt.Amf0Object{
-		PropertyName: "seal_sig",
-		Value:        "seal",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
+	pkt.AddProsObj(pt.NewAmf0Object("fmsVer", "FMS/"+pt.FMS_VERSION, pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("capabilities", 127.0, pt.RTMP_AMF0_Number))
+	pkt.AddProsObj(pt.NewAmf0Object("mode", 1.0, pt.RTMP_AMF0_Number))
+	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeConnectSuccess, pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusDescription, "Connection succeeded", pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("objectEncoding", rc.connectInfo.objectEncoding, pt.RTMP_AMF0_Number))
+	pkt.AddProsObj(pt.NewAmf0Object("version", pt.FMS_VERSION, pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_license", "The MIT License (MIT)", pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_authors", "YangKai", pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_email", "beyondyangkai@gmail.com", pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_copyright", "Copyright (c) 2018 YangKai", pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_sig", "seal", pt.RTMP_AMF0_String))
 
 	if err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		log.Println("response connect error.", err)
@@ -350,33 +286,11 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	if true {
 		var pp pt.OnStatusCallPacket
 		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusLevel,
-			Value:        pt.StatusLevelStatus,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusCode,
-			Value:        pt.StatusCodeStreamReset,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDescription,
-			Value:        "Playing and resetting stream.",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDetails,
-			Value:        "stream",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusClientId,
-			Value:        pt.RTMP_SIG_CLIENT_ID,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
+		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamReset, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Playing and resetting stream.", pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusClientId, pt.RTMP_SIG_CLIENT_ID, pt.RTMP_AMF0_String))
 
 		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -390,35 +304,11 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		var pp pt.OnStatusCallPacket
 		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
 
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusLevel,
-			Value:        pt.StatusLevelStatus,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusCode,
-			Value:        pt.StatusCodeStreamStart,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDescription,
-			Value:        "Started playing stream.",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDetails,
-			Value:        "stream",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusClientId,
-			Value:        pt.RTMP_SIG_CLIENT_ID,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
+		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamStart, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream.", pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusClientId, pt.RTMP_SIG_CLIENT_ID, pt.RTMP_AMF0_String))
 
 		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -445,23 +335,10 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	if true {
 		var pp pt.OnStatusDataPacket
 		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusLevel,
-			Value:        pt.StatusLevelStatus,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
 
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusCode,
-			Value:        pt.StatusCodeDataStart,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		pp.Data = append(pp.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDescription,
-			Value:        "Started playing stream data.",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
+		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeDataStart, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream data.", pt.RTMP_AMF0_String))
 
 		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -639,16 +516,8 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 
 	var pp pt.OnStatusCallPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
-	pp.Data = append(pp.Data, pt.Amf0Object{
-		PropertyName: pt.StatusCode,
-		Value:        pt.StatusCodePublishStart,
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-	pp.Data = append(pp.Data, pt.Amf0Object{
-		PropertyName: pt.StatusDescription,
-		Value:        "Started publishing stream.",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
+	pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodePublishStart, pt.RTMP_AMF0_String))
+	pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started publishing stream.", pt.RTMP_AMF0_String))
 
 	if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
@@ -708,23 +577,9 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	log.Println("decode meta data success, meta=", p)
 
 	//add server info to metadata
-	p.AddObject(pt.Amf0Object{
-		PropertyName: "server",
-		Value:        "seal rtmp server",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	p.AddObject(pt.Amf0Object{
-		PropertyName: "primary",
-		Value:        "YangKai",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
-
-	p.AddObject(pt.Amf0Object{
-		PropertyName: "author",
-		Value:        "YangKai",
-		ValueType:    pt.RTMP_AMF0_String,
-	})
+	p.AddObject(*pt.NewAmf0Object("server", "seal rtmp server", pt.RTMP_AMF0_String))
+	p.AddObject(*pt.NewAmf0Object("primary", "YangKai", pt.RTMP_AMF0_String))
+	p.AddObject(*pt.NewAmf0Object("author", "YangKai", pt.RTMP_AMF0_String))
 
 	if v := p.GetProperty("audiosamplerate"); v != nil {
 		rc.source.sampleRate = v.(float64)

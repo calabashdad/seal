@@ -151,23 +151,9 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 		p := pt.OnStatusCallPacket{}
 		p.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
 
-		p.Data = append(p.Data, pt.Amf0Object{
-			PropertyName: pt.StatusLevel,
-			Value:        pt.StatusLevelStatus,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		p.Data = append(p.Data, pt.Amf0Object{
-			PropertyName: pt.StatusCode,
-			Value:        pt.StatusCodeStreamPause,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		p.Data = append(p.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDescription,
-			Value:        "Paused stream.",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
+		p.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamPause, pt.RTMP_AMF0_String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Paused stream.", pt.RTMP_AMF0_String))
 
 		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -190,23 +176,9 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 		p := pt.OnStatusCallPacket{}
 		p.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
 
-		p.Data = append(p.Data, pt.Amf0Object{
-			PropertyName: pt.StatusLevel,
-			Value:        pt.StatusLevelStatus,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		p.Data = append(p.Data, pt.Amf0Object{
-			PropertyName: pt.StatusCode,
-			Value:        pt.StatusCodeStreamUnpause,
-			ValueType:    pt.RTMP_AMF0_String,
-		})
-
-		p.Data = append(p.Data, pt.Amf0Object{
-			PropertyName: pt.StatusDescription,
-			Value:        "UnPaused stream.",
-			ValueType:    pt.RTMP_AMF0_String,
-		})
+		p.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamUnpause, pt.RTMP_AMF0_String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "UnPaused stream.", pt.RTMP_AMF0_String))
 
 		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return

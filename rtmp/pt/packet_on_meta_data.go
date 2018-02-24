@@ -72,14 +72,14 @@ func (pkt *OnMetaDataPacket) GetProperty(name string) interface{} {
 
 	if RTMP_AMF0_Object == pkt.Marker {
 		for _, v := range pkt.Metadata.([]Amf0Object) {
-			if name == v.PropertyName {
-				return v.Value
+			if name == v.propertyName {
+				return v.value
 			}
 		}
 	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
 		for _, v := range (pkt.Metadata.(amf0EcmaArray)).anyObject {
-			if name == v.PropertyName {
-				return v.Value
+			if name == v.propertyName {
+				return v.value
 			}
 		}
 	}

@@ -31,8 +31,8 @@ type ConnectPacket struct {
 func (pkt *ConnectPacket) GetObjectProperty(name string) (value interface{}) {
 
 	for _, v := range pkt.CommandObject {
-		if name == v.PropertyName {
-			return v.Value
+		if name == v.propertyName {
+			return v.value
 		}
 	}
 
