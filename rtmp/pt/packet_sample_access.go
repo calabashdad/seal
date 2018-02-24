@@ -21,9 +21,9 @@ func (pkt *SampleAccessPacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *SampleAccessPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteBool(pkt.VideoSampleAccess)...)
-	data = append(data, Amf0WriteBool(pkt.AudioSampleAccess)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteBool(pkt.VideoSampleAccess)...)
+	data = append(data, amf0WriteBool(pkt.AudioSampleAccess)...)
 
 	return
 }

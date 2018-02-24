@@ -40,14 +40,14 @@ func (pkt *CallResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	pkt.CommandObject, err = Amf0ReadAny(data, &pkt.CommandObjectMarker, &offset)
+	pkt.CommandObject, err = amf0ReadAny(data, &pkt.CommandObjectMarker, &offset)
 	if err != nil {
 		return
 	}
 
 	maxOffset := uint32(len(data)) - 1
 	if maxOffset-offset > 0 {
-		pkt.Response, err = Amf0ReadAny(data, &pkt.ResponseMarker, &offset)
+		pkt.Response, err = amf0ReadAny(data, &pkt.ResponseMarker, &offset)
 		if err != nil {
 			return
 		}
@@ -58,14 +58,14 @@ func (pkt *CallResPacket) Decode(data []uint8) (err error) {
 }
 
 func (pkt *CallResPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
 	if nil != pkt.CommandObject {
-		data = append(data, Amf0WriteAny(pkt.CommandObject.(Amf0Object))...)
+		data = append(data, amf0WriteAny(pkt.CommandObject.(Amf0Object))...)
 	}
 
 	if nil != pkt.Response {
-		data = append(data, Amf0WriteAny(pkt.Response.(Amf0Object))...)
+		data = append(data, amf0WriteAny(pkt.Response.(Amf0Object))...)
 	}
 
 	return

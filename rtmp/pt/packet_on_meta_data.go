@@ -33,7 +33,7 @@ func (pkt *OnMetaDataPacket) Decode(data []uint8) (err error) {
 		}
 	}
 
-	pkt.Metadata, err = Amf0ReadAny(data, &pkt.Marker, &offset)
+	pkt.Metadata, err = amf0ReadAny(data, &pkt.Marker, &offset)
 	if err != nil {
 		return
 	}
@@ -41,11 +41,11 @@ func (pkt *OnMetaDataPacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *OnMetaDataPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.Name)...)
+	data = append(data, amf0WriteString(pkt.Name)...)
 	if RTMP_AMF0_Object == pkt.Marker {
-		data = append(data, Amf0WriteObject(pkt.Metadata.([]Amf0Object))...)
+		data = append(data, amf0WriteObject(pkt.Metadata.([]Amf0Object))...)
 	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
-		data = append(data, Amf0WriteEcmaArray(pkt.Metadata.(Amf0EcmaArray))...)
+		data = append(data, amf0WriteEcmaArray(pkt.Metadata.(amf0EcmaArray))...)
 	}
 
 	return
@@ -61,7 +61,7 @@ func (pkt *OnMetaDataPacket) AddObject(obj Amf0Object) {
 	if RTMP_AMF0_Object == pkt.Marker {
 		pkt.Metadata = append(pkt.Metadata.([]Amf0Object), obj)
 	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
-		v := pkt.Metadata.(Amf0EcmaArray)
+		v := pkt.Metadata.(amf0EcmaArray)
 		v.addObject(obj)
 
 		pkt.Metadata = v
@@ -77,7 +77,7 @@ func (pkt *OnMetaDataPacket) GetProperty(name string) interface{} {
 			}
 		}
 	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
-		for _, v := range (pkt.Metadata.(Amf0EcmaArray)).anyObject {
+		for _, v := range (pkt.Metadata.(amf0EcmaArray)).anyObject {
 			if name == v.PropertyName {
 				return v.Value
 			}

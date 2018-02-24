@@ -62,7 +62,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	pkt.CommandObject, err = Amf0ReadObject(data, &offset)
+	pkt.CommandObject, err = amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
@@ -70,7 +70,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	if uint32(len(data))-offset > 0 {
 		var marker uint8
 		var v interface{}
-		v, err = Amf0ReadAny(data, &marker, &offset)
+		v, err = amf0ReadAny(data, &marker, &offset)
 		if err != nil {
 			return
 		}
@@ -83,11 +83,11 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *ConnectPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteObject(pkt.CommandObject)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteObject(pkt.CommandObject)...)
 	if len(pkt.Args) > 0 {
-		data = append(data, Amf0WriteObject(pkt.Args)...)
+		data = append(data, amf0WriteObject(pkt.Args)...)
 	}
 
 	return

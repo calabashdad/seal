@@ -28,7 +28,7 @@ func (pkt *CloseStreamPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err = Amf0ReadNull(data, &offset)
+	err = amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}

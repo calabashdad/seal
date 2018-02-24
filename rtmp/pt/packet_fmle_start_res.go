@@ -39,12 +39,12 @@ func (pkt *FmleStartResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err = Amf0ReadNull(data, &offset)
+	err = amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
 
-	err = Amf0ReadUndefined(data, &offset)
+	err = amf0ReadUndefined(data, &offset)
 	if err != nil {
 		return
 	}
@@ -54,10 +54,10 @@ func (pkt *FmleStartResPacket) Decode(data []uint8) (err error) {
 
 func (pkt *FmleStartResPacket) Encode() (data []uint8) {
 
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteUndefined()...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNull()...)
+	data = append(data, amf0WriteUndefined()...)
 
 	return
 }

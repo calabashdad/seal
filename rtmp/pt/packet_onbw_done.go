@@ -20,9 +20,9 @@ func (pkt *OnBwDonePacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *OnBwDonePacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteNull()...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNull()...)
 
 	return
 }

@@ -49,12 +49,12 @@ func (pkt *PausePacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err = Amf0ReadNull(data, &offset)
+	err = amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
 
-	pkt.IsPause, err = Amf0ReadBool(data, &offset)
+	pkt.IsPause, err = amf0ReadBool(data, &offset)
 	if err != nil {
 		return
 	}

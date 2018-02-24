@@ -54,12 +54,12 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	pkt.Props, err = Amf0ReadObject(data, &offset)
+	pkt.Props, err = amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
 
-	pkt.Info, err = Amf0ReadObject(data, &offset)
+	pkt.Info, err = amf0ReadObject(data, &offset)
 	if err != nil {
 		return
 	}
@@ -69,10 +69,10 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 
 func (pkt *ConnectResPacket) Encode() (data []uint8) {
 
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteObject(pkt.Props)...)
-	data = append(data, Amf0WriteObject(pkt.Info)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteObject(pkt.Props)...)
+	data = append(data, amf0WriteObject(pkt.Info)...)
 
 	return
 }

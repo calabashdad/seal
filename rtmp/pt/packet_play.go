@@ -91,7 +91,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err = Amf0ReadNull(data, &offset)
+	err = amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 
 		var v interface{}
 		var marker uint8
-		v, err = Amf0ReadAny(data, &marker, &offset)
+		v, err = amf0ReadAny(data, &marker, &offset)
 		if err != nil {
 			return
 		}
@@ -148,13 +148,13 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 }
 func (pkt *PlayPacket) Encode() (data []uint8) {
 
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteString(pkt.StreamName)...)
-	data = append(data, Amf0WriteNumber(pkt.Start)...)
-	data = append(data, Amf0WriteNumber(pkt.Duration)...)
-	data = append(data, Amf0WriteBool(pkt.Reset)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNull()...)
+	data = append(data, amf0WriteString(pkt.StreamName)...)
+	data = append(data, amf0WriteNumber(pkt.Start)...)
+	data = append(data, amf0WriteNumber(pkt.Duration)...)
+	data = append(data, amf0WriteBool(pkt.Reset)...)
 
 	return
 }

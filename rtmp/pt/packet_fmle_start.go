@@ -52,7 +52,7 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err = Amf0ReadNull(data, &offset)
+	err = amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
@@ -74,10 +74,10 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 	return
 }
 func (pkt *FmleStartPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteString(pkt.StreamName)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNull()...)
+	data = append(data, amf0WriteString(pkt.StreamName)...)
 
 	return
 }

@@ -39,13 +39,13 @@ func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	err = Amf0ReadNull(data, &offset)
+	err = amf0ReadNull(data, &offset)
 	if err != nil {
 		return
 	}
 
 	if pkt.isStopPlay() || pkt.isStopPublish() || pkt.isFinish() {
-		pkt.Data, err = Amf0ReadObject(data, &offset)
+		pkt.Data, err = amf0ReadObject(data, &offset)
 		if err != nil {
 			return
 		}
@@ -66,10 +66,10 @@ func (pkt *BandWidthPacket) isFinish() bool {
 	return SRS_BW_CHECK_FINISHED == pkt.CommandName
 }
 func (pkt *BandWidthPacket) Encode() (data []uint8) {
-	data = append(data, Amf0WriteString(pkt.CommandName)...)
-	data = append(data, Amf0WriteNumber(pkt.TransactionId)...)
-	data = append(data, Amf0WriteNull()...)
-	data = append(data, Amf0WriteObject(pkt.Data)...)
+	data = append(data, amf0WriteString(pkt.CommandName)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNull()...)
+	data = append(data, amf0WriteObject(pkt.Data)...)
 
 	return
 }
