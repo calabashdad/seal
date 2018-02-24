@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"seal/rtmp/pt"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 )
 
 //RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.

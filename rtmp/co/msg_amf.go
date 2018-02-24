@@ -5,7 +5,8 @@ import (
 	"log"
 	"seal/conf"
 	"seal/rtmp/pt"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 )
 
 func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {

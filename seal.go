@@ -7,7 +7,8 @@ import (
 	"seal/conf"
 	"sync"
 	"time"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 )
 
 const sealVersion = "seal: 1.0.0"
@@ -18,7 +19,7 @@ var (
 )
 
 var (
-	gWgServers sync.WaitGroup
+	gGuards sync.WaitGroup
 )
 
 func init() {
@@ -52,13 +53,13 @@ func main() {
 
 	log.Println("load conf file success, conf=", conf.GlobalConfInfo)
 
-	gWgServers.Add(1)
+	gGuards.Add(1)
 	if true {
 		rtmpServer := RtmpServer{}
 
 		rtmpServer.Start()
 	}
 
-	gWgServers.Wait()
+	gGuards.Wait()
 	log.Println("seal quit gracefully.")
 }

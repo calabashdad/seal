@@ -5,7 +5,8 @@ import (
 	"seal/conf"
 	"seal/kernel"
 	"seal/rtmp/pt"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 )
 
 type AckWindowSizeS struct {

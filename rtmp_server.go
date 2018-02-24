@@ -7,7 +7,8 @@ import (
 	"seal/kernel"
 	"seal/rtmp/co"
 	"seal/rtmp/pt"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 )
 
 type RtmpServer struct {
@@ -19,7 +20,7 @@ func (rs *RtmpServer) Start() {
 			log.Println(utiltools.PanicTrace())
 		}
 
-		gWgServers.Done()
+		gGuards.Done()
 	}()
 
 	listener, err := net.Listen("tcp", ":"+conf.GlobalConfInfo.Rtmp.Listen)

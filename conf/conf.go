@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 
 	"github.com/yaml"
 )

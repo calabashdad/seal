@@ -4,7 +4,8 @@ import (
 	"encoding/binary"
 	"log"
 	"seal/rtmp/pt"
-	"utiltools"
+
+	"github.com/calabashdad/utiltools"
 )
 
 func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
@@ -109,26 +110,29 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			}
 		}
 
-		//send header
-		err = rc.TcpConn.SendBytes(header[:headerOffset])
-		if err != nil {
-			log.Println("send msg header failed.")
-			return
-		}
+		if true {
+			//send header
+			err = rc.TcpConn.SendBytes(header[:headerOffset])
+			if err != nil {
+				log.Println("send msg header failed.")
+				return
+			}
 
-		//payload
-		payloadSize := msg.Header.PayloadLength - payloadOffset
-		if payloadSize > rc.OutChunkSize {
-			payloadSize = rc.OutChunkSize
-		}
+			//payload
+			payloadSize := msg.Header.PayloadLength - payloadOffset
+			if payloadSize > rc.OutChunkSize {
+				payloadSize = rc.OutChunkSize
+			}
 
-		err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset:payloadOffset+payloadSize])
-		if err != nil {
-			log.Println("send msg payload failed.")
-			return
-		}
+			err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize])
+			if err != nil {
+				log.Println("send msg payload failed.")
+				return
+			}
 
-		payloadOffset += payloadSize
+			payloadOffset += payloadSize
+
+		}
 	}
 
 	return
