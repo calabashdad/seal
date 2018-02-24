@@ -4,6 +4,7 @@ import (
 	"seal/rtmp/pt"
 )
 
+// AudioIsSequenceHeader judge audio is aac sequence header
 func AudioIsSequenceHeader(data []uint8) bool {
 
 	if !audioIsAAC(data) {
@@ -31,18 +32,20 @@ func audioIsAAC(data []uint8) bool {
 	return soundFormat == pt.SrsCodecAudioAAC
 }
 
+// VideoIsH264 judge video is h264 sequence header
 func VideoIsH264(data []uint8) bool {
 
 	if len(data) < 1 {
 		return false
 	}
 
-	codecId := data[0]
-	codecId &= 0x0f
+	codecID := data[0]
+	codecID &= 0x0f
 
-	return pt.SrsCodecVideoAVC == codecId
+	return pt.SrsCodecVideoAVC == codecID
 }
 
+// VideoH264IsKeyframe judge video is h264 key frame
 func VideoH264IsKeyframe(data []uint8) bool {
 	// 2bytes required.
 	if len(data) < 2 {
@@ -55,6 +58,7 @@ func VideoH264IsKeyframe(data []uint8) bool {
 	return frameType == pt.SrsCodecVideoAVCFrameKeyFrame
 }
 
+// VideoH264IsSequenceHeaderAndKeyFrame judge video is h264 sequence header and key frame
 func VideoH264IsSequenceHeaderAndKeyFrame(data []uint8) bool {
 	// sequence header only for h264
 	if !VideoIsH264(data) {
@@ -74,6 +78,7 @@ func VideoH264IsSequenceHeaderAndKeyFrame(data []uint8) bool {
 	return frameType == pt.SrsCodecVideoAVCFrameKeyFrame && avcPacketType == pt.SrsCodecVideoAVCTypeSequenceHeader
 }
 
+// VideoH264IsSpspps judge video is spspps
 func VideoH264IsSpspps(data []uint8) bool {
 	// sequence header only for h264
 	if !VideoIsH264(data) {

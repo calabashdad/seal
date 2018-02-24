@@ -4,17 +4,15 @@ import (
 	"log"
 	"net"
 	"seal/conf"
-	"seal/kernel"
 	"seal/rtmp/co"
-	"seal/rtmp/pt"
 
 	"github.com/calabashdad/utiltools"
 )
 
-type RtmpServer struct {
+type rtmpServer struct {
 }
 
-func (rs *RtmpServer) Start() {
+func (rs *rtmpServer) Start() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
@@ -42,22 +40,6 @@ func (rs *RtmpServer) Start() {
 	}
 }
 
-func (rtmp_server *RtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
-	return &co.RtmpConn{
-		TcpConn: &kernel.TcpSock{
-			Conn: c,
-		},
-		ChunkStreams: make(map[uint32]*pt.ChunkStream),
-		InChunkSize:  pt.RTMP_DEFAULT_CHUNK_SIZE,
-		OutChunkSize: pt.RTMP_DEFAULT_CHUNK_SIZE,
-		AckWindow: co.AckWindowSizeS{
-			AckWindowSize: 250000,
-		},
-		CmdRequests:     make(map[float64]string),
-		Role:            co.RtmpRoleUnknown,
-		DefaultStreamId: 1.0,
-		ConnectInfo: &co.ConnectInfoS{
-			ObjectEncoding: pt.RTMP_SIG_AMF0_VER,
-		},
-	}
+func (rs *rtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
+	return co.NewRtmpConnection(c)
 }

@@ -22,8 +22,7 @@ func (rc *RtmpConn) msgUserCtrl(msg *pt.Message) (err error) {
 	}
 
 	p := pt.UserControlPacket{}
-	err = p.Decode(msg.Payload.Payload)
-	if err != nil {
+	if err = p.Decode(msg.Payload.Payload); err != nil {
 		return
 	}
 
@@ -59,8 +58,7 @@ func (rc *RtmpConn) ctrlPingRequest(p *pt.UserControlPacket) (err error) {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCPingResponse
 		pp.EventData = p.EventData
-		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-		if err != nil {
+		if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
 		}
 

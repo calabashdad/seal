@@ -30,8 +30,7 @@ func (rc *RtmpConn) handShake() (err error) {
 	s0s1s2 := handshakeData[3073:6146]
 
 	//recv c0c1
-	err = rc.TcpConn.ExpectBytesFull(c0c1, 1537)
-	if err != nil {
+	if err = rc.tcpConn.ExpectBytesFull(c0c1, 1537); err != nil {
 		return
 	}
 
@@ -45,8 +44,7 @@ func (rc *RtmpConn) handShake() (err error) {
 	//parse c1
 	clientVer := binary.BigEndian.Uint32(c1[4:8])
 	if 0 != clientVer {
-		err = pt.ComplexHandShake(c1, s0, s1, s2)
-		if err != nil {
+		if err = pt.ComplexHandShake(c1, s0, s1, s2); err != nil {
 			return
 		}
 		log.Println("complex handshake success.")
@@ -60,14 +58,12 @@ func (rc *RtmpConn) handShake() (err error) {
 	}
 
 	//send s0s1s2
-	err = rc.TcpConn.SendBytes(s0s1s2)
-	if err != nil {
+	if err = rc.tcpConn.SendBytes(s0s1s2); err != nil {
 		return
 	}
 
 	//recv c2
-	err = rc.TcpConn.ExpectBytesFull(c2, uint32(len(c2)))
-	if err != nil {
+	if err = rc.tcpConn.ExpectBytesFull(c2, uint32(len(c2))); err != nil {
 		return
 	}
 

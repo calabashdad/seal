@@ -20,8 +20,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 	for {
 		//read basic header
 		var buf [3]uint8
-		err = rc.TcpConn.ExpectBytesFull(buf[:1], 1)
-		if err != nil {
+		if err = rc.tcpConn.ExpectBytesFull(buf[:1], 1); err != nil {
 			return
 		}
 
@@ -31,11 +30,11 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		switch csid {
 		case 0:
 			//csId 2 bytes. 64-319
-			err = rc.TcpConn.ExpectBytesFull(buf[1:2], 1)
+			err = rc.tcpConn.ExpectBytesFull(buf[1:2], 1)
 			csid = uint32(64 + buf[1])
 		case 1:
 			//csId 3 bytes. 64-65599
-			err = rc.TcpConn.ExpectBytesFull(buf[1:3], 2)
+			err = rc.tcpConn.ExpectBytesFull(buf[1:3], 2)
 			csid = uint32(64) + uint32(buf[1]) + uint32(buf[2])*256
 		}
 
@@ -43,10 +42,10 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 			break
 		}
 
-		chunk, ok := rc.ChunkStreams[csid]
+		chunk, ok := rc.chunkStreams[csid]
 		if !ok {
 			chunk = &pt.ChunkStream{}
-			rc.ChunkStreams[csid] = chunk
+			rc.chunkStreams[csid] = chunk
 		}
 
 		chunk.Fmt = chunkFmt
@@ -89,16 +88,16 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		}
 
 		var msgHeader [11]uint8 //max is 11
-		err = rc.TcpConn.ExpectBytesFull(msgHeader[:], msgHeaderSize)
+		err = rc.tcpConn.ExpectBytesFull(msgHeader[:], msgHeaderSize)
 		if err != nil {
 			break
 		}
 
-		//parse msg header
-		//*   3bytes: timestamp delta,    fmt=0,1,2
-		//*   3bytes: payload length,     fmt=0,1
-		//*   1bytes: message type,       fmt=0,1
-		//*   4bytes: stream id,          fmt=0
+		// parse msg header
+		// 3bytes: timestamp delta,    fmt=0,1,2
+		// 3bytes: payload length,     fmt=0,1
+		// 1bytes: message type,       fmt=0,1
+		// 4bytes: stream id,          fmt=0
 		switch chunk.Fmt {
 		case pt.RTMP_FMT_TYPE0:
 			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
@@ -157,11 +156,10 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 			break
 		}
 
-		//read extend timestamp
+		// read extend timestamp
 		if chunk.HasExtendedTimestamp {
 			var buf [4]uint8
-			err = rc.TcpConn.ExpectBytesFull(buf[:], 4)
-			if err != nil {
+			if err = rc.tcpConn.ExpectBytesFull(buf[:], 4); err != nil {
 				break
 			}
 
@@ -175,28 +173,25 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 				chunk.MsgHeader.Timestamp = uint64(extendTimeStamp)
 			}
 
-			//because of the flv file format is lower 24bits, and higher 8bit is SI32, so timestamp is
-			//31bit.
+			// because of the flv file format is lower 24bits, and higher 8bit is SI32, so timestamp is 31bit.
 			chunk.MsgHeader.Timestamp &= 0x7fffffff
-
 		}
 
 		chunk.MsgCount++
 
-		//make cache of msg
+		// make cache of msg
 		if uint32(len(payload.Payload)) < chunk.MsgHeader.PayloadLength {
 			payload.Payload = make([]uint8, chunk.MsgHeader.PayloadLength)
 		}
 
-		//read chunk data
+		// read chunk data
 		remainPayloadSize := chunk.MsgHeader.PayloadLength - payload.SizeTmp
 
-		if remainPayloadSize >= rc.InChunkSize {
-			remainPayloadSize = rc.InChunkSize
+		if remainPayloadSize >= rc.inChunkSize {
+			remainPayloadSize = rc.inChunkSize
 		}
 
-		err = rc.TcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize)
-		if err != nil {
+		if err = rc.tcpConn.ExpectBytesFull(payload.Payload[payload.SizeTmp:payload.SizeTmp+remainPayloadSize], remainPayloadSize); err != nil {
 			break
 		} else {
 			payload.SizeTmp += remainPayloadSize
@@ -204,8 +199,8 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 
 				*header = chunk.MsgHeader
 
-				//has recv entire rtmp message.
-				//reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
+				// has recv entire rtmp message.
+				// reset the payload size this time, the message actually size is header length, this chunk can reuse by a new csid.
 				payload.SizeTmp = 0
 
 				break

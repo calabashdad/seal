@@ -21,13 +21,12 @@ func (rc *RtmpConn) msgSetAck(msg *pt.Message) (err error) {
 	}
 
 	p := pt.SetWindowAckSizePacket{}
-	err = p.Decode(msg.Payload.Payload)
-	if err != nil {
+	if err = p.Decode(msg.Payload.Payload); err != nil {
 		return
 	}
 
 	if p.AckowledgementWindowSize > 0 {
-		rc.AckWindow.AckWindowSize = p.AckowledgementWindowSize
+		rc.ack.ackWindowSize = p.AckowledgementWindowSize
 		log.Println("set ack window size=", p.AckowledgementWindowSize)
 	}
 

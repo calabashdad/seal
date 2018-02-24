@@ -17,7 +17,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 		//if recv failed, it's ok, not an error.
 		if true {
 			const timeOutUs = 10 * 1000 //ms
-			rc.TcpConn.SetRecvTimeout(timeOutUs)
+			rc.tcpConn.SetRecvTimeout(timeOutUs)
 
 			var msg pt.Message
 			if localErr := rc.RecvMsg(&msg.Header, &msg.Payload); localErr != nil {
@@ -34,8 +34,8 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 		}
 
 		// reset the socket send and recv timeout
-		rc.TcpConn.SetRecvTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
-		rc.TcpConn.SetSendTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
+		rc.tcpConn.SetRecvTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
+		rc.tcpConn.SetSendTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
 
 		msg := rc.consumer.dump()
 		if nil == msg {
@@ -50,16 +50,14 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 					startTime = int64(msg.Header.Timestamp)
 				}
 
-				rc.consumer.Duration += (float64(msg.Header.Timestamp) - float64(startTime))
+				rc.consumer.duration += (float64(msg.Header.Timestamp) - float64(startTime))
 				startTime = int64(msg.Header.Timestamp)
 			}
 
-			err = rc.SendMsg(msg, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-			if err != nil {
+			if err = rc.SendMsg(msg, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 				log.Println("playing... send to remote failed.err=", err)
 				break
 			}
-
 		}
 	}
 
@@ -98,58 +96,45 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 	// for jwplayer/flowplayer, which send close as pause message.
 	if true {
 		p := pt.CloseStreamPacket{}
-		_ = p.Decode(msg.Payload.Payload)
-		if 0 == len(p.CommandName) {
-			//it's ok, not an error
+		if localError := p.Decode(msg.Payload.Payload); localError != nil {
+			//it's ok
+		} else {
+			err = fmt.Errorf("player ask to close stream,remote=%s", rc.tcpConn.RemoteAddr())
 			return
 		}
-
-		err = fmt.Errorf("player ask to close stream,remote=%s", rc.TcpConn.RemoteAddr())
-
-		return
-
 	}
 
 	// call msg,
 	// support response null first
 	if true {
 		p := pt.CallPacket{}
-		_ = p.Decode(msg.Payload.Payload)
-		if 0 == len(p.CommandName) {
-			//it's ok, not an error.
-			log.Println("decode call packet failed when handle play user control.")
-			return
-		}
+		if localErr := p.Decode(msg.Payload.Payload); localErr != nil {
+			// it's ok
+		} else {
+			pRes := pt.CallResPacket{}
+			pRes.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+			pRes.TransactionId = p.TransactionId
+			pRes.CommandObjectMarker = pt.RTMP_AMF0_Null
+			pRes.ResponseMarker = pt.RTMP_AMF0_Null
 
-		pRes := pt.CallResPacket{}
-		pRes.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-		pRes.TransactionId = p.TransactionId
-		pRes.CommandObjectMarker = pt.RTMP_AMF0_Null
-		pRes.ResponseMarker = pt.RTMP_AMF0_Null
-
-		err = rc.SendPacket(&pRes, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-		if err != nil {
-			return
+			if err = rc.SendPacket(&pRes, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+				return
+			}
 		}
 	}
 
 	//pause or other msg
 	if true {
 		p := pt.PausePacket{}
-		_ = p.Decode(msg.Payload.Payload)
-		if 0 == len(p.CommandName) {
-			//it's ok, not an error.
-			log.Println("decode pause packet failed")
-			return
+		if localErr := p.Decode(msg.Payload.Payload); localErr != nil {
+			// it's ok
 		} else {
-			err = rc.onPlayClientPause(uint32(rc.DefaultStreamId), p.IsPause)
-			if err != nil {
+			if err = rc.onPlayClientPause(uint32(rc.defaultStreamID), p.IsPause); err != nil {
 				log.Println("play client pause error.err=", err)
 				return
 			}
 
-			err = rc.consumer.onPlayPause(p.IsPause)
-			if err != nil {
+			if err = rc.consumer.onPlayPause(p.IsPause); err != nil {
 				log.Println("consumer on play pause error.err=", err)
 				return
 			}
@@ -159,7 +144,7 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 	return
 }
 
-func (rc *RtmpConn) onPlayClientPause(streamId uint32, isPause bool) (err error) {
+func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error) {
 
 	if isPause {
 		// onStatus(NetStream.Pause.Notify)
@@ -184,8 +169,7 @@ func (rc *RtmpConn) onPlayClientPause(streamId uint32, isPause bool) (err error)
 			ValueType:    pt.RTMP_AMF0_String,
 		})
 
-		err = rc.SendPacket(&p, streamId, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-		if err != nil {
+		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
 		}
 
@@ -193,10 +177,9 @@ func (rc *RtmpConn) onPlayClientPause(streamId uint32, isPause bool) (err error)
 		if true {
 			p := pt.UserControlPacket{}
 			p.EventType = pt.SrcPCUCStreamEOF
-			p.EventData = streamId
+			p.EventData = streamID
 
-			err = rc.SendPacket(&p, streamId, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-			if err != nil {
+			if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 				log.Println("send PCUC(StreamEOF) message failed.")
 				return
 			}
@@ -225,8 +208,7 @@ func (rc *RtmpConn) onPlayClientPause(streamId uint32, isPause bool) (err error)
 			ValueType:    pt.RTMP_AMF0_String,
 		})
 
-		err = rc.SendPacket(&p, streamId, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-		if err != nil {
+		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
 		}
 
@@ -234,15 +216,13 @@ func (rc *RtmpConn) onPlayClientPause(streamId uint32, isPause bool) (err error)
 		if true {
 			p := pt.UserControlPacket{}
 			p.EventType = pt.SrcPCUCStreamBegin
-			p.EventData = streamId
+			p.EventData = streamID
 
-			err = rc.SendPacket(&p, streamId, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-			if err != nil {
+			if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 				log.Println("send PCUC(StreanBegin) message failed.")
 				return
 			}
 		}
-
 	}
 
 	return

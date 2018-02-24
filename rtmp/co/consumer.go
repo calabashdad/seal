@@ -17,7 +17,7 @@ type Consumer struct {
 		lastPktCorrectTime int64
 	}
 	paused   bool
-	Duration float64
+	duration float64
 }
 
 // atc whether atc, donot use jitter correct if true
@@ -96,7 +96,6 @@ func (c *Consumer) timeJittrCorrect(msg *pt.Message, tba float64, tbv float64, t
 	}
 
 	// full jitter algorithm, do jitter correct.
-
 	// set to 0 for metadata.
 	if !msg.Header.IsAudio() && !msg.Header.IsVideo() {
 		msg.Header.Timestamp = 0
@@ -109,8 +108,8 @@ func (c *Consumer) timeJittrCorrect(msg *pt.Message, tba float64, tbv float64, t
 	/**
 	 * we use a very simple time jitter detect/correct algorithm:
 	 * 1. delta: ensure the delta is positive and valid,
-	 *     we set the delta to DEFAULT_FRAME_TIME_MS,
-	 *     if the delta of time is nagative or greater than CONST_MAX_JITTER_MS.
+	 *     we set the delta to DefaultFrameTimeMs,
+	 *     if the delta of time is nagative or greater than MaxJitterMs.
 	 * 2. last_pkt_time: specifies the original packet time,
 	 *     is used to detect next jitter.
 	 * 3. last_pkt_correct_time: simply add the positive delta,
@@ -120,20 +119,20 @@ func (c *Consumer) timeJittrCorrect(msg *pt.Message, tba float64, tbv float64, t
 	delta := int64(timeLocal) - c.jitter.lastPktTime
 
 	// if jitter detected, reset the delta.
-	if delta < 0 || delta > CONST_MAX_JITTER_MS {
+	if delta < 0 || delta > MaxJitterMs {
 		// calc the right diff by audio sample rate
 		if msg.Header.IsAudio() && sampleRate > 0 {
 			delta = (int64)(float64(delta) * 1000.0 / sampleRate)
 		} else if msg.Header.IsVideo() && frameRate > 0 {
 			delta = (int64)(float64(delta) * 1.0 / frameRate)
 		} else {
-			delta = DEFAULT_FRAME_TIME_MS
+			delta = DefaultFrameTimeMs
 		}
 	}
 
 	// sometimes, the time is absolute time, so correct it again.
-	if delta < 0 || delta > CONST_MAX_JITTER_MS {
-		delta = DEFAULT_FRAME_TIME_MS
+	if delta < 0 || delta > MaxJitterMs {
+		delta = DefaultFrameTimeMs
 	}
 
 	if c.jitter.lastPktCorrectTime+delta > 0 {

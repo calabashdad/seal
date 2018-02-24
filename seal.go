@@ -55,9 +55,8 @@ func main() {
 
 	gGuards.Add(1)
 	if true {
-		rtmpServer := RtmpServer{}
-
-		rtmpServer.Start()
+		rtmpSrv := rtmpServer{}
+		rtmpSrv.Start()
 	}
 
 	gGuards.Wait()

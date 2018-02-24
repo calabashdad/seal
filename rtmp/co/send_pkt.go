@@ -32,8 +32,7 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32, timeOutUs uint32)
 	msg.Header.PerferCsid = pkt.GetPreferCsId()
 	msg.Header.StreamId = streamID
 
-	err = rc.SendMsg(&msg, timeOutUs)
-	if err != nil {
+	if err = rc.SendMsg(&msg, timeOutUs); err != nil {
 		return
 	}
 

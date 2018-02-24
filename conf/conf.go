@@ -6,13 +6,13 @@ import (
 	"os"
 
 	"github.com/calabashdad/utiltools"
-
 	"github.com/yaml"
 )
 
-var GlobalConfInfo ConfInfo
+// GlobalConfInfo global config info
+var GlobalConfInfo confInfo
 
-type RtmpConfInfo struct {
+type rtmpConfInfo struct {
 	Listen            string `yaml:"listen"`
 	TimeOut           uint32 `yaml:"timeout"`
 	ChunkSize         uint32 `yaml:"chunkSize"`
@@ -22,11 +22,11 @@ type RtmpConfInfo struct {
 	ConsumerQueueSize uint32 `yaml:"consumerQueueSize"`
 }
 
-type ConfInfo struct {
-	Rtmp RtmpConfInfo `yaml:"rtmp"`
+type confInfo struct {
+	Rtmp rtmpConfInfo `yaml:"rtmp"`
 }
 
-func (t *ConfInfo) Loads(c string) (err error) {
+func (t *confInfo) Loads(c string) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
@@ -41,14 +41,13 @@ func (t *ConfInfo) Loads(c string) (err error) {
 	}
 	defer f.Close()
 
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
+	var data []byte
+	if data, err = ioutil.ReadAll(f); err != nil {
 		log.Println("config file loads failed, ", err.Error())
 		return err
-	}
-
-	err = yaml.Unmarshal(data, t)
-	if err != nil {
+	} 
+	
+	if err = yaml.Unmarshal(data, t); err != nil {
 		log.Println("error:", err.Error())
 		return err
 	}

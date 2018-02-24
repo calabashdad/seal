@@ -18,13 +18,7 @@ func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 		return
 	}
 
-	err = rc.EstimateNeedSendAcknowlegement()
-	if err != nil {
-		return
-	}
-
-	if nil == msg {
-
+	if err = rc.estimateNeedSendAcknowlegement(); err != nil {
 		return
 	}
 

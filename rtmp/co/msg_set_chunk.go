@@ -21,13 +21,12 @@ func (rc *RtmpConn) msgSetChunk(msg *pt.Message) (err error) {
 	}
 
 	p := pt.SetChunkSizePacket{}
-	err = p.Decode(msg.Payload.Payload)
-	if err != nil {
+	if err = p.Decode(msg.Payload.Payload); err != nil {
 		return
 	}
 
 	if p.ChunkSize >= pt.RTMP_CHUNKSIZE_MIN && p.ChunkSize <= pt.RTMP_CHUNKSIZE_MAX {
-		rc.InChunkSize = p.ChunkSize
+		rc.inChunkSize = p.ChunkSize
 		log.Println("peer set chunk size to ", p.ChunkSize)
 	}
 

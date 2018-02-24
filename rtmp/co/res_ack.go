@@ -17,25 +17,23 @@ func (rc *RtmpConn) ResponseAcknowlegementMsg() (err error) {
 
 	var pkt pt.AcknowlegementPacket
 
-	pkt.SequenceNumber = uint32(rc.TcpConn.RecvBytesSum)
+	pkt.SequenceNumber = uint32(rc.tcpConn.GetRecvBytesSum())
 
-	err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
-	if err != nil {
+	if err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
 	}
 
-	rc.AckWindow.HasAckedSize = rc.TcpConn.RecvBytesSum
+	rc.ack.hasAckedSize = rc.tcpConn.GetRecvBytesSum()
 
 	return
 }
 
-func (rc *RtmpConn) EstimateNeedSendAcknowlegement() (err error) {
+func (rc *RtmpConn) estimateNeedSendAcknowlegement() (err error) {
 
-	if rc.AckWindow.AckWindowSize > 0 &&
-		((rc.TcpConn.RecvBytesSum - rc.AckWindow.HasAckedSize) > uint64(rc.AckWindow.AckWindowSize)) {
+	if rc.ack.ackWindowSize > 0 &&
+		((rc.tcpConn.GetRecvBytesSum() - rc.ack.hasAckedSize) > uint64(rc.ack.ackWindowSize)) {
 		//response a acknowlegement to peer.
-		err = rc.ResponseAcknowlegementMsg()
-		if err != nil {
+		if err = rc.ResponseAcknowlegementMsg(); err != nil {
 			log.Println("response acknowlegement msg failed to peer.")
 			return
 		}

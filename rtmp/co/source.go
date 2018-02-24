@@ -7,18 +7,18 @@ import (
 	"sync"
 )
 
-type SourceHub struct {
+type sourceHub struct {
 	//key: streamName
-	hub  map[string]*Source
+	hub  map[string]*sourceStream
 	lock sync.RWMutex
 }
 
-var sourcesHub = &SourceHub{
-	hub: make(map[string]*Source),
+var gSources = &sourceHub{
+	hub: make(map[string]*sourceStream),
 }
 
-//data source info.
-type Source struct {
+// data source info.
+type sourceStream struct {
 	// the sample rate of audio in metadata
 	sampleRate float64
 	// the video frame rate in metadata
@@ -45,7 +45,7 @@ type Source struct {
 	gopCache *GopCache
 }
 
-func (s *Source) CreateConsumer(c *Consumer) {
+func (s *sourceStream) CreateConsumer(c *Consumer) {
 	if nil == c {
 		log.Println("when registe consumer, nil == consumer")
 		return
@@ -59,7 +59,7 @@ func (s *Source) CreateConsumer(c *Consumer) {
 
 }
 
-func (s *Source) DestroyConsumer(c *Consumer) {
+func (s *sourceStream) DestroyConsumer(c *Consumer) {
 	if nil == c {
 		log.Println("when destroy consumer, nil == consummer")
 		return
@@ -72,7 +72,7 @@ func (s *Source) DestroyConsumer(c *Consumer) {
 	log.Println("a consumer destroyed.consumer=", c)
 }
 
-func (s *Source) copyToAllConsumers(msg *pt.Message) {
+func (s *sourceStream) copyToAllConsumers(msg *pt.Message) {
 
 	if nil == msg {
 		return
@@ -86,7 +86,7 @@ func (s *Source) copyToAllConsumers(msg *pt.Message) {
 	}
 }
 
-func (s *SourceHub) findSourceToPublish(k string) *Source {
+func (s *sourceHub) findSourceToPublish(k string) *sourceStream {
 
 	if 0 == len(k) {
 		log.Println("find source to publish, nil == k")
@@ -96,14 +96,13 @@ func (s *SourceHub) findSourceToPublish(k string) *Source {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	res := s.hub[k]
-	if nil != res {
+	if res := s.hub[k]; nil != res {
 		log.Println("stream ", k, " can not publish, because has already publishing....")
 		return nil
 	}
 
 	//can publish. new a source
-	s.hub[k] = &Source{
+	s.hub[k] = &sourceStream{
 		timeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
 		gopCache:   &GopCache{},
 		consumers:  make(map[*Consumer]*Consumer),
@@ -112,12 +111,11 @@ func (s *SourceHub) findSourceToPublish(k string) *Source {
 	return s.hub[k]
 }
 
-func (s *SourceHub) findSourceToPlay(k string) *Source {
+func (s *sourceHub) findSourceToPlay(k string) *sourceStream {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	res := s.hub[k]
-	if nil != res {
+	if res := s.hub[k]; nil != res {
 		return res
 	}
 
@@ -126,7 +124,7 @@ func (s *SourceHub) findSourceToPlay(k string) *Source {
 	return nil
 }
 
-func (s *SourceHub) deleteSource(streamName string) {
+func (s *sourceHub) deleteSource(streamName string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 

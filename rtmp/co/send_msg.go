@@ -110,28 +110,26 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			}
 		}
 
+		// not use writev method, we use net.Buffers to mock writev in c/c++, socket disconnected qickly
 		if true {
-			//send header
-			err = rc.TcpConn.SendBytes(header[:headerOffset])
-			if err != nil {
+			// send header
+			if err = rc.tcpConn.SendBytes(header[:headerOffset]); err != nil {
 				log.Println("send msg header failed.")
 				return
 			}
 
 			//payload
 			payloadSize := msg.Header.PayloadLength - payloadOffset
-			if payloadSize > rc.OutChunkSize {
-				payloadSize = rc.OutChunkSize
+			if payloadSize > rc.outChunkSize {
+				payloadSize = rc.outChunkSize
 			}
 
-			err = rc.TcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize])
-			if err != nil {
+			if err = rc.tcpConn.SendBytes(msg.Payload.Payload[payloadOffset : payloadOffset+payloadSize]); err != nil {
 				log.Println("send msg payload failed.")
 				return
 			}
 
 			payloadOffset += payloadSize
-
 		}
 	}
 
