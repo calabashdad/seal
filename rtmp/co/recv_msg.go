@@ -53,8 +53,8 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		chunk.MsgHeader.PerferCsid = csid
 
 		//read message header
-		if 0 == chunk.MsgCount && chunk.Fmt != pt.RTMP_FMT_TYPE0 {
-			if pt.RTMP_CID_ProtocolControl == chunk.CsID && pt.RTMP_FMT_TYPE1 == chunk.Fmt {
+		if 0 == chunk.MsgCount && chunk.Fmt != pt.RtmpFmtType0 {
+			if pt.RtmpCidProtocolControl == chunk.CsID && pt.RtmpFmtType1 == chunk.Fmt {
 				// for librtmp, if ping, it will send a fresh stream with fmt=1,
 				// 0x42             where: fmt=1, cid=2, protocol contorl user-control message
 				// 0x00 0x00 0x00   where: timestamp=0
@@ -69,7 +69,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 			}
 		}
 
-		if payload.SizeTmp > 0 && pt.RTMP_FMT_TYPE0 == chunk.Fmt {
+		if payload.SizeTmp > 0 && pt.RtmpFmtType0 == chunk.Fmt {
 			err = fmt.Errorf("when msg count > 0, chunk fmt is not allowed to be RTMP_FMT_TYPE0")
 			break
 		}
@@ -77,13 +77,13 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		var msgHeaderSize uint32
 
 		switch chunk.Fmt {
-		case pt.RTMP_FMT_TYPE0:
+		case pt.RtmpFmtType0:
 			msgHeaderSize = 11
-		case pt.RTMP_FMT_TYPE1:
+		case pt.RtmpFmtType1:
 			msgHeaderSize = 7
-		case pt.RTMP_FMT_TYPE2:
+		case pt.RtmpFmtType2:
 			msgHeaderSize = 3
-		case pt.RTMP_FMT_TYPE3:
+		case pt.RtmpFmtType3:
 			msgHeaderSize = 0
 		}
 
@@ -99,9 +99,9 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		// 1bytes: message type,       fmt=0,1
 		// 4bytes: stream id,          fmt=0
 		switch chunk.Fmt {
-		case pt.RTMP_FMT_TYPE0:
+		case pt.RtmpFmtType0:
 			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
-			if chunk.MsgHeader.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
+			if chunk.MsgHeader.TimestampDelta >= pt.RtmpExtendTimeStamp {
 				chunk.HasExtendedTimestamp = true
 			} else {
 				chunk.HasExtendedTimestamp = false
@@ -117,11 +117,11 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 
 			chunk.MsgHeader.PayloadLength = payloadLength
 			chunk.MsgHeader.MessageType = msgHeader[6]
-			chunk.MsgHeader.StreamId = binary.LittleEndian.Uint32(msgHeader[7:11])
+			chunk.MsgHeader.StreamID = binary.LittleEndian.Uint32(msgHeader[7:11])
 
-		case pt.RTMP_FMT_TYPE1:
+		case pt.RtmpFmtType1:
 			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
-			if chunk.MsgHeader.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
+			if chunk.MsgHeader.TimestampDelta >= pt.RtmpExtendTimeStamp {
 				chunk.HasExtendedTimestamp = true
 			} else {
 				chunk.HasExtendedTimestamp = false
@@ -137,15 +137,15 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 			chunk.MsgHeader.PayloadLength = payloadLength
 			chunk.MsgHeader.MessageType = msgHeader[6]
 
-		case pt.RTMP_FMT_TYPE2:
+		case pt.RtmpFmtType2:
 			chunk.MsgHeader.TimestampDelta = uint32(msgHeader[0])<<16 + uint32(msgHeader[1])<<8 + uint32(msgHeader[2])
-			if chunk.MsgHeader.TimestampDelta >= pt.RTMP_EXTENDED_TIMESTAMP {
+			if chunk.MsgHeader.TimestampDelta >= pt.RtmpExtendTimeStamp {
 				chunk.HasExtendedTimestamp = true
 			} else {
 				chunk.HasExtendedTimestamp = false
 				chunk.MsgHeader.Timestamp += uint64(chunk.MsgHeader.TimestampDelta)
 			}
-		case pt.RTMP_FMT_TYPE3:
+		case pt.RtmpFmtType3:
 			// update the timestamp even fmt=3 for first chunk packet. the same with previous.
 			if 0 == payload.SizeTmp && !chunk.HasExtendedTimestamp {
 				chunk.MsgHeader.Timestamp += uint64(chunk.MsgHeader.TimestampDelta)

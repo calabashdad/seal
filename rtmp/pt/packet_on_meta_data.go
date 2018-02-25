@@ -1,45 +1,41 @@
 package pt
 
-/**
-* the stream metadata.
-* FMLE: @setDataFrame
-* others: onMetaData
- */
-
+// OnMetaDataPacket the stream metadata.
+// @setDataFrame
 type OnMetaDataPacket struct {
-	/**
-	 * Name of metadata. Set to "onMetaData"
-	 */
+
+	// Name Name of metadata. Set to "onMetaData"
 	Name string
-	/**
-	 * Metadata of stream.
-	 */
+
+	// Metadata Metadata of stream.
 	Metadata interface{}
-	Marker   uint8 //object or ecma
+
+	// Marker type of Metadata object or ecma
+	Marker uint8
 }
 
+// Decode .
 func (pkt *OnMetaDataPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.Name, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.Name, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
 	if RTMP_AMF0_DATA_SET_DATAFRAME == pkt.Name {
-		pkt.Name, err = Amf0ReadString(data, &offset)
-		if err != nil {
+		if pkt.Name, err = Amf0ReadString(data, &offset); err != nil {
 			return
 		}
 	}
 
-	pkt.Metadata, err = amf0ReadAny(data, &pkt.Marker, &offset)
-	if err != nil {
+	if pkt.Metadata, err = amf0ReadAny(data, &pkt.Marker, &offset); err != nil {
 		return
 	}
 
 	return
 }
+
+// Encode .
 func (pkt *OnMetaDataPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.Name)...)
 	if RTMP_AMF0_Object == pkt.Marker {
@@ -50,13 +46,18 @@ func (pkt *OnMetaDataPacket) Encode() (data []uint8) {
 
 	return
 }
+
+// GetMessageType .
 func (pkt *OnMetaDataPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0DataMessage
-}
-func (pkt *OnMetaDataPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverConnection2
+	return RtmpMsgAmf0DataMessage
 }
 
+// GetPreferCsID .
+func (pkt *OnMetaDataPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverConnection2
+}
+
+// AddObject add object to objs
 func (pkt *OnMetaDataPacket) AddObject(obj Amf0Object) {
 	if RTMP_AMF0_Object == pkt.Marker {
 		pkt.Metadata = append(pkt.Metadata.([]Amf0Object), obj)
@@ -68,6 +69,7 @@ func (pkt *OnMetaDataPacket) AddObject(obj Amf0Object) {
 	}
 }
 
+// GetProperty get object property name
 func (pkt *OnMetaDataPacket) GetProperty(name string) interface{} {
 
 	if RTMP_AMF0_Object == pkt.Marker {

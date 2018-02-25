@@ -23,8 +23,8 @@ func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 	}
 
 	switch msg.Header.MessageType {
-	case pt.RTMP_MSG_AMF3CommandMessage, pt.RTMP_MSG_AMF0CommandMessage,
-		pt.RTMP_MSG_AMF0DataMessage, pt.RTMP_MSG_AMF3DataMessage:
+	case pt.RtmpMsgAmf3CommandMessage, pt.RtmpMsgAmf0CommandMessage,
+		pt.RtmpMsgAmf0DataMessage, pt.RtmpMsgAmf3DataMessage:
 		err = rc.msgAmf(msg)
 	case pt.RTMP_MSG_UserControlMessage:
 		err = rc.msgUserCtrl(msg)
@@ -39,9 +39,9 @@ func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 	case pt.RTMP_MSG_AbortMessage:
 		err = rc.msgAbort(msg)
 	case pt.RTMP_MSG_EdgeAndOriginServerCommand:
-	case pt.RTMP_MSG_AMF3SharedObject:
-	case pt.RTMP_MSG_AMF0SharedObject:
-	case pt.RTMP_MSG_AudioMessage:
+	case pt.RtmpMsgAmf3SharedObject:
+	case pt.RtmpMsgAmf0SharedObject:
+	case pt.RtmpMsgAudioMessage:
 		err = rc.msgAudio(msg)
 	case pt.RTMP_MSG_VideoMessage:
 		err = rc.msgVideo(msg)

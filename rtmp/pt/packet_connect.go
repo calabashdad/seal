@@ -2,32 +2,24 @@ package pt
 
 import "fmt"
 
-/**
-* 4.1.1. connect
-* The client sends the connect command to the server to request
-* connection to a server application instance.
- */
+// ConnectPacket The client sends the connect command to the server to request
+// connection to a server application instance.
 type ConnectPacket struct {
-	/**
-	 * Name of the command. Set to “connect”.
-	 */
+
+	// CommandName Name of the command. Set to “connect”.
 	CommandName string
-	/**
-	 * Always set to 1.
-	 */
-	TransactionId float64
-	/**
-	 * Command information object which has the name-value pairs.
-	 * @remark: alloc in packet constructor, user can directly use it,
-	 *       user should never alloc it again which will cause memory leak.
-	 */
+
+	// TransactionID Always set to 1.
+	TransactionID float64
+
+	// CommandObject Command information object which has the name-value pairs.
 	CommandObject []Amf0Object
-	/**
-	 * Any optional information
-	 */
+
+	// Args Any optional information
 	Args []Amf0Object
 }
 
+// GetObjectProperty get object property in connect packet
 func (pkt *ConnectPacket) GetObjectProperty(name string) (value interface{}) {
 
 	for _, v := range pkt.CommandObject {
@@ -39,31 +31,29 @@ func (pkt *ConnectPacket) GetObjectProperty(name string) (value interface{}) {
 	return
 }
 
+// Decode .
 func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
 	if RTMP_AMF0_COMMAND_CONNECT != pkt.CommandName {
-		err = fmt.Errorf("decode connect packet, command name is not connect.")
+		err = fmt.Errorf("decode connect packet, command name is not connect")
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	if 1.0 != pkt.TransactionId {
+	if 1.0 != pkt.TransactionID {
 		err = fmt.Errorf("decode conenct packet, transaction id is not 1.0")
 		return
 	}
 
-	pkt.CommandObject, err = amf0ReadObject(data, &offset)
-	if err != nil {
+	if pkt.CommandObject, err = amf0ReadObject(data, &offset); err != nil {
 		return
 	}
 
@@ -82,9 +72,11 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 
 	return
 }
+
+// Encode .
 func (pkt *ConnectPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
-	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionID)...)
 	data = append(data, amf0WriteObject(pkt.CommandObject)...)
 	if len(pkt.Args) > 0 {
 		data = append(data, amf0WriteObject(pkt.Args)...)
@@ -92,9 +84,13 @@ func (pkt *ConnectPacket) Encode() (data []uint8) {
 
 	return
 }
+
+// GetMessageType .
 func (pkt *ConnectPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0CommandMessage
+	return RtmpMsgAmf0CommandMessage
 }
-func (pkt *ConnectPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverConnection
+
+// GetPreferCsID .
+func (pkt *ConnectPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverConnection
 }

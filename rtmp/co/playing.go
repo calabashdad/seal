@@ -113,7 +113,7 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 		} else {
 			pRes := pt.CallResPacket{}
 			pRes.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-			pRes.TransactionId = p.TransactionId
+			pRes.TransactionID = p.TransactionID
 			pRes.CommandObjectMarker = pt.RTMP_AMF0_Null
 			pRes.ResponseMarker = pt.RTMP_AMF0_Null
 

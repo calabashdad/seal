@@ -21,7 +21,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 
 	// ensure the basic header is 1bytes. make simple.
 	if msg.Header.PerferCsid < 2 {
-		msg.Header.PerferCsid = pt.RTMP_CID_ProtocolControl
+		msg.Header.PerferCsid = pt.RtmpCidProtocolControl
 	}
 
 	//current position of payload send.
@@ -44,7 +44,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			// chunk message header, 11 bytes
 			// timestamp, 3bytes, big-endian
 			timestamp := msg.Header.Timestamp
-			if timestamp < pt.RTMP_EXTENDED_TIMESTAMP {
+			if timestamp < pt.RtmpExtendTimeStamp {
 				header[headerOffset] = uint8((timestamp & 0x00ff0000) >> 16)
 				headerOffset++
 				header[headerOffset] = uint8((timestamp & 0x0000ff00) >> 8)
@@ -74,11 +74,11 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			headerOffset++
 
 			// stream id, 4 bytes, little-endian
-			binary.LittleEndian.PutUint32(header[headerOffset:headerOffset+4], msg.Header.StreamId)
+			binary.LittleEndian.PutUint32(header[headerOffset:headerOffset+4], msg.Header.StreamID)
 			headerOffset += 4
 
 			// chunk extended timestamp header, 0 or 4 bytes, big-endian
-			if timestamp >= pt.RTMP_EXTENDED_TIMESTAMP {
+			if timestamp >= pt.RtmpExtendTimeStamp {
 				binary.BigEndian.PutUint32(header[headerOffset:headerOffset+4], uint32(timestamp))
 				headerOffset += 4
 			}
@@ -104,7 +104,7 @@ func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
 			//        must send the extended-timestamp to FMS,
 			//        must send the extended-timestamp to flash-player.
 			timestamp := msg.Header.Timestamp
-			if timestamp >= pt.RTMP_EXTENDED_TIMESTAMP {
+			if timestamp >= pt.RtmpExtendTimeStamp {
 				binary.BigEndian.PutUint32(header[headerOffset:headerOffset+4], uint32(timestamp))
 				headerOffset += 4
 			}

@@ -4,37 +4,28 @@ import (
 	"fmt"
 )
 
-/**
-* response for SrsConnectAppPacket.
- */
+// ConnectResPacket response for SrsConnectAppPacket.
 type ConnectResPacket struct {
-	/**
-	 * _result or _error; indicates whether the response is result or error.
-	 */
+
+	// CommandName _result or _error; indicates whether the response is result or error.
 	CommandName string
 
-	/**
-	 * Transaction ID is 1 for call connect responses
-	 */
-	TransactionId float64
+	// Transaction ID is 1 for call connect responses
+	TransactionID float64
 
-	/**
-	 * Name-value pairs that describe the properties(fmsver etc.) of the connection.
-	 */
+	// Props Name-value pairs that describe the properties(fmsver etc.) of the connection.
 	Props []Amf0Object
 
-	/**
-	 * Name-value pairs that describe the response from|the server. ‘code’,
-	 * ‘level’, ‘description’ are names of few among such information.
-	 */
+	// Info Name-value pairs that describe the response from|the server. ‘code’,
+	// ‘level’, ‘description’ are names of few among such information.
 	Info []Amf0Object
 }
 
+// Decode .
 func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
@@ -44,47 +35,48 @@ func (pkt *ConnectResPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	if pkt.TransactionId != 1.0 {
-		err = fmt.Errorf("decode connect res packet transaction id != 1.0.")
+	if pkt.TransactionID != 1.0 {
+		err = fmt.Errorf("decode connect res packet transaction id != 1.0")
 		return
 	}
 
-	pkt.Props, err = amf0ReadObject(data, &offset)
-	if err != nil {
+	if pkt.Props, err = amf0ReadObject(data, &offset); err != nil {
 		return
 	}
 
-	pkt.Info, err = amf0ReadObject(data, &offset)
-	if err != nil {
+	if pkt.Info, err = amf0ReadObject(data, &offset); err != nil {
 		return
 	}
 
 	return
 }
 
+// Encode .
 func (pkt *ConnectResPacket) Encode() (data []uint8) {
 
 	data = append(data, amf0WriteString(pkt.CommandName)...)
-	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionID)...)
 	data = append(data, amf0WriteObject(pkt.Props)...)
 	data = append(data, amf0WriteObject(pkt.Info)...)
 
 	return
 }
 
+// GetMessageType .
 func (pkt *ConnectResPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0CommandMessage
+	return RtmpMsgAmf0CommandMessage
 }
 
-func (pkt *ConnectResPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverConnection
+// GetPreferCsID .
+func (pkt *ConnectResPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverConnection
 }
 
+// AddProsObj add object to pros
 func (pkt *ConnectResPacket) AddProsObj(obj *Amf0Object) {
 	pkt.Props = append(pkt.Props, *obj)
 }

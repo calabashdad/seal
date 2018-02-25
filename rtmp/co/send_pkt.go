@@ -29,8 +29,8 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32, timeOutUs uint32)
 
 	msg.Header.PayloadLength = uint32(len(msg.Payload.Payload))
 	msg.Header.MessageType = pkt.GetMessageType()
-	msg.Header.PerferCsid = pkt.GetPreferCsId()
-	msg.Header.StreamId = streamID
+	msg.Header.PerferCsid = pkt.GetPreferCsID()
+	msg.Header.StreamID = streamID
 
 	if err = rc.SendMsg(&msg, timeOutUs); err != nil {
 		return

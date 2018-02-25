@@ -5,79 +5,70 @@ import (
 	"strings"
 )
 
+// PlayPacket The client sends this command to the server to play a stream.
 type PlayPacket struct {
-	/**
-	 * Name of the command. Set to “play”.
-	 */
+
+	// CommandName Name of the command. Set to “play”.
 	CommandName string
-	/**
-	 * Transaction ID set to 0.
-	 */
-	TransactionId float64
-	/**
-	 * Command information does not exist. Set to null type.
-	 */
-	CommandObject Amf0Object // null
-	/**
-	 * Name of the stream to play.
-	 * To play video (FLV) files, specify the name of the stream without a file
-	 *       extension (for example, "sample").
-	 * To play back MP3 or ID3 tags, you must precede the stream name with mp3:
-	 *       (for example, "mp3:sample".)
-	 * To play H.264/AAC files, you must precede the stream name with mp4: and specify the
-	 *       file extension. For example, to play the file sample.m4v, specify
-	 *       "mp4:sample.m4v"
-	 */
+
+	// Transaction ID set to 0.
+	TransactionID float64
+
+	// CommandObject Command information does not exist. Set to null type.
+	CommandObject Amf0Object
+
+	// StreamName Name of the stream to play.
+	// To play video (FLV) files, specify the name of the stream without a file
+	//       extension (for example, "sample").
+	// To play back MP3 or ID3 tags, you must precede the stream name with mp3:
+	//       (for example, "mp3:sample".)
+	// To play H.264/AAC files, you must precede the stream name with mp4: and specify the
+	//       file extension. For example, to play the file sample.m4v, specify
+	//       "mp4:sample.m4v"
 	StreamName string
 
-	/**
-	* Token value, for authentication. it's optional.
-	**/
+	// TokenStr Token value, for authentication. it's optional.
 	TokenStr string
 
-	/**
-	 * An optional parameter that specifies the start time in seconds.
-	 * The default value is -2, which means the subscriber first tries to play the live
-	 *       stream specified in the Stream Name field. If a live stream of that name is
-	 *       not found, it plays the recorded stream specified in the Stream Name field.
-	 * If you pass -1 in the Start field, only the live stream specified in the Stream
-	 *       Name field is played.
-	 * If you pass 0 or a positive number in the Start field, a recorded stream specified
-	 *       in the Stream Name field is played beginning from the time specified in the
-	 *       Start field.
-	 * If no recorded stream is found, the next item in the playlist is played.
-	 */
+	// Start An optional parameter that specifies the start time in seconds.
+	// The default value is -2, which means the subscriber first tries to play the live
+	//       stream specified in the Stream Name field. If a live stream of that name is
+	//       not found, it plays the recorded stream specified in the Stream Name field.
+	// If you pass -1 in the Start field, only the live stream specified in the Stream
+	//       Name field is played.
+	// If you pass 0 or a positive number in the Start field, a recorded stream specified
+	//       in the Stream Name field is played beginning from the time specified in the
+	//       Start field.
+	// If no recorded stream is found, the next item in the playlist is played.
 	Start float64
-	/**
-	 * An optional parameter that specifies the duration of playback in seconds.
-	 * The default value is -1. The -1 value means a live stream is played until it is no
-	 *       longer available or a recorded stream is played until it ends.
-	 * If u pass 0, it plays the single frame since the time specified in the Start field
-	 *       from the beginning of a recorded stream. It is assumed that the value specified
-	 *       in the Start field is equal to or greater than 0.
-	 * If you pass a positive number, it plays a live stream for the time period specified
-	 *       in the Duration field. After that it becomes available or plays a recorded
-	 *       stream for the time specified in the Duration field. (If a stream ends before the
-	 *       time specified in the Duration field, playback ends when the stream ends.)
-	 * If you pass a negative number other than -1 in the Duration field, it interprets the
-	 *       value as if it were -1.
-	 */
+
+	// Duration An optional parameter that specifies the duration of playback in seconds.
+	// The default value is -1. The -1 value means a live stream is played until it is no
+	//       longer available or a recorded stream is played until it ends.
+	// If u pass 0, it plays the single frame since the time specified in the Start field
+	//       from the beginning of a recorded stream. It is assumed that the value specified
+	//       in the Start field is equal to or greater than 0.
+	// If you pass a positive number, it plays a live stream for the time period specified
+	//       in the Duration field. After that it becomes available or plays a recorded
+	//       stream for the time specified in the Duration field. (If a stream ends before the
+	//       time specified in the Duration field, playback ends when the stream ends.)
+	// If you pass a negative number other than -1 in the Duration field, it interprets the
+	//       value as if it were -1.
 	Duration float64
-	/**
-	 * An optional Boolean value or number that specifies whether to flush any
-	 * previous playlist.
-	 */
+
+	// Reset An optional Boolean value or number that specifies whether to flush any
+	// previous playlist.
 	Reset bool
 }
 
+// Decode .
 func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 	var maxOffset uint32
 	maxOffset = uint32(len(data)) - 1
 
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
@@ -86,19 +77,16 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	err = amf0ReadNull(data, &offset)
-	if err != nil {
+	if err = amf0ReadNull(data, &offset); err != nil {
 		return
 	}
 
 	var streamNameLocal string
-	streamNameLocal, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if streamNameLocal, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
@@ -111,15 +99,13 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 	}
 
 	if maxOffset-offset > (1 + 8) { // number need at least 1(marker) + 8(number)
-		pkt.Start, err = Amf0ReadNumber(data, &offset)
-		if err != nil {
+		if pkt.Start, err = Amf0ReadNumber(data, &offset); err != nil {
 			return
 		}
 	}
 
 	if maxOffset-offset > (1 + 8) {
-		pkt.Duration, err = Amf0ReadNumber(data, &offset)
-		if err != nil {
+		if pkt.Duration, err = Amf0ReadNumber(data, &offset); err != nil {
 			return
 		}
 	}
@@ -132,8 +118,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 
 		var v interface{}
 		var marker uint8
-		v, err = amf0ReadAny(data, &marker, &offset)
-		if err != nil {
+		if v, err = amf0ReadAny(data, &marker, &offset); err != nil {
 			return
 		}
 
@@ -146,10 +131,12 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 
 	return
 }
+
+// Encode .
 func (pkt *PlayPacket) Encode() (data []uint8) {
 
 	data = append(data, amf0WriteString(pkt.CommandName)...)
-	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionID)...)
 	data = append(data, amf0WriteNull()...)
 	data = append(data, amf0WriteString(pkt.StreamName)...)
 	data = append(data, amf0WriteNumber(pkt.Start)...)
@@ -158,9 +145,13 @@ func (pkt *PlayPacket) Encode() (data []uint8) {
 
 	return
 }
+
+// GetMessageType .
 func (pkt *PlayPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0CommandMessage
+	return RtmpMsgAmf0CommandMessage
 }
-func (pkt *PlayPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverStream
+
+// GetPreferCsID .
+func (pkt *PlayPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverStream
 }

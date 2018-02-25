@@ -1,42 +1,43 @@
 package pt
 
+// CallPacket  the call method of the NetConnection object runs remote procedure
+// calls (RPC) at the receiving end. The called RPC name is passed as a parameter to the
+// call command
 type CallPacket struct {
-	/**
-	 * Name of the remote procedure that is called.
-	 */
+
+	// CommandName Name of the remote procedure that is called.
 	CommandName string
-	/**
-	 * If a response is expected we give a transaction Id. Else we pass a value of 0
-	 */
-	TransactionId float64
-	/**
-	 * If there exists any command info this
-	 * is set, else this is set to null type.
-	 */
-	CommandObject  interface{}
-	Cmd_objectType uint8
-	/**
-	 * Any optional arguments to be provided
-	 */
-	Arguments     interface{}
+
+	// TransactionID If a response is expected we give a transaction Id. Else we pass a value of 0
+	TransactionID float64
+
+	// CommandObject If there exists any command info this
+	// is set, else this is set to null type.
+	CommandObject interface{}
+
+	// CmdObjectType object type marker
+	CmdObjectType uint8
+
+	// Arguments Any optional arguments to be provided
+	Arguments interface{}
+
+	// ArgumentsType type of Arguments
 	ArgumentsType uint8
 }
 
+// Decode .
 func (pkt *CallPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	pkt.CommandObject, err = amf0ReadAny(data, &pkt.Cmd_objectType, &offset)
-	if err != nil {
+	if pkt.CommandObject, err = amf0ReadAny(data, &pkt.CmdObjectType, &offset); err != nil {
 		return
 	}
 
@@ -50,9 +51,10 @@ func (pkt *CallPacket) Decode(data []uint8) (err error) {
 	return
 }
 
+// Encode .
 func (pkt *CallPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
-	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionID)...)
 
 	if nil != pkt.CommandObject {
 		data = append(data, amf0WriteAny(pkt.CommandObject.(Amf0Object))...)
@@ -65,10 +67,12 @@ func (pkt *CallPacket) Encode() (data []uint8) {
 	return
 }
 
+// GetMessageType .
 func (pkt *CallPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0CommandMessage
+	return RtmpMsgAmf0CommandMessage
 }
 
-func (pkt *CallPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverConnection
+// GetPreferCsID .
+func (pkt *CallPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverConnection
 }

@@ -47,8 +47,8 @@ func NewRtmpConnection(c net.Conn) *RtmpConn {
 			Conn: c,
 		},
 		chunkStreams: make(map[uint32]*pt.ChunkStream),
-		inChunkSize:  pt.RTMP_DEFAULT_CHUNK_SIZE,
-		outChunkSize: pt.RTMP_DEFAULT_CHUNK_SIZE,
+		inChunkSize:  pt.RtmpDefalutChunkSize,
+		outChunkSize: pt.RtmpDefalutChunkSize,
 		ack: ackWindowSize{
 			ackWindowSize: 250000,
 		},

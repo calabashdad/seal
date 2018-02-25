@@ -1,25 +1,26 @@
 package pt
 
+// SampleAccessPacket .
 type SampleAccessPacket struct {
-	/**
-	 * Name of command. Set to "|RtmpSampleAccess".
-	 */
+
+	// CommandName Name of command. Set to "|RtmpSampleAccess".
 	CommandName string
-	/**
-	 * whether allow access the sample of video.
-	 */
+
+	// VideoSampleAccess whether allow access the sample of video.
 	VideoSampleAccess bool
-	/**
-	 * whether allow access the sample of audio.
-	 */
+
+	// AudioSampleAccess whether allow access the sample of audio.
 	AudioSampleAccess bool
 }
 
+// Decode .
 func (pkt *SampleAccessPacket) Decode(data []uint8) (err error) {
 	//nothing
 
 	return
 }
+
+// Encode .
 func (pkt *SampleAccessPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
 	data = append(data, amf0WriteBool(pkt.VideoSampleAccess)...)
@@ -27,9 +28,13 @@ func (pkt *SampleAccessPacket) Encode() (data []uint8) {
 
 	return
 }
+
+// GetMessageType .
 func (pkt *SampleAccessPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0DataMessage
+	return RtmpMsgAmf0DataMessage
 }
-func (pkt *SampleAccessPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverStream
+
+// GetPreferCsID .
+func (pkt *SampleAccessPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverStream
 }

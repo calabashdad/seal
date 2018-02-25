@@ -1,49 +1,50 @@
 package pt
 
+// CloseStreamPacket client close stream packet.
 type CloseStreamPacket struct {
-	/**
-	 * Name of the command, set to “closeStream”.
-	 */
+	// CommandName Name of the command, set to “closeStream”.
 	CommandName string
-	/**
-	 * Transaction ID set to 0.
-	 */
-	TransactionId float64
-	/**
-	 * Command information object does not exist. Set to null type.
-	 */
+
+	// Transaction ID set to 0.
+	TransactionID float64
+
+	// CommandObject Command information object does not exist. Set to null type.
 	CommandObject Amf0Object // null
 }
 
+// Decode .
 func (pkt *CloseStreamPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	err = amf0ReadNull(data, &offset)
-	if err != nil {
+	if err = amf0ReadNull(data, &offset); err != nil {
 		return
 	}
 
 	return
 }
+
+// Encode .
 func (pkt *CloseStreamPacket) Encode() (data []uint8) {
 	//nothing
 	return
 }
+
+// GetMessageType .
 func (pkt *CloseStreamPacket) GetMessageType() uint8 {
 	//no method for this pakcet
 	return 0
 }
-func (pkt *CloseStreamPacket) GetPreferCsId() uint32 {
+
+// GetPreferCsID .
+func (pkt *CloseStreamPacket) GetPreferCsID() uint32 {
 	//no method for this pakcet
 	return 0
 }

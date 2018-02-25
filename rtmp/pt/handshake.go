@@ -45,10 +45,10 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) (err error
 	//use digest-key scheme.
 	c1Digest764 := c1[8 : 8+764]
 	var serverDigestForS2 []uint8
-	if ok, digest := IsDigestKeyScheme(c1, c1Digest764); !ok {
+	if ok, digest := isDigestKeyScheme(c1, c1Digest764); !ok {
 		//failed try key-digest scheme
 		c1Digest764_2 := c1[8+764 : 8+764+764]
-		if ok2, digest2 := IsKeyDigestScheme(c1, c1Digest764_2); !ok2 {
+		if ok2, digest2 := isKeyDigestScheme(c1, c1Digest764_2); !ok2 {
 			err = fmt.Errorf("ComplexHandShake verify both digest-key scheme and key-digest failed")
 		} else {
 			serverDigestForS2 = digest2
@@ -69,7 +69,7 @@ func ComplexHandShake(c1 []uint8, s0 []uint8, s1 []uint8, s2 []uint8) (err error
 	createS1(s1, handshakeServerPartialKey)
 
 	//create s2.
-	CreateS2(s2, serverDigestForS2)
+	createS2(s2, serverDigestForS2)
 
 	return
 }
@@ -110,7 +110,7 @@ func createS1(s1 []uint8, key []uint8) {
 	return
 }
 
-func CreateS2(s2 []uint8, key []uint8) {
+func createS2(s2 []uint8, key []uint8) {
 	// 1536bytes c2s2. c2 and s2 has the same structure.
 	//random-data: 1504bytes
 	//digest-data: 32bytes
@@ -123,20 +123,20 @@ func CreateS2(s2 []uint8, key []uint8) {
 	return
 }
 
-//just for c1 or s1
-func IsDigestKeyScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint8) {
+// just for c1 or s1
+func isDigestKeyScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint8) {
 
 	// 764bytes digest
-	//offset: 4bytes (u[0] + u[1] + u[2] + u[3])
-	//random-data: (offset)bytes
-	//digest-data: 32bytes
-	//random-data: (764-4-offset-32)bytes
+	// offset: 4bytes (u[0] + u[1] + u[2] + u[3])
+	// random-data: (offset)bytes
+	// digest-data: 32bytes
+	// random-data: (764-4-offset-32)bytes
 
 	// 764bytes key
-	//random-data: (offset)bytes
-	//key-data: 128bytes
-	//random-data: (764-offset-128-4)bytes
-	//offset: 4bytes
+	// random-data: (offset)bytes
+	// key-data: 128bytes
+	// random-data: (764-offset-128-4)bytes
+	// offset: 4bytes
 
 	var digestOffset uint32
 	for i := 0; i < 4; i++ {
@@ -151,7 +151,7 @@ func IsDigestKeyScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint
 	digestLoc := 4 + digestOffset
 	digestData := c1Digest764[digestLoc : digestLoc+32]
 
-	//part1 and part2 is divided by digest data of c1 or s1.
+	// part1 and part2 is divided by digest data of c1 or s1.
 	part1 := buf[:8+digestLoc]
 	part2 := buf[8+digestLoc+32:]
 
@@ -172,18 +172,18 @@ func IsDigestKeyScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint
 	return
 }
 
-func IsKeyDigestScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint8) {
+func isKeyDigestScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint8) {
 	// 764bytes key
-	//random-data: (offset)bytes
-	//key-data: 128bytes
-	//random-data: (764-offset-128-4)bytes
-	//offset: 4bytes
+	// random-data: (offset)bytes
+	// key-data: 128bytes
+	// random-data: (764-offset-128-4)bytes
+	// offset: 4bytes
 
 	// 764bytes digest
-	//offset: 4bytes (u[0] + u[1] + u[2] + u[3])
-	//random-data: (offset)bytes
-	//digest-data: 32bytes
-	//random-data: (764-4-offset-32)bytes
+	// offset: 4bytes (u[0] + u[1] + u[2] + u[3])
+	// random-data: (offset)bytes
+	// digest-data: 32bytes
+	// random-data: (764-4-offset-32)bytes
 
 	var digestOffset uint32
 	for i := 0; i < 4; i++ {
@@ -198,7 +198,7 @@ func IsKeyDigestScheme(buf []uint8, c1Digest764 []uint8) (ok bool, digest []uint
 	digestLoc := 4 + digestOffset
 	digestData := c1Digest764[digestLoc : digestLoc+32]
 
-	//part1 and part2 is divided by digest data of c1 or s1.
+	// part1 and part2 is divided by digest data of c1 or s1.
 	part1 := buf[:8+764+digestLoc]
 	part2 := buf[8+764+digestLoc+32:]
 

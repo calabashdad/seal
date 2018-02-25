@@ -5,17 +5,18 @@ import (
 	"fmt"
 )
 
+// SetChunkSizePacket Protocol control message 1, Set Chunk Size, is used to notify the
+// peer about the new maximum chunk size.
 type SetChunkSizePacket struct {
-	/**
-	 * The maximum chunk size can be 65536 bytes. The chunk size is
-	 * maintained independently for each direction.
-	 */
+	// ChunkSize The maximum chunk size can be 65536 bytes. The chunk size is
+	// maintained independently for each direction.
 	ChunkSize uint32
 }
 
+// Decode .
 func (pkt *SetChunkSizePacket) Decode(data []uint8) (err error) {
 	if len(data) < 4 {
-		err = fmt.Errorf("decode set chunk size packet, data len is not enough.")
+		err = fmt.Errorf("decode set chunk size packet, data len is not enough")
 		return
 	}
 
@@ -25,6 +26,8 @@ func (pkt *SetChunkSizePacket) Decode(data []uint8) (err error) {
 
 	return
 }
+
+// Encode .
 func (pkt *SetChunkSizePacket) Encode() (data []uint8) {
 
 	data = make([]uint8, 4)
@@ -36,9 +39,13 @@ func (pkt *SetChunkSizePacket) Encode() (data []uint8) {
 
 	return
 }
+
+// GetMessageType .
 func (pkt *SetChunkSizePacket) GetMessageType() uint8 {
 	return RTMP_MSG_SetChunkSize
 }
-func (pkt *SetChunkSizePacket) GetPreferCsId() uint32 {
-	return RTMP_CID_ProtocolControl
+
+// GetPreferCsID .
+func (pkt *SetChunkSizePacket) GetPreferCsID() uint32 {
+	return RtmpCidProtocolControl
 }

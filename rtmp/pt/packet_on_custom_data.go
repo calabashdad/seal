@@ -1,37 +1,34 @@
 package pt
 
-/**
-* the stream custom data.
-* FMLE: @setDataFrame
-* others: onCustomData
- */
+// OnCustomDataPakcet  the stream custom data.
 type OnCustomDataPakcet struct {
-	/**
-	* Name of custom data. Set to "onCustomData"
-	 */
+
+	// Name of custom data. Set to "onCustomData"
 	Name string
-	/**
-	* Custom data of stream.
-	 */
+
+	// Customdata Custom data of stream.
 	Customdata interface{}
-	Marker     uint8
+
+	// Marker type of CustomData
+	Marker uint8
 }
 
+// Decode .
 func (pkt *OnCustomDataPakcet) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.Name, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.Name, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
-	pkt.Customdata, err = amf0ReadAny(data, &pkt.Marker, &offset)
-	if err != nil {
+	if pkt.Customdata, err = amf0ReadAny(data, &pkt.Marker, &offset); err != nil {
 		return
 	}
 
 	return
 }
+
+// Encode .
 func (pkt *OnCustomDataPakcet) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.Name)...)
 	if RTMP_AMF0_Object == pkt.Marker {
@@ -42,9 +39,13 @@ func (pkt *OnCustomDataPakcet) Encode() (data []uint8) {
 
 	return
 }
+
+// GetMessageType .
 func (pkt *OnCustomDataPakcet) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0DataMessage
+	return RtmpMsgAmf0DataMessage
 }
-func (pkt *OnCustomDataPakcet) GetPreferCsId() uint32 {
-	return RTMP_CID_OverConnection2
+
+// GetPreferCsID .
+func (pkt *OnCustomDataPakcet) GetPreferCsID() uint32 {
+	return RtmpCidOverConnection2
 }

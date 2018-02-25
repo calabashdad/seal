@@ -23,7 +23,7 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	var offset uint32
 
 	// skip 1bytes to decode the amf3 command.
-	if pt.RTMP_MSG_AMF3CommandMessage == msg.Header.MessageType && msg.Header.PayloadLength >= 1 {
+	if pt.RtmpMsgAmf3CommandMessage == msg.Header.MessageType && msg.Header.PayloadLength >= 1 {
 		offset++
 	}
 
@@ -176,7 +176,7 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	var pkt pt.ConnectResPacket
 
 	pkt.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-	pkt.TransactionId = 1
+	pkt.TransactionID = 1
 
 	pkt.AddProsObj(pt.NewAmf0Object("fmsVer", "FMS/"+pt.FMS_VERSION, pt.RTMP_AMF0_String))
 	pkt.AddProsObj(pt.NewAmf0Object("capabilities", 127.0, pt.RTMP_AMF0_Number))
@@ -224,8 +224,8 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 	//createStream response
 	var pkt pt.CreateStreamResPacket
 	pkt.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-	pkt.TransactionId = p.TransactionId
-	pkt.StreamId = rc.defaultStreamID
+	pkt.TransactionID = p.TransactionID
+	pkt.StreamID = rc.defaultStreamID
 
 	if err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		log.Println("send createStream response failed. err=", err)
@@ -274,7 +274,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	if true {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCStreamBegin
-		pp.EventData = msg.Header.StreamId
+		pp.EventData = msg.Header.StreamID
 		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
 		if err != nil {
 			return
@@ -436,7 +436,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-	pp.TransactionId = p.TransactionId
+	pp.TransactionID = p.TransactionID
 	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
 	}
@@ -445,7 +445,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	//set chunk size to peer.
 	var pkt pt.SetChunkSizePacket
 	pkt.ChunkSize = conf.GlobalConfInfo.Rtmp.ChunkSize
-	if err = rc.SendPacket(&pkt, msg.Header.StreamId, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.SendPacket(&pkt, msg.Header.StreamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
 	}
 	log.Println("send request, set chunk size to ", pkt.ChunkSize)
@@ -473,7 +473,7 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-	pp.TransactionId = p.TransactionId
+	pp.TransactionID = p.TransactionID
 	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
 	}
@@ -548,7 +548,7 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
-	pp.TransactionId = p.TransactionId
+	pp.TransactionID = p.TransactionID
 	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
 	}

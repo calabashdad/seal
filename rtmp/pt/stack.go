@@ -1,31 +1,32 @@
 package pt
 
 const (
-	/**
-	 * 6.1.2. Chunk MessageStream Header
-	 * There are four different formats for the chunk message header,
-	 * selected by the "chunkFmt" field in the chunk basic header.
-	 */
+	// RtmpFmtType0 Chunk MessageStream Header
+	// There are four different formats for the chunk message header,
+	// selected by the "chunkFmt" field in the chunk basic header.
 	// 6.1.2.1. Type 0
 	// Chunks of Type 0 are 11 bytes long. This type MUST be used at the
 	// start of a chunk stream, and whenever the stream timestampDelta goes
 	// backward (e.g., because of a backward seek).
-	RTMP_FMT_TYPE0 = 0
-	// 6.1.2.2. Type 1
+	RtmpFmtType0 = 0
+
+	// RtmpFmtType1 Type 1
 	// Chunks of Type 1 are 7 bytes long. The message stream ID is not
 	// included; this chunk takes the same stream ID as the preceding chunk.
 	// Streams with variable-sized messages (for example, many video
 	// formats) SHOULD use this format for the first chunk of each new
 	// message after the first.
-	RTMP_FMT_TYPE1 = 1
-	// 6.1.2.3. Type 2
+	RtmpFmtType1 = 1
+
+	//RtmpFmtType2 Type 2
 	// Chunks of Type 2 are 3 bytes long. Neither the stream ID nor the
 	// message length is included; this chunk has the same stream ID and
 	// message length as the preceding chunk. Streams with constant-sized
 	// messages (for example, some audio and data formats) SHOULD use this
 	// format for the first chunk of each message after the first.
-	RTMP_FMT_TYPE2 = 2
-	// 6.1.2.4. Type 3
+	RtmpFmtType2 = 2
+
+	// RtmpFmtType3 Type 3
 	// Chunks of Type 3 have no header. Stream ID, message length and
 	// timestampDelta delta are not present; chunks of this type take values from
 	// the preceding chunk. When a single message is split into chunks, all
@@ -39,57 +40,54 @@ const (
 	// need for a chunk of type 2 to register the delta. If Type 3 chunk
 	// follows a Type 0 chunk, then timestampDelta delta for this Type 3 chunk is
 	// the same as the timestampDelta of Type 0 chunk.
-	RTMP_FMT_TYPE3 = 3
+	RtmpFmtType3 = 3
 )
 
 const (
-	/**
-	 * the chunk stream id used for some under-layer message,
-	 * for example, the PC(protocol control) message.
-	 */
-	RTMP_CID_ProtocolControl = 0x02
-	/**
-	 * the AMF0/AMF3 command message, invoke method and return the result, over NetConnection.
-	 * generally use 0x03.
-	 */
-	RTMP_CID_OverConnection = 0x03
-	/**
-	 * the AMF0/AMF3 command message, invoke method and return the result, over NetConnection,
-	 * the midst state(we guess).
-	 * rarely used, e.g. onStatus(NetStream.Play.Reset).
-	 */
-	RTMP_CID_OverConnection2 = 0x04
-	/**
-	 * the stream message(amf0/amf3), over NetStream.
-	 * generally use 0x05.
-	 */
-	RTMP_CID_OverStream = 0x05
-	/**
-	 * the stream message(amf0/amf3), over NetStream, the midst state(we guess).
-	 * rarely used, e.g. play("mp4:mystram.f4v")
-	 */
-	RTMP_CID_OverStream2 = 0x08
-	/**
-	 * the stream message(video), over NetStream
-	 * generally use 0x06.
-	 */
-	RTMP_CID_Video = 0x06
-	/**
-	 * the stream message(audio), over NetStream.
-	 * generally use 0x07.
-	 */
-	RTMP_CID_Audio = 0x07
+	// RtmpCidProtocolControl the chunk stream id used for some under-layer message,
+	// for example, the PC(protocol control) message.
+	RtmpCidProtocolControl = 0x02
+
+	// RtmpCidOverConnection the AMF0/AMF3 command message, invoke method and return the result, over NetConnection.
+	// generally use 0x03.
+	RtmpCidOverConnection = 0x03
+
+	// RtmpCidOverConnection2 the AMF0/AMF3 command message, invoke method and return the result, over NetConnection,
+	// the midst state(we guess).
+	// rarely used, e.g. onStatus(NetStream.Play.Reset).
+	RtmpCidOverConnection2 = 0x04
+
+	// RtmpCidOverStream the stream message(amf0/amf3), over NetStream.
+	// generally use 0x05.
+	RtmpCidOverStream = 0x05
+
+	// RtmpCidOverStream2 the stream message(amf0/amf3), over NetStream, the midst state(we guess).
+	// rarely used, e.g. play("mp4:mystram.f4v")
+	RtmpCidOverStream2 = 0x08
+
+	// RtmpCidVideo the stream message(video), over NetStream
+	// generally use 0x06.
+	RtmpCidVideo = 0x06
+
+	// RtmpCidAudio  the stream message(audio), over NetStream.
+	// generally use 0x07.
+	RtmpCidAudio = 0x07
 )
 
 const (
-	RTMP_EXTENDED_TIMESTAMP = 0xFFFFFF
+	// RtmpExtendTimeStamp rtmp extend timestamp in message, when time > 0xffffff
+	RtmpExtendTimeStamp = 0xFFFFFF
 )
 
 const (
-	RTMP_DEFAULT_CHUNK_SIZE = 128
+	// RtmpDefalutChunkSize rmtp chunk default size
+	RtmpDefalutChunkSize = 128
 
-	RTMP_CHUNKSIZE_MIN = 128
-	RTMP_CHUNKSIZE_MAX = 65536
+	// RtmpChunkSizeMin rtmp chunk min size
+	RtmpChunkSizeMin = 128
+
+	// RtmpChunkSizeMax rtmp chunk max size
+	RtmpChunkSizeMax = 65536
 )
 
 const (
@@ -113,8 +111,8 @@ const (
 	command messages to the peer.
 	*/
 
-	RTMP_MSG_AMF3CommandMessage = 17 // 0x11
-	RTMP_MSG_AMF0CommandMessage = 20 // 0x14
+	RtmpMsgAmf3CommandMessage = 17 // 0x11
+	RtmpMsgAmf0CommandMessage = 20 // 0x14
 
 	/**
 	3.2. Data message
@@ -125,8 +123,8 @@ const (
 	AMF0 and message type value of 15 for AMF3.
 	*/
 
-	RTMP_MSG_AMF0DataMessage = 18 // 0x12
-	RTMP_MSG_AMF3DataMessage = 15 // 0x0F
+	RtmpMsgAmf0DataMessage = 18 // 0x12
+	RtmpMsgAmf3DataMessage = 15 // 0x0F
 
 	/**
 	3.3. Shared object message
@@ -136,14 +134,16 @@ const (
 	kMsgContainerEx=16 for AMF3 are reserved for shared object events.
 	Each message can contain multiple events.
 	*/
-	RTMP_MSG_AMF3SharedObject = 16 // 0x10
-	RTMP_MSG_AMF0SharedObject = 19 // 0x13
+	RtmpMsgAmf3SharedObject = 16 // 0x10
+	RtmpMsgAmf0SharedObject = 19 // 0x13
+
 	/**
 	  3.4. Audio message
 	  The client or the server sends this message to send audio data to the
 	  peer. The message type value of 8 is reserved for audio messages.
 	*/
-	RTMP_MSG_AudioMessage = 8 // 0x08
+	RtmpMsgAudioMessage = 8 // 0x08
+
 	/* *
 	   3.5. Video message
 	   The client or the server sends this message to send video data to the

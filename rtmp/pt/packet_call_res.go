@@ -1,47 +1,39 @@
 package pt
 
+// CallResPacket response for CallPacket
 type CallResPacket struct {
-	/**
-	 * Name of the command.
-	 */
+	// CommandName Name of the command.
 	CommandName string
 
-	/**
-	 * @brief 请求的命令名
-	 */
-	ReqCommandName string
+	// TransactionID ID of the command, to which the response belongs to
+	TransactionID float64
 
-	/**
-	 * ID of the command, to which the response belongs to
-	 */
-	TransactionId float64
-	/**
-	 * If there exists any command info this is set, else this is set to null type.
-	 */
-	CommandObject       interface{}
+	// CommandObject If there exists any command info this is set, else this is set to null type.
+	CommandObject interface{}
+
+	// CommandObjectMarker object type marker
 	CommandObjectMarker uint8
-	/**
-	 * Response from the method that was called.
-	 */
-	Response       interface{}
+
+	//  Response from the method that was called.
+	Response interface{}
+
+	// ResponseMarker response type marker
 	ResponseMarker uint8
 }
 
+// Decode .
 func (pkt *CallResPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	pkt.CommandObject, err = amf0ReadAny(data, &pkt.CommandObjectMarker, &offset)
-	if err != nil {
+	if pkt.CommandObject, err = amf0ReadAny(data, &pkt.CommandObjectMarker, &offset); err != nil {
 		return
 	}
 
@@ -57,9 +49,10 @@ func (pkt *CallResPacket) Decode(data []uint8) (err error) {
 	return
 }
 
+// Encode .
 func (pkt *CallResPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
-	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionID)...)
 	if nil != pkt.CommandObject {
 		data = append(data, amf0WriteAny(pkt.CommandObject.(Amf0Object))...)
 	}
@@ -71,10 +64,12 @@ func (pkt *CallResPacket) Encode() (data []uint8) {
 	return
 }
 
+// GetMessageType .
 func (pkt *CallResPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0CommandMessage
+	return RtmpMsgAmf0CommandMessage
 }
 
-func (pkt *CallResPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverConnection
+// GetPreferCsID .
+func (pkt *CallResPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverConnection
 }

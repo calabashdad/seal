@@ -1,46 +1,37 @@
 package pt
 
-/**
-* the special packet for the bandwidth test.
-* actually, it's a OnStatusCallPacket, but
-* 1. encode with data field, to send data to client.
-* 2. decode ignore the data field, donot care.
- */
+// BandWidthPacket the special packet for the bandwidth test.
+// actually, it's a OnStatusCallPacket, but
+// 1. encode with data field, to send data to client.
+// 2. decode ignore the data field, donot care.
 type BandWidthPacket struct {
-	/**
-	 * Name of command.
-	 */
+	// Name of command.
 	CommandName string
-	/**
-	 * Transaction ID set to 0.
-	 */
-	TransactionId float64
-	/**
-	 * Command information does not exist. Set to null type.
-	 */
+
+	// Transaction ID set to 0.
+	TransactionID float64
+
+	// Args Command information does not exist. Set to null type.
 	Args Amf0Object // null
-	/**
-	 * Name-value pairs that describe the response from the server.
-	 * ‘code’,‘level’, ‘description’ are names of few among such information.
-	 */
+
+	// Data Name-value pairs that describe the response from the server.
+	// ‘code’,‘level’, ‘description’ are names of few among such information.
 	Data []Amf0Object
 }
 
+// Decode .
 func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
 	var offset uint32
 
-	pkt.CommandName, err = Amf0ReadString(data, &offset)
-	if err != nil {
+	if pkt.CommandName, err = Amf0ReadString(data, &offset); err != nil {
 		return
 	}
 
-	pkt.TransactionId, err = Amf0ReadNumber(data, &offset)
-	if err != nil {
+	if pkt.TransactionID, err = Amf0ReadNumber(data, &offset); err != nil {
 		return
 	}
 
-	err = amf0ReadNull(data, &offset)
-	if err != nil {
+	if err = amf0ReadNull(data, &offset); err != nil {
 		return
 	}
 
@@ -65,19 +56,23 @@ func (pkt *BandWidthPacket) isStopPublish() bool {
 func (pkt *BandWidthPacket) isFinish() bool {
 	return SRS_BW_CHECK_FINISHED == pkt.CommandName
 }
+
+// Encode .
 func (pkt *BandWidthPacket) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.CommandName)...)
-	data = append(data, amf0WriteNumber(pkt.TransactionId)...)
+	data = append(data, amf0WriteNumber(pkt.TransactionID)...)
 	data = append(data, amf0WriteNull()...)
 	data = append(data, amf0WriteObject(pkt.Data)...)
 
 	return
 }
 
+// GetMessageType .
 func (pkt *BandWidthPacket) GetMessageType() uint8 {
-	return RTMP_MSG_AMF0CommandMessage
+	return RtmpMsgAmf0CommandMessage
 }
 
-func (pkt *BandWidthPacket) GetPreferCsId() uint32 {
-	return RTMP_CID_OverStream
+// GetPreferCsID .
+func (pkt *BandWidthPacket) GetPreferCsID() uint32 {
+	return RtmpCidOverStream
 }
