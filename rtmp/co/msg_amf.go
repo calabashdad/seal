@@ -41,40 +41,40 @@ func (rc *RtmpConn) msgAmf(msg *pt.Message) (err error) {
 	log.Println("amf0/3 command or amf0/3 data, msg typeid=", msg.Header.MessageType, ",command =", command)
 
 	switch command {
-	case pt.RTMP_AMF0_COMMAND_RESULT, pt.RTMP_AMF0_COMMAND_ERROR:
+	case pt.RtmpAmf0CommandResult, pt.RtmpAmf0CommandError:
 		err = rc.amf0ResultError(msg)
-	case pt.RTMP_AMF0_COMMAND_CONNECT:
+	case pt.RtmpAmf0CommandConnect:
 		err = rc.amf0Connect(msg)
-	case pt.RTMP_AMF0_COMMAND_CREATE_STREAM:
+	case pt.RtmpAmf0CommandCreateStream:
 		err = rc.amf0CreateStream(msg)
-	case pt.RTMP_AMF0_COMMAND_PLAY:
+	case pt.RtmpAmf0CommandPlay:
 		err = rc.amf0Play(msg)
-	case pt.RTMP_AMF0_COMMAND_PAUSE:
+	case pt.RtmpAmf0CommandPause:
 		err = rc.amf0Pause(msg)
-	case pt.RTMP_AMF0_COMMAND_RELEASE_STREAM:
+	case pt.RtmpAmf0CommandReleaseStream:
 		err = rc.amf0ReleaseStream(msg)
-	case pt.RTMP_AMF0_COMMAND_FC_PUBLISH:
+	case pt.RtmpAmf0CommandFcPublish:
 		err = rc.amf0FcPublish(msg)
-	case pt.RTMP_AMF0_COMMAND_PUBLISH:
+	case pt.RtmpAmf0CommandPublish:
 		err = rc.amf0Publish(msg)
-	case pt.RTMP_AMF0_COMMAND_UNPUBLISH:
+	case pt.RtmpAmf0CommandUnpublish:
 		err = rc.amf0UnPublish(msg)
-	case pt.RTMP_AMF0_COMMAND_KEEPLIVE:
-	case pt.RTMP_AMF0_COMMAND_ENABLEVIDEO:
-	case pt.RTMP_AMF0_DATA_SET_DATAFRAME, pt.RTMP_AMF0_DATA_ON_METADATA:
+	case pt.RtmpAmf0CommandKeeplive:
+	case pt.RtmpAmf0CommandEnableVideo:
+	case pt.RtmpAmf0DataSetDataFrame, pt.RtmpAmf0DataOnMetaData:
 		err = rc.amf0Meta(msg)
-	case pt.RTMP_AMF0_DATA_ON_CUSTOMDATA:
+	case pt.RtmpAmf0DataOnCustomData:
 		err = rc.amf0OnCustomer(msg)
-	case pt.RTMP_AMF0_COMMAND_CLOSE_STREAM:
+	case pt.RtmpAmf0CommandCloseStream:
 		err = rc.amf0CloseStream(msg)
-	case pt.RTMP_AMF0_COMMAND_ON_BW_DONE:
+	case pt.RtmpAmf0CommandOnBwDone:
 		err = rc.amf0OnBwDone(msg)
-	case pt.RTMP_AMF0_COMMAND_ON_STATUS:
+	case pt.RtmpAmf0CommandOnStatus:
 		err = rc.amf0OnStatus(msg)
-	case pt.RTMP_AMF0_COMMAND_GET_STREAM_LENGTH:
+	case pt.RtmpAmf0CommandGetStreamLength:
 		err = rc.amf0GetStreamLen(msg)
-	case pt.RTMP_AMF0_COMMAND_INSERT_KEYFREAME:
-	case pt.RTMP_AMF0_DATA_SAMPLE_ACCESS:
+	case pt.RtmpAmf0CommandInsertKeyFrame:
+	case pt.RtmpAmf0DataSampleAccess:
 		err = rc.amf0SampleAccess(msg)
 	default:
 		log.Println("msg amf unknown command name=", command)
@@ -113,15 +113,15 @@ func (rc *RtmpConn) amf0ResultError(msg *pt.Message) (err error) {
 		return
 	}
 	switch reqCommandName {
-	case pt.RTMP_AMF0_COMMAND_CONNECT:
+	case pt.RtmpAmf0CommandConnect:
 		p := pt.ConnectResPacket{}
 		err = p.Decode(msg.Payload.Payload)
-	case pt.RTMP_AMF0_COMMAND_CREATE_STREAM:
+	case pt.RtmpAmf0CommandCreateStream:
 		p := pt.CreateStreamResPacket{}
 		err = p.Decode(msg.Payload.Payload)
-	case pt.RTMP_AMF0_COMMAND_RELEASE_STREAM,
-		pt.RTMP_AMF0_COMMAND_FC_PUBLISH,
-		pt.RTMP_AMF0_COMMAND_UNPUBLISH:
+	case pt.RtmpAmf0CommandReleaseStream,
+		pt.RtmpAmf0CommandFcPublish,
+		pt.RtmpAmf0CommandUnpublish:
 		p := pt.FmleStartResPacket{}
 		err = p.Decode(msg.Payload.Payload)
 	default:
@@ -175,22 +175,22 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 
 	var pkt pt.ConnectResPacket
 
-	pkt.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pkt.CommandName = pt.RtmpAmf0CommandResult
 	pkt.TransactionID = 1
 
-	pkt.AddProsObj(pt.NewAmf0Object("fmsVer", "FMS/"+pt.FMS_VERSION, pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("capabilities", 127.0, pt.RTMP_AMF0_Number))
-	pkt.AddProsObj(pt.NewAmf0Object("mode", 1.0, pt.RTMP_AMF0_Number))
-	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeConnectSuccess, pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusDescription, "Connection succeeded", pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("objectEncoding", rc.connectInfo.objectEncoding, pt.RTMP_AMF0_Number))
-	pkt.AddProsObj(pt.NewAmf0Object("version", pt.FMS_VERSION, pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("seal_license", "The MIT License (MIT)", pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("seal_authors", "YangKai", pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("seal_email", "beyondyangkai@gmail.com", pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("seal_copyright", "Copyright (c) 2018 YangKai", pt.RTMP_AMF0_String))
-	pkt.AddProsObj(pt.NewAmf0Object("seal_sig", "seal", pt.RTMP_AMF0_String))
+	pkt.AddProsObj(pt.NewAmf0Object("fmsVer", "FMS/"+pt.RtmpSigFmsVersion, pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("capabilities", 127.0, pt.RtmpAmf0Number))
+	pkt.AddProsObj(pt.NewAmf0Object("mode", 1.0, pt.RtmpAmf0Number))
+	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeConnectSuccess, pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusDescription, "Connection succeeded", pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("objectEncoding", rc.connectInfo.objectEncoding, pt.RtmpAmf0Number))
+	pkt.AddProsObj(pt.NewAmf0Object("version", pt.RtmpSigFmsVersion, pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_license", "The MIT License (MIT)", pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_authors", "YangKai", pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_email", "beyondyangkai@gmail.com", pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_copyright", "Copyright (c) 2018 YangKai", pt.RtmpAmf0String))
+	pkt.AddProsObj(pt.NewAmf0Object("seal_sig", "seal", pt.RtmpAmf0String))
 
 	if err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		log.Println("response connect error.", err)
@@ -223,7 +223,7 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 
 	//createStream response
 	var pkt pt.CreateStreamResPacket
-	pkt.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pkt.CommandName = pt.RtmpAmf0CommandResult
 	pkt.TransactionID = p.TransactionID
 	pkt.StreamID = rc.defaultStreamID
 
@@ -285,12 +285,12 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	// onStatus(NetStream.Play.Reset)
 	if true {
 		var pp pt.OnStatusCallPacket
-		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
-		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamReset, pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Playing and resetting stream.", pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusClientId, pt.RTMP_SIG_CLIENT_ID, pt.RTMP_AMF0_String))
+		pp.CommandName = pt.RtmpAmf0CommandOnStatus
+		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamReset, pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Playing and resetting stream.", pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusClientID, pt.RtmpSigClientID, pt.RtmpAmf0String))
 
 		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -302,13 +302,13 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	// onStatus(NetStream.Play.Start)
 	if true {
 		var pp pt.OnStatusCallPacket
-		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+		pp.CommandName = pt.RtmpAmf0CommandOnStatus
 
-		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamStart, pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream.", pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusClientId, pt.RTMP_SIG_CLIENT_ID, pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamStart, pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream.", pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusClientID, pt.RtmpSigClientID, pt.RtmpAmf0String))
 
 		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -320,7 +320,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	// |RtmpSampleAccess(false, false)
 	if true {
 		var pp pt.SampleAccessPacket
-		pp.CommandName = pt.RTMP_AMF0_DATA_SAMPLE_ACCESS
+		pp.CommandName = pt.RtmpAmf0DataSampleAccess
 		pp.AudioSampleAccess = true
 		pp.VideoSampleAccess = true
 
@@ -334,11 +334,11 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	// onStatus(NetStream.Data.Start)
 	if true {
 		var pp pt.OnStatusDataPacket
-		pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+		pp.CommandName = pt.RtmpAmf0CommandOnStatus
 
-		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeDataStart, pt.RTMP_AMF0_String))
-		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream data.", pt.RTMP_AMF0_String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeDataStart, pt.RtmpAmf0String))
+		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream data.", pt.RtmpAmf0String))
 
 		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -435,7 +435,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	}
 
 	var pp pt.FmleStartResPacket
-	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pp.CommandName = pt.RtmpAmf0CommandResult
 	pp.TransactionID = p.TransactionID
 	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
@@ -472,7 +472,7 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 	}
 
 	var pp pt.FmleStartResPacket
-	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pp.CommandName = pt.RtmpAmf0CommandResult
 	pp.TransactionID = p.TransactionID
 	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
@@ -515,9 +515,9 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	rc.role = RtmpRoleFMLEPublisher
 
 	var pp pt.OnStatusCallPacket
-	pp.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
-	pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodePublishStart, pt.RTMP_AMF0_String))
-	pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started publishing stream.", pt.RTMP_AMF0_String))
+	pp.CommandName = pt.RtmpAmf0CommandOnStatus
+	pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodePublishStart, pt.RtmpAmf0String))
+	pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started publishing stream.", pt.RtmpAmf0String))
 
 	if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
@@ -547,7 +547,7 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 	}
 
 	var pp pt.FmleStartResPacket
-	pp.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+	pp.CommandName = pt.RtmpAmf0CommandResult
 	pp.TransactionID = p.TransactionID
 	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 		return
@@ -577,9 +577,9 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	log.Println("decode meta data success, meta=", p)
 
 	//add server info to metadata
-	p.AddObject(*pt.NewAmf0Object("server", "seal rtmp server", pt.RTMP_AMF0_String))
-	p.AddObject(*pt.NewAmf0Object("primary", "YangKai", pt.RTMP_AMF0_String))
-	p.AddObject(*pt.NewAmf0Object("author", "YangKai", pt.RTMP_AMF0_String))
+	p.AddObject(*pt.NewAmf0Object("server", "seal rtmp server", pt.RtmpAmf0String))
+	p.AddObject(*pt.NewAmf0Object("primary", "YangKai", pt.RtmpAmf0String))
+	p.AddObject(*pt.NewAmf0Object("author", "YangKai", pt.RtmpAmf0String))
 
 	if v := p.GetProperty("audiosamplerate"); v != nil {
 		rc.source.sampleRate = v.(float64)

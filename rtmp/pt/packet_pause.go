@@ -35,7 +35,7 @@ func (pkt *PausePacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_PAUSE == pkt.CommandName {
+	if RtmpAmf0CommandPause == pkt.CommandName {
 		err = fmt.Errorf("decode pause packet command name is error.actully=%s", pkt.CommandName)
 		return
 	}

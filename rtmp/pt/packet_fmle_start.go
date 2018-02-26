@@ -31,9 +31,9 @@ func (pkt *FmleStartPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_RELEASE_STREAM != pkt.CommandName &&
-		RTMP_AMF0_COMMAND_FC_PUBLISH != pkt.CommandName &&
-		RTMP_AMF0_COMMAND_UNPUBLISH != pkt.CommandName {
+	if RtmpAmf0CommandReleaseStream != pkt.CommandName &&
+		RtmpAmf0CommandFcPublish != pkt.CommandName &&
+		RtmpAmf0CommandUnpublish != pkt.CommandName {
 		err = fmt.Errorf("decode fmle start packet error, command name is error.actully=%s", pkt.CommandName)
 		return
 	}

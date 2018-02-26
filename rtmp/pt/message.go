@@ -42,7 +42,7 @@ func (h *MessageHeader) IsAudio() bool {
 
 // IsVideo .
 func (h *MessageHeader) IsVideo() bool {
-	return RTMP_MSG_VideoMessage == h.MessageType
+	return RtmpMsgVideoMessage == h.MessageType
 }
 
 // IsAmf0Command .
@@ -67,32 +67,32 @@ func (h *MessageHeader) IsAmf3Data() bool {
 
 // IsWindowAckledgementSize .
 func (h *MessageHeader) IsWindowAckledgementSize() bool {
-	return RTMP_MSG_WindowAcknowledgementSize == h.MessageType
+	return RtmpMsgWindowAcknowledgementSize == h.MessageType
 }
 
 // IsAckledgement .
 func (h *MessageHeader) IsAckledgement() bool {
-	return RTMP_MSG_Acknowledgement == h.MessageType
+	return RtmpMsgAcknowledgement == h.MessageType
 }
 
 // IsSetChunkSize .
 func (h *MessageHeader) IsSetChunkSize() bool {
-	return RTMP_MSG_SetChunkSize == h.MessageType
+	return RtmpMsgSetChunkSize == h.MessageType
 }
 
 // IsUserControlMessage .
 func (h *MessageHeader) IsUserControlMessage() bool {
-	return RTMP_MSG_UserControlMessage == h.MessageType
+	return RtmpMsgUserControlMessage == h.MessageType
 }
 
 // IsSetPeerBandwidth .
 func (h *MessageHeader) IsSetPeerBandwidth() bool {
-	return RTMP_MSG_SetPeerBandwidth == h.MessageType
+	return RtmpMsgSetPeerBandwidth == h.MessageType
 }
 
 // IsAggregate .
 func (h *MessageHeader) IsAggregate() bool {
-	return RTMP_MSG_AggregateMessage == h.MessageType
+	return RtmpMsgAggregateMessage == h.MessageType
 }
 
 // InitializeAmf0Script create a amf0 script header, set the size and stream_id.
@@ -121,7 +121,7 @@ func (h *MessageHeader) InitializeAudio(payloadSize uint32, time uint32, streamI
 
 // InitializeVideo create a video header, set the size, timestamp and stream_id.
 func (h *MessageHeader) InitializeVideo(payloadSize uint32, time uint32, streamID uint32) {
-	h.MessageType = RTMP_MSG_VideoMessage
+	h.MessageType = RtmpMsgVideoMessage
 	h.PayloadLength = payloadSize
 	h.TimestampDelta = time
 	h.Timestamp = uint64(time)

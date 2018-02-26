@@ -112,10 +112,10 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 			// it's ok
 		} else {
 			pRes := pt.CallResPacket{}
-			pRes.CommandName = pt.RTMP_AMF0_COMMAND_RESULT
+			pRes.CommandName = pt.RtmpAmf0CommandResult
 			pRes.TransactionID = p.TransactionID
-			pRes.CommandObjectMarker = pt.RTMP_AMF0_Null
-			pRes.ResponseMarker = pt.RTMP_AMF0_Null
+			pRes.CommandObjectMarker = pt.RtmpAMF0Null
+			pRes.ResponseMarker = pt.RtmpAMF0Null
 
 			if err = rc.SendPacket(&pRes, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 				return
@@ -149,11 +149,11 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 	if isPause {
 		// onStatus(NetStream.Pause.Notify)
 		p := pt.OnStatusCallPacket{}
-		p.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+		p.CommandName = pt.RtmpAmf0CommandOnStatus
 
-		p.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
-		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamPause, pt.RTMP_AMF0_String))
-		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Paused stream.", pt.RTMP_AMF0_String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamPause, pt.RtmpAmf0String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Paused stream.", pt.RtmpAmf0String))
 
 		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return
@@ -174,11 +174,11 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 	} else {
 		// onStatus(NetStream.Unpause.Notify)
 		p := pt.OnStatusCallPacket{}
-		p.CommandName = pt.RTMP_AMF0_COMMAND_ON_STATUS
+		p.CommandName = pt.RtmpAmf0CommandOnStatus
 
-		p.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RTMP_AMF0_String))
-		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamUnpause, pt.RTMP_AMF0_String))
-		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "UnPaused stream.", pt.RTMP_AMF0_String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamUnpause, pt.RtmpAmf0String))
+		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "UnPaused stream.", pt.RtmpAmf0String))
 
 		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
 			return

@@ -34,7 +34,7 @@ func (pkt *SetPeerBandWidthPacket) Encode() (data []uint8) {
 
 // GetMessageType .
 func (pkt *SetPeerBandWidthPacket) GetMessageType() uint8 {
-	return RTMP_MSG_SetPeerBandwidth
+	return RtmpMsgSetPeerBandwidth
 }
 
 // GetPreferCsID .

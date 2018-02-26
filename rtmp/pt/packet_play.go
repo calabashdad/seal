@@ -72,7 +72,7 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_PLAY != pkt.CommandName {
+	if RtmpAmf0CommandPlay != pkt.CommandName {
 		err = fmt.Errorf("decode play packet, command name is not play.actully=%s", pkt.CommandName)
 		return
 	}
@@ -122,9 +122,9 @@ func (pkt *PlayPacket) Decode(data []uint8) (err error) {
 			return
 		}
 
-		if RTMP_AMF0_Boolean == marker {
+		if RtmpAmf0Boolean == marker {
 			pkt.Reset = v.(bool)
-		} else if RTMP_AMF0_Number == marker {
+		} else if RtmpAmf0Number == marker {
 			pkt.Reset = (v.(float64) != 0)
 		}
 	}

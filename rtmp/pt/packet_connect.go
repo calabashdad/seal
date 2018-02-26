@@ -39,7 +39,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_CONNECT != pkt.CommandName {
+	if RtmpAmf0CommandConnect != pkt.CommandName {
 		err = fmt.Errorf("decode connect packet, command name is not connect")
 		return
 	}
@@ -65,7 +65,7 @@ func (pkt *ConnectPacket) Decode(data []uint8) (err error) {
 			return
 		}
 
-		if RTMP_AMF0_Object == marker {
+		if RtmpAmf0Object == marker {
 			pkt.Args = v.([]Amf0Object)
 		}
 	}

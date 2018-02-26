@@ -42,7 +42,7 @@ func (pkt *SetChunkSizePacket) Encode() (data []uint8) {
 
 // GetMessageType .
 func (pkt *SetChunkSizePacket) GetMessageType() uint8 {
-	return RTMP_MSG_SetChunkSize
+	return RtmpMsgSetChunkSize
 }
 
 // GetPreferCsID .

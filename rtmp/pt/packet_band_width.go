@@ -46,15 +46,15 @@ func (pkt *BandWidthPacket) Decode(data []uint8) (err error) {
 }
 
 func (pkt *BandWidthPacket) isStopPlay() bool {
-	return SRS_BW_CHECK_STOP_PLAY == pkt.CommandName
+	return RtmpBwCheckStopPlay == pkt.CommandName
 }
 
 func (pkt *BandWidthPacket) isStopPublish() bool {
-	return SRS_BW_CHECK_START_PUBLISH == pkt.CommandName
+	return RtmpBwCheckStartPublish == pkt.CommandName
 }
 
 func (pkt *BandWidthPacket) isFinish() bool {
-	return SRS_BW_CHECK_FINISHED == pkt.CommandName
+	return RtmpBwCheckFinished == pkt.CommandName
 }
 
 // Encode .

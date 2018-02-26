@@ -56,7 +56,7 @@ func NewRtmpConnection(c net.Conn) *RtmpConn {
 		role:            RtmpRoleUnknown,
 		defaultStreamID: 1.0,
 		connectInfo: &connectInfoS{
-			objectEncoding: pt.RTMP_SIG_AMF0_VER,
+			objectEncoding: pt.RtmpSigAmf0Ver,
 		},
 	}
 }

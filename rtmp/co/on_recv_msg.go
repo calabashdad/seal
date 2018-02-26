@@ -26,26 +26,26 @@ func (rc *RtmpConn) onRecvMsg(msg *pt.Message) (err error) {
 	case pt.RtmpMsgAmf3CommandMessage, pt.RtmpMsgAmf0CommandMessage,
 		pt.RtmpMsgAmf0DataMessage, pt.RtmpMsgAmf3DataMessage:
 		err = rc.msgAmf(msg)
-	case pt.RTMP_MSG_UserControlMessage:
+	case pt.RtmpMsgUserControlMessage:
 		err = rc.msgUserCtrl(msg)
-	case pt.RTMP_MSG_WindowAcknowledgementSize:
+	case pt.RtmpMsgWindowAcknowledgementSize:
 		err = rc.msgSetAck(msg)
-	case pt.RTMP_MSG_SetChunkSize:
+	case pt.RtmpMsgSetChunkSize:
 		err = rc.msgSetChunk(msg)
-	case pt.RTMP_MSG_SetPeerBandwidth:
+	case pt.RtmpMsgSetPeerBandwidth:
 		err = rc.msgSetBand(msg)
-	case pt.RTMP_MSG_Acknowledgement:
+	case pt.RtmpMsgAcknowledgement:
 		err = rc.msgAck(msg)
-	case pt.RTMP_MSG_AbortMessage:
+	case pt.RtmpMsgAbortMessage:
 		err = rc.msgAbort(msg)
-	case pt.RTMP_MSG_EdgeAndOriginServerCommand:
+	case pt.RtmpMsgEdgeAndOriginServerCommand:
 	case pt.RtmpMsgAmf3SharedObject:
 	case pt.RtmpMsgAmf0SharedObject:
 	case pt.RtmpMsgAudioMessage:
 		err = rc.msgAudio(msg)
-	case pt.RTMP_MSG_VideoMessage:
+	case pt.RtmpMsgVideoMessage:
 		err = rc.msgVideo(msg)
-	case pt.RTMP_MSG_AggregateMessage:
+	case pt.RtmpMsgAggregateMessage:
 		err = rc.msgAggregate(msg)
 	default:
 		log.Println("on recv msg unknown msg typeid=", msg.Header.MessageType)

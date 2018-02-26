@@ -27,7 +27,7 @@ func (pkt *AcknowlegementPacket) Encode() (data []uint8) {
 
 // GetMessageType .
 func (pkt *AcknowlegementPacket) GetMessageType() uint8 {
-	return RTMP_MSG_Acknowledgement
+	return RtmpMsgAcknowledgement
 }
 
 // GetPreferCsID .

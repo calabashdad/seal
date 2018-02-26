@@ -81,9 +81,9 @@ func (pkt *UserControlPacket) Encode() (data []uint8) {
 	return
 }
 
-// GetMessageType
+// GetMessageType .
 func (pkt *UserControlPacket) GetMessageType() uint8 {
-	return RTMP_MSG_UserControlMessage
+	return RtmpMsgUserControlMessage
 }
 
 // GetPreferCsID .

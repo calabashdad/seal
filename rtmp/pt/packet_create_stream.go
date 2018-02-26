@@ -27,7 +27,7 @@ func (pkt *CreateStreamPacket) Decode(data []uint8) (err error) {
 		return
 	}
 
-	if RTMP_AMF0_COMMAND_CREATE_STREAM != pkt.CommandName {
+	if RtmpAmf0CommandCreateStream != pkt.CommandName {
 		err = fmt.Errorf("decode create stream packet, command name is wrong. actully=%s", pkt.CommandName)
 		return
 	}

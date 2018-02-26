@@ -31,9 +31,9 @@ func (pkt *OnCustomDataPakcet) Decode(data []uint8) (err error) {
 // Encode .
 func (pkt *OnCustomDataPakcet) Encode() (data []uint8) {
 	data = append(data, amf0WriteString(pkt.Name)...)
-	if RTMP_AMF0_Object == pkt.Marker {
+	if RtmpAmf0Object == pkt.Marker {
 		data = append(data, amf0WriteObject(pkt.Customdata.([]Amf0Object))...)
-	} else if RTMP_AMF0_EcmaArray == pkt.Marker {
+	} else if RtmpAmf0EcmaArray == pkt.Marker {
 		data = append(data, amf0WriteEcmaArray(pkt.Customdata.(amf0EcmaArray))...)
 	}
 

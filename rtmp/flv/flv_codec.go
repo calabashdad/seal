@@ -17,7 +17,7 @@ func AudioIsSequenceHeader(data []uint8) bool {
 
 	aacPacketType := data[1]
 
-	return aacPacketType == pt.SrsCodecAudioTypeSequenceHeader
+	return aacPacketType == pt.RtmpCodecAudioTypeSequenceHeader
 }
 
 func audioIsAAC(data []uint8) bool {
@@ -29,7 +29,7 @@ func audioIsAAC(data []uint8) bool {
 	soundFormat := data[0]
 	soundFormat = (soundFormat >> 4) & 0x0f
 
-	return soundFormat == pt.SrsCodecAudioAAC
+	return soundFormat == pt.RtmpCodecAudioAAC
 }
 
 // VideoIsH264 judge video is h264 sequence header
@@ -42,7 +42,7 @@ func VideoIsH264(data []uint8) bool {
 	codecID := data[0]
 	codecID &= 0x0f
 
-	return pt.SrsCodecVideoAVC == codecID
+	return pt.RtmpCodecVideoAVC == codecID
 }
 
 // VideoH264IsKeyframe judge video is h264 key frame
@@ -55,7 +55,7 @@ func VideoH264IsKeyframe(data []uint8) bool {
 	frameType := data[0]
 	frameType = (frameType >> 4) & 0x0F
 
-	return frameType == pt.SrsCodecVideoAVCFrameKeyFrame
+	return frameType == pt.RtmpCodecVideoAVCFrameKeyFrame
 }
 
 // VideoH264IsSequenceHeaderAndKeyFrame judge video is h264 sequence header and key frame
@@ -75,7 +75,7 @@ func VideoH264IsSequenceHeaderAndKeyFrame(data []uint8) bool {
 
 	avcPacketType := data[1]
 
-	return frameType == pt.SrsCodecVideoAVCFrameKeyFrame && avcPacketType == pt.SrsCodecVideoAVCTypeSequenceHeader
+	return frameType == pt.RtmpCodecVideoAVCFrameKeyFrame && avcPacketType == pt.RtmpCodecVideoAVCTypeSequenceHeader
 }
 
 // VideoH264IsSpspps judge video is spspps
@@ -95,5 +95,5 @@ func VideoH264IsSpspps(data []uint8) bool {
 
 	avcPacketType := data[1]
 
-	return avcPacketType == pt.SrsCodecVideoAVCTypeSequenceHeader
+	return avcPacketType == pt.RtmpCodecVideoAVCTypeSequenceHeader
 }

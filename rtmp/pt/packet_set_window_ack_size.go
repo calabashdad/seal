@@ -39,7 +39,7 @@ func (pkt *SetWindowAckSizePacket) Encode() (data []uint8) {
 
 // GetMessageType .
 func (pkt *SetWindowAckSizePacket) GetMessageType() uint8 {
-	return RTMP_MSG_WindowAcknowledgementSize
+	return RtmpMsgWindowAcknowledgementSize
 }
 
 // GetPreferCsID .

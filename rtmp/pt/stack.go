@@ -91,311 +91,357 @@ const (
 )
 
 const (
-	/**
-	3. Types of messages
-	The server and the client send messages over the network to
-	communicate with each other. The messages can be of any type which
-	includes audio messages, video messages, command messages, shared
-	object messages, data messages, and user control messages.
-	3.1. Command message
-	Command messages carry the AMF-encoded commands between the client
-	and the server. These messages have been assigned message type value
-	of 20 for AMF0 encoding and message type value of 17 for AMF3
-	encoding. These messages are sent to perform some operations like
-	connect, createStream, publish, play, pause on the peer. Command
-	messages like onstatus, result etc. are used to inform the sender
-	about the status of the requested commands. A command message
-	consists of command name, transaction ID, and command object that
-	contains related parameters. A client or a server can request Remote
-	Procedure Calls (RPC) over streams that are communicated using the
-	command messages to the peer.
-	*/
 
+	// Types of messages
+	// The server and the client send messages over the network to
+	// communicate with each other. The messages can be of any type which
+	// includes audio messages, video messages, command messages, shared
+	// object messages, data messages, and user control messages.
+	// 3.1. Command message
+	// Command messages carry the AMF-encoded commands between the client
+	// and the server. These messages have been assigned message type value
+	// of 20 for AMF0 encoding and message type value of 17 for AMF3
+	// encoding. These messages are sent to perform some operations like
+	// connect, createStream, publish, play, pause on the peer. Command
+	// messages like onstatus, result etc. are used to inform the sender
+	// about the status of the requested commands. A command message
+	// consists of command name, transaction ID, and command object that
+	// contains related parameters. A client or a server can request Remote
+	// Procedure Calls (RPC) over streams that are communicated using the
+	// command messages to the peer.
+
+	// RtmpMsgAmf3CommandMessage .
 	RtmpMsgAmf3CommandMessage = 17 // 0x11
+
+	// RtmpMsgAmf0CommandMessage .
 	RtmpMsgAmf0CommandMessage = 20 // 0x14
 
-	/**
-	3.2. Data message
-	The client or the server sends this message to send Metadata or any
-	user data to the peer. Metadata includes details about the
-	data(audio, video etc.) like creation time, duration, theme and so
-	on. These messages have been assigned message type value of 18 for
-	AMF0 and message type value of 15 for AMF3.
-	*/
+	// Data message
+	// The client or the server sends this message to send Metadata or any
+	// user data to the peer. Metadata includes details about the
+	// data(audio, video etc.) like creation time, duration, theme and so
+	// on. These messages have been assigned message type value of 18 for
+	// AMF0 and message type value of 15 for AMF3.
 
+	// RtmpMsgAmf0DataMessage .
 	RtmpMsgAmf0DataMessage = 18 // 0x12
+
+	// RtmpMsgAmf3DataMessage .
 	RtmpMsgAmf3DataMessage = 15 // 0x0F
 
-	/**
-	3.3. Shared object message
-	A shared object is a Flash object (a collection of name value pairs)
-	that are in synchronization across multiple clients, instances, and
-	so on. The message types kMsgContainer=19 for AMF0 and
-	kMsgContainerEx=16 for AMF3 are reserved for shared object events.
-	Each message can contain multiple events.
-	*/
+	// Shared object message
+	// A shared object is a Flash object (a collection of name value pairs)
+	// that are in synchronization across multiple clients, instances, and
+	// so on. The message types kMsgContainer=19 for AMF0 and
+	// kMsgContainerEx=16 for AMF3 are reserved for shared object events.
+	// Each message can contain multiple events.
+
+	// RtmpMsgAmf3SharedObject .
 	RtmpMsgAmf3SharedObject = 16 // 0x10
+
+	// RtmpMsgAmf0SharedObject .
 	RtmpMsgAmf0SharedObject = 19 // 0x13
 
-	/**
-	  3.4. Audio message
-	  The client or the server sends this message to send audio data to the
-	  peer. The message type value of 8 is reserved for audio messages.
-	*/
+	// RtmpMsgAudioMessage  Audio message
+	// The client or the server sends this message to send audio data to the
+	// peer. The message type value of 8 is reserved for audio messages.
 	RtmpMsgAudioMessage = 8 // 0x08
 
-	/* *
-	   3.5. Video message
-	   The client or the server sends this message to send video data to the
-	   peer. The message type value of 9 is reserved for video messages.
-	   These messages are large and can delay the sending of other type of
-	   messages. To avoid such a situation, the video message is assigned
-	   the lowest priority.
-	*/
-	RTMP_MSG_VideoMessage = 9 // 0x09
-	/**
-	  3.6. Aggregate message
-	  An aggregate message is a single message that contains a list of submessages.
-	  The message type value of 22 is reserved for aggregate
-	  messages.
-	*/
-	RTMP_MSG_AggregateMessage = 22 // 0x16
+	// RtmpMsgVideoMessage Video message
+	// The client or the server sends this message to send video data to the
+	// peer. The message type value of 9 is reserved for video messages.
+	// These messages are large and can delay the sending of other type of
+	// messages. To avoid such a situation, the video message is assigned
+	// the lowest priority.
+	RtmpMsgVideoMessage = 9 // 0x09
+
+	// RtmpMsgAggregateMessage Aggregate message
+	// An aggregate message is a single message that contains a list of submessages.
+	// The message type value of 22 is reserved for aggregate
+	// messages.
+	RtmpMsgAggregateMessage = 22 // 0x16
 
 )
 
 const (
-	/**
-	5. Protocol Control Messages
-	RTMP reserves message type IDs 1-7 for protocol control messages.
-	These messages contain information needed by the RTM Chunk Stream
-	protocol or RTMP itself. Protocol messages with IDs 1 & 2 are
-	reserved for usage with RTM Chunk Stream protocol. Protocol messages
-	with IDs 3-6 are reserved for usage of RTMP. Protocol message with ID
-	7 is used between edge server and origin server.
-	*/
-	RTMP_MSG_SetChunkSize               = 0x01
-	RTMP_MSG_AbortMessage               = 0x02
-	RTMP_MSG_Acknowledgement            = 0x03
-	RTMP_MSG_UserControlMessage         = 0x04
-	RTMP_MSG_WindowAcknowledgementSize  = 0x05
-	RTMP_MSG_SetPeerBandwidth           = 0x06
-	RTMP_MSG_EdgeAndOriginServerCommand = 0x07
+
+	// RTMP reserves message type IDs 1-7 for protocol control messages.
+	// These messages contain information needed by the RTM Chunk Stream
+	// protocol or RTMP itself. Protocol messages with IDs 1 & 2 are
+	// reserved for usage with RTM Chunk Stream protocol. Protocol messages
+	// with IDs 3-6 are reserved for usage of RTMP. Protocol message with ID
+	// 7 is used between edge server and origin server.
+
+	// RtmpMsgSetChunkSize .
+	RtmpMsgSetChunkSize = 0x01
+	// RtmpMsgAbortMessage .
+	RtmpMsgAbortMessage = 0x02
+	// RtmpMsgAcknowledgement .
+	RtmpMsgAcknowledgement = 0x03
+	// RtmpMsgUserControlMessage .
+	RtmpMsgUserControlMessage = 0x04
+	// RtmpMsgWindowAcknowledgementSize .
+	RtmpMsgWindowAcknowledgementSize = 0x05
+	// RtmpMsgSetPeerBandwidth .
+	RtmpMsgSetPeerBandwidth = 0x06
+	// RtmpMsgEdgeAndOriginServerCommand .
+	RtmpMsgEdgeAndOriginServerCommand = 0x07
 )
 
 const (
-	// AMF0 marker
-	RTMP_AMF0_Number      = 0x00
-	RTMP_AMF0_Boolean     = 0x01
-	RTMP_AMF0_String      = 0x02
-	RTMP_AMF0_Object      = 0x03
-	RTMP_AMF0_MovieClip   = 0x04 // reserved, not supported
-	RTMP_AMF0_Null        = 0x05
-	RTMP_AMF0_Undefined   = 0x06
-	RTMP_AMF0_Reference   = 0x07
-	RTMP_AMF0_EcmaArray   = 0x08
-	RTMP_AMF0_ObjectEnd   = 0x09
-	RTMP_AMF0_StrictArray = 0x0A
-	RTMP_AMF0_Date        = 0x0B
-	RTMP_AMF0_LongString  = 0x0C
-	RTMP_AMF0_UnSupported = 0x0D
-	RTMP_AMF0_RecordSet   = 0x0E // reserved, not supported
-	RTMP_AMF0_XmlDocument = 0x0F
-	RTMP_AMF0_TypedObject = 0x10
-	// AVM+ object is the AMF3 object.
-	RTMP_AMF0_AVMplusObject = 0x11
-	// origin array whos data takes the same form as LengthValueBytes
-	RTMP_AMF0_OriginStrictArray = 0x20
-
-	// User defined
-	RTMP_AMF0_Invalid = 0x3F
+	// RtmpAmf0Number .
+	RtmpAmf0Number = 0x00
+	// RtmpAmf0Boolean .
+	RtmpAmf0Boolean = 0x01
+	// RtmpAmf0String .
+	RtmpAmf0String = 0x02
+	// RtmpAmf0Object .
+	RtmpAmf0Object = 0x03
+	// RtmpAmf0MovieClip reserved, not supported
+	RtmpAmf0MovieClip = 0x04
+	// RtmpAMF0Null .
+	RtmpAMF0Null = 0x05
+	// RtmpAmf0Undefined .
+	RtmpAmf0Undefined = 0x06
+	// RtmpAmf0Reference .
+	RtmpAmf0Reference = 0x07
+	// RtmpAmf0EcmaArray .
+	RtmpAmf0EcmaArray = 0x08
+	// RtmpAmf0ObjectEnd .
+	RtmpAmf0ObjectEnd = 0x09
+	// RtmpAmf0StrictArray .
+	RtmpAmf0StrictArray = 0x0A
+	// RtmpAmf0Date .
+	RtmpAmf0Date = 0x0B
+	// RtmpAmf0LongString .
+	RtmpAmf0LongString = 0x0C
+	// RtmpAmf0UnSupported .
+	RtmpAmf0UnSupported = 0x0D
+	// RtmpAmf0RecordSet reserved, not supported
+	RtmpAmf0RecordSet = 0x0E
+	// RtmpAmf0XmlDocument .
+	RtmpAmf0XmlDocument = 0x0F
+	// RtmpAmf0TypedObject .
+	RtmpAmf0TypedObject = 0x10
+	// RtmpAmf0AVMplusObject AVM+ object is the AMF3 object.
+	RtmpAmf0AVMplusObject = 0x11
+	// RtmpAmf0OriginStrictArray origin array whos data takes the same form as LengthValueBytes
+	RtmpAmf0OriginStrictArray = 0x20
+	// RtmpAmf0Invalid User defined
+	RtmpAmf0Invalid = 0x3F
 )
 
 const (
-	/**
-	 * amf0 command message, command name macros
-	 */
-	RTMP_AMF0_COMMAND_CONNECT           = "connect"
-	RTMP_AMF0_COMMAND_CREATE_STREAM     = "createStream"
-	RTMP_AMF0_COMMAND_CLOSE_STREAM      = "closeStream"
-	RTMP_AMF0_COMMAND_PLAY              = "play"
-	RTMP_AMF0_COMMAND_PAUSE             = "pause"
-	RTMP_AMF0_COMMAND_ON_BW_DONE        = "onBWDone"
-	RTMP_AMF0_COMMAND_ON_STATUS         = "onStatus"
-	RTMP_AMF0_COMMAND_RESULT            = "_result"
-	RTMP_AMF0_COMMAND_ERROR             = "_error"
-	RTMP_AMF0_COMMAND_RELEASE_STREAM    = "releaseStream"
-	RTMP_AMF0_COMMAND_FC_PUBLISH        = "FCPublish"
-	RTMP_AMF0_COMMAND_UNPUBLISH         = "FCUnpublish"
-	RTMP_AMF0_COMMAND_PUBLISH           = "publish"
-	RTMP_AMF0_COMMAND_GET_STREAM_LENGTH = "getStreamLength"
-
-	RTMP_AMF0_COMMAND_KEEPLIVE         = "JMS.KeepAlive"
-	RTMP_AMF0_COMMAND_ENABLEVIDEO      = "JMS.EnableVideo"
-	RTMP_AMF0_COMMAND_INSERT_KEYFREAME = "JMS.InsertKeyframe"
-	RTMP_AMF0_DATA_SAMPLE_ACCESS       = "|RtmpSampleAccess"
-	RTMP_AMF0_DATA_SET_DATAFRAME       = "@setDataFrame"
-	RTMP_AMF0_DATA_ON_METADATA         = "onMetaData"
-	RTMP_AMF0_DATA_ON_CUSTOMDATA       = "onCustomData"
+	// RtmpAmf0CommandConnect .
+	RtmpAmf0CommandConnect = "connect"
+	// RtmpAmf0CommandCreateStream .
+	RtmpAmf0CommandCreateStream = "createStream"
+	// RtmpAmf0CommandCloseStream .
+	RtmpAmf0CommandCloseStream = "closeStream"
+	// RtmpAmf0CommandPlay .
+	RtmpAmf0CommandPlay = "play"
+	// RtmpAmf0CommandPause .
+	RtmpAmf0CommandPause = "pause"
+	// RtmpAmf0CommandOnBwDone .
+	RtmpAmf0CommandOnBwDone = "onBWDone"
+	// RtmpAmf0CommandOnStatus .
+	RtmpAmf0CommandOnStatus = "onStatus"
+	// RtmpAmf0CommandResult .
+	RtmpAmf0CommandResult = "_result"
+	// RtmpAmf0CommandError .
+	RtmpAmf0CommandError = "_error"
+	// RtmpAmf0CommandReleaseStream .
+	RtmpAmf0CommandReleaseStream = "releaseStream"
+	// RtmpAmf0CommandFcPublish .
+	RtmpAmf0CommandFcPublish = "FCPublish"
+	// RtmpAmf0CommandUnpublish .
+	RtmpAmf0CommandUnpublish = "FCUnpublish"
+	// RtmpAmf0CommandPublish .
+	RtmpAmf0CommandPublish = "publish"
+	// RtmpAmf0CommandGetStreamLength .
+	RtmpAmf0CommandGetStreamLength = "getStreamLength"
+	// RtmpAmf0CommandKeeplive .
+	RtmpAmf0CommandKeeplive = "JMS.KeepAlive"
+	// RtmpAmf0CommandEnableVideo .
+	RtmpAmf0CommandEnableVideo = "JMS.EnableVideo"
+	// RtmpAmf0CommandInsertKeyFrame .
+	RtmpAmf0CommandInsertKeyFrame = "JMS.InsertKeyframe"
+	// RtmpAmf0DataSampleAccess .
+	RtmpAmf0DataSampleAccess = "|RtmpSampleAccess"
+	// RtmpAmf0DataSetDataFrame .
+	RtmpAmf0DataSetDataFrame = "@setDataFrame"
+	// RtmpAmf0DataOnMetaData .
+	RtmpAmf0DataOnMetaData = "onMetaData"
+	// RtmpAmf0DataOnCustomData .
+	RtmpAmf0DataOnCustomData = "onCustomData"
 )
 
 const (
-	/**
-	 * onStatus consts.
-	 */
-	StatusLevel       = "level"
-	StatusCode        = "code"
+	// StatusLevel .
+	StatusLevel = "level"
+	// StatusCode .
+	StatusCode = "code"
+	// StatusDescription .
 	StatusDescription = "description"
-	StatusDetails     = "details"
-	StatusClientId    = "clientid"
-
-	// status value
+	// StatusDetails .
+	StatusDetails = "details"
+	// StatusClientID .
+	StatusClientID = "clientid"
+	// StatusLevelStatus .
 	StatusLevelStatus = "status"
-
-	// status error
+	// StatusLevelError status error
 	StatusLevelError = "error"
 
-	// code value
-	StatusCodeConnectSuccess   = "NetConnection.Connect.Success"
-	StatusCodeConnectRejected  = "NetConnection.Connect.Rejected"
-	StatusCodeStreamReset      = "NetStream.Play.Reset"
-	StatusCodeStreamStart      = "NetStream.Play.Start"
-	StatusCodeStreamPause      = "NetStream.Pause.Notify"
-	StatusCodeStreamUnpause    = "NetStream.Unpause.Notify"
-	StatusCodePublishStart     = "NetStream.Publish.Start"
-	StatusCodeDataStart        = "NetStream.Data.Start"
+	// StatusCodeConnectSuccess .
+	StatusCodeConnectSuccess = "NetConnection.Connect.Success"
+	// StatusCodeConnectRejected .
+	StatusCodeConnectRejected = "NetConnection.Connect.Rejected"
+	// StatusCodeStreamReset .
+	StatusCodeStreamReset = "NetStream.Play.Reset"
+	// StatusCodeStreamStart .
+	StatusCodeStreamStart = "NetStream.Play.Start"
+	// StatusCodeStreamPause .
+	StatusCodeStreamPause = "NetStream.Pause.Notify"
+	// StatusCodeStreamUnpause .
+	StatusCodeStreamUnpause = "NetStream.Unpause.Notify"
+	// StatusCodePublishStart .
+	StatusCodePublishStart = "NetStream.Publish.Start"
+	// StatusCodeDataStart .
+	StatusCodeDataStart = "NetStream.Data.Start"
+	// StatusCodeUnpublishSuccess .
 	StatusCodeUnpublishSuccess = "NetStream.Unpublish.Success"
 
 	// FMLE
-	RTMP_AMF0_COMMAND_ON_FC_PUBLISH   = "onFCPublish"
-	RTMP_AMF0_COMMAND_ON_FC_UNPUBLISH = "onFCUnpublish"
+
+	// RtmpAmf0CommandOnFcPublish .
+	RtmpAmf0CommandOnFcPublish = "onFCPublish"
+	// RtmpAmf0CommandOnFcUnpublish .
+	RtmpAmf0CommandOnFcUnpublish = "onFCUnpublish"
 )
 
 const (
-	/**
-	* band width check method name, which will be invoked by client.
-	* band width check mothods use SrsBandwidthPacket as its internal packet type,
-	* so ensure you set command name when you use it.
-	 */
+
+	// band width check method name, which will be invoked by client.
+	// band width check mothods use SrsBandwidthPacket as its internal packet type,
+	// so ensure you set command name when you use it.
 	// server play control
-	SRS_BW_CHECK_START_PLAY    = "onSrsBandCheckStartPlayBytes"
-	SRS_BW_CHECK_STARTING_PLAY = "onSrsBandCheckStartingPlayBytes"
-	SRS_BW_CHECK_STOP_PLAY     = "onSrsBandCheckStopPlayBytes"
-	SRS_BW_CHECK_STOPPED_PLAY  = "onSrsBandCheckStoppedPlayBytes"
+
+	// RtmpBwCheckStartPlay .
+	RtmpBwCheckStartPlay = "onSrsBandCheckStartPlayBytes"
+	// RtmpBwCheckStartingPlay .
+	RtmpBwCheckStartingPlay = "onSrsBandCheckStartingPlayBytes"
+	// RtmpBwCheckStopPlay .
+	RtmpBwCheckStopPlay = "onSrsBandCheckStopPlayBytes"
+	// RtmpBwCheckStoppedPlay .
+	RtmpBwCheckStoppedPlay = "onSrsBandCheckStoppedPlayBytes"
 
 	// server publish control
-	SRS_BW_CHECK_START_PUBLISH    = "onSrsBandCheckStartPublishBytes"
-	SRS_BW_CHECK_STARTING_PUBLISH = "onSrsBandCheckStartingPublishBytes"
-	SRS_BW_CHECK_STOP_PUBLISH     = "onSrsBandCheckStopPublishBytes"
-	// @remark, flash never send out this packet, for its queue is full.
-	SRS_BW_CHECK_STOPPED_PUBLISH = "onSrsBandCheckStoppedPublishBytes"
+
+	// RtmpBwCheckStartPublish .
+	RtmpBwCheckStartPublish = "onSrsBandCheckStartPublishBytes"
+	// RtmpBwCheckStartingPublish .
+	RtmpBwCheckStartingPublish = "onSrsBandCheckStartingPublishBytes"
+	// RtmpBwCheckStopPublish .
+	RtmpBwCheckStopPublish = "onSrsBandCheckStopPublishBytes"
+	// RtmpBwCheckStopppedPublish flash never send out this packet, for its queue is full.
+	RtmpBwCheckStopppedPublish = "onSrsBandCheckStoppedPublishBytes"
 
 	// EOF control.
-	// the report packet when check finished.
-	SRS_BW_CHECK_FINISHED = "onSrsBandCheckFinished"
-	// @remark, flash never send out this packet, for its queue is full.
-	SRS_BW_CHECK_FINAL = "finalClientPacket"
+
+	// RtmpBwCheckFinished the report packet when check finished.
+	RtmpBwCheckFinished = "onSrsBandCheckFinished"
+	// RtmpBwCheckFinal flash never send out this packet, for its queue is full.
+	RtmpBwCheckFinal = "finalClientPacket"
 
 	// data packets
-	SRS_BW_CHECK_PLAYING    = "onSrsBandCheckPlaying"
-	SRS_BW_CHECK_PUBLISHING = "onSrsBandCheckPublishing"
+
+	// RtmpBwCheckPlaying .
+	RtmpBwCheckPlaying = "onSrsBandCheckPlaying"
+	// RtmpBwCheckPublishing .
+	RtmpBwCheckPublishing = "onSrsBandCheckPublishing"
 )
 
 const (
-	//objectEncoding default value.
-	RTMP_SIG_AMF0_VER = 0.0
-)
-
-const (
-	/**
-	 * The server sends this event to notify the client
-	 * that a stream has become functional and can be
-	 * used for communication. By default, this event
-	 * is sent on ID 0 after the application connect
-	 * command is successfully received from the
-	 * client. The event data is 4-byte and represents
-	 * the stream ID of the stream that became
-	 * functional.
-	 */
+	// SrcPCUCStreamBegin The server sends this event to notify the client
+	// that a stream has become functional and can be
+	// used for communication. By default, this event
+	// is sent on ID 0 after the application connect
+	// command is successfully received from the
+	// client. The event data is 4-byte and represents
+	// the stream ID of the stream that became
+	// functional.
 	SrcPCUCStreamBegin = 0x00
 
-	/**
-	* The server sends this event to notify the client
-	* that the playback of data is over as requested
-	* on this stream. No more data is sent without
-	* issuing additional commands. The client discards
-	* the messages received for the stream. The
-	* 4 bytes of event data represent the ID of the
-	* stream on which playback has ended.
-	 */
+	// SrcPCUCStreamEOF The server sends this event to notify the client
+	// that the playback of data is over as requested
+	// on this stream. No more data is sent without
+	// issuing additional commands. The client discards
+	// the messages received for the stream. The
+	// 4 bytes of event data represent the ID of the
+	// stream on which playback has ended.
 	SrcPCUCStreamEOF = 0x01
 
-	/**
-	 * The server sends this event to notify the client
-	 * that there is no more data on the stream. If the
-	 * server does not detect any message for a time
-	 * period, it can notify the subscribed clients
-	 * that the stream is dry. The 4 bytes of event
-	 * data represent the stream ID of the dry stream.
-	 */
+	// SrcPCUCStreamDry The server sends this event to notify the client
+	// that there is no more data on the stream. If the
+	// server does not detect any message for a time
+	// period, it can notify the subscribed clients
+	// that the stream is dry. The 4 bytes of event
+	// data represent the stream ID of the dry stream.
 	SrcPCUCStreamDry = 0x02
 
-	/**
-	 * The client sends this event to inform the server
-	 * of the buffer size (in milliseconds) that is
-	 * used to buffer any data coming over a stream.
-	 * This event is sent before the server starts
-	 * processing the stream. The first 4 bytes of the
-	 * event data represent the stream ID and the next
-	 * 4 bytes represent the buffer length, in
-	 * milliseconds.
-	 */
+	// SrcPCUCSetBufferLength The client sends this event to inform the server
+	// of the buffer size (in milliseconds) that is
+	// used to buffer any data coming over a stream.
+	// This event is sent before the server starts
+	// processing the stream. The first 4 bytes of the
+	// event data represent the stream ID and the next
+	// 4 bytes represent the buffer length, in
+	// milliseconds.
 	SrcPCUCSetBufferLength = 0x03 // 8bytes event-data
 
-	/**
-	 * The server sends this event to notify the client
-	 * that the stream is a recorded stream. The
-	 * 4 bytes event data represent the stream ID of
-	 * the recorded stream.
-	 */
+	// SrcPCUCStreamIsRecorded The server sends this event to notify the client
+	// that the stream is a recorded stream. The
+	// 4 bytes event data represent the stream ID of
+	// the recorded stream.
 	SrcPCUCStreamIsRecorded = 0x04
 
-	/**
-	 * The server sends this event to test whether the
-	 * client is reachable. Event data is a 4-byte
-	 * timestamp, representing the local server time
-	 * when the server dispatched the command. The
-	 * client responds with kMsgPingResponse on
-	 * receiving kMsgPingRequest.
-	 */
+	// SrcPCUCPingRequest The server sends this event to test whether the
+	// client is reachable. Event data is a 4-byte
+	// timestamp, representing the local server time
+	// when the server dispatched the command. The
+	// client responds with kMsgPingResponse on
+	// receiving kMsgPingRequest.
 	SrcPCUCPingRequest = 0x06
 
-	/**
-	 * The client sends this event to the server in
-	 * response to the ping request. The event data is
-	 * a 4-byte timestamp, which was received with the
-	 * kMsgPingRequest request.
-	 */
+	// SrcPCUCPingResponse The client sends this event to the server in
+	// response to the ping request. The event data is
+	// a 4-byte timestamp, which was received with the
+	// kMsgPingRequest request.
 	SrcPCUCPingResponse = 0x07
 )
 
 const (
-	FMS_VERSION = "1.0.0.0"
+	// RtmpSigClientID signature for packets to client
+	RtmpSigClientID = "ASAICiss"
+	// RtmpSigFmsVersion signature for packets to client
+	RtmpSigFmsVersion = "1.0.0.0"
+	// RtmpSigAmf0Ver objectEncoding default value.
+	RtmpSigAmf0Ver = 0.0
 )
 
-const (
-	RTMP_SIG_CLIENT_ID = "ASAICiss"
-)
-
+// flv format
 // AACPacketType IF SoundFormat == 10 UI8
 // The following values are defined:
 //     0 = AAC sequence header
 //     1 = AAC raw
 const (
-	// set to the max value to reserved, for array map.
-	SrsCodecAudioTypeReserved = 2
+	// RtmpCodecAudioTypeReserved set to the max value to reserved, for array map.
+	RtmpCodecAudioTypeReserved = 2
 
-	SrsCodecAudioTypeSequenceHeader = 0
-	SrsCodecAudioTypeRawData        = 1
+	// RtmpCodecAudioTypeSequenceHeader audio type sequence header
+	RtmpCodecAudioTypeSequenceHeader = 0
+	// RtmpCodecAudioTypeRawData audio raw data
+	RtmpCodecAudioTypeRawData = 1
 )
 
 // E.4.3.1 VIDEODATA
@@ -407,15 +453,21 @@ const (
 //     4 = generated key frame (reserved for server use only)
 //     5 = video info/command frame
 const (
-	// set to the max value to reserved, for array map.
-	SrsCodecVideoAVCFrameReserved  = 0
-	SrsCodecVideoAVCFrameReserved1 = 6
+	// RtmpCodecVideoAVCFrameReserved set to the max value to reserved, for array map.
+	RtmpCodecVideoAVCFrameReserved = 0
+	// RtmpCodecVideoAVCFrameReserved1 .
+	RtmpCodecVideoAVCFrameReserved1 = 6
 
-	SrsCodecVideoAVCFrameKeyFrame             = 1
-	SrsCodecVideoAVCFrameInterFrame           = 2
-	SrsCodecVideoAVCFrameDisposableInterFrame = 3
-	SrsCodecVideoAVCFrameGeneratedKeyFrame    = 4
-	SrsCodecVideoAVCFrameVideoInfoFrame       = 5
+	// RtmpCodecVideoAVCFrameKeyFrame video h264 key frame
+	RtmpCodecVideoAVCFrameKeyFrame = 1
+	// RtmpCodecVideoAVCFrameInterFrame video h264 inter frame
+	RtmpCodecVideoAVCFrameInterFrame = 2
+	// RtmpCodecVideoAVCFrameDisposableInterFrame .
+	RtmpCodecVideoAVCFrameDisposableInterFrame = 3
+	// RtmpCodecVideoAVCFrameGeneratedKeyFrame .
+	RtmpCodecVideoAVCFrameGeneratedKeyFrame = 4
+	// RtmpCodecVideoAVCFrameVideoInfoFrame .
+	RtmpCodecVideoAVCFrameVideoInfoFrame = 5
 )
 
 // AVCPacketType IF CodecID == 7 UI8
@@ -426,11 +478,14 @@ const (
 //         not required or supported)
 const (
 	// set to the max value to reserved, for array map.
-	SrsCodecVideoAVCTypeReserved = 3
+	RtmpCodecVideoAVCTypeReserved = 3
 
-	SrsCodecVideoAVCTypeSequenceHeader    = 0
-	SrsCodecVideoAVCTypeNALU              = 1
-	SrsCodecVideoAVCTypeSequenceHeaderEOF = 2
+	// RtmpCodecVideoAVCTypeSequenceHeader .
+	RtmpCodecVideoAVCTypeSequenceHeader = 0
+	// RtmpCodecVideoAVCTypeNALU .
+	RtmpCodecVideoAVCTypeNALU = 1
+	// RtmpCodecVideoAVCTypeSequenceHeaderEOF .
+	RtmpCodecVideoAVCTypeSequenceHeaderEOF = 2
 )
 
 // E.4.3.1 VIDEODATA
@@ -444,18 +499,27 @@ const (
 //     7 = AVC
 //     13 = HEVC
 const (
-	// set to the max value to reserved, for array map.
-	SrsCodecVideoReserved  = 0
-	SrsCodecVideoReserved1 = 1
-	SrsCodecVideoReserved2 = 8
+	// RtmpCodecVideoReserved set to the max value to reserved, for array map.
+	RtmpCodecVideoReserved = 0
+	// RtmpCodecVideoReserved1 .
+	RtmpCodecVideoReserved1 = 1
+	// RtmpCodecVideoReserved2 .
+	RtmpCodecVideoReserved2 = 8
 
-	SrsCodecVideoSorensonH263           = 2
-	SrsCodecVideoScreenVideo            = 3
-	SrsCodecVideoOn2VP6                 = 4
-	SrsCodecVideoOn2VP6WithAlphaChannel = 5
-	SrsCodecVideoScreenVideoVersion2    = 6
-	SrsCodecVideoAVC                    = 7
-	SrsCodecVideoHEVC                   = 13
+	// RtmpCodecVideoSorensonH263 .
+	RtmpCodecVideoSorensonH263 = 2
+	// RtmpCodecVideoScreenVideo .
+	RtmpCodecVideoScreenVideo = 3
+	// RtmpCodecVideoOn2VP6 .
+	RtmpCodecVideoOn2VP6 = 4
+	// RtmpCodecVideoOn2VP6WithAlphaChannel .
+	RtmpCodecVideoOn2VP6WithAlphaChannel = 5
+	// RtmpCodecVideoScreenVideoVersion2 .
+	RtmpCodecVideoScreenVideoVersion2 = 6
+	// RtmpCodecVideoAVC .
+	RtmpCodecVideoAVC = 7
+	// RtmpCodecVideoHEVC h265
+	RtmpCodecVideoHEVC = 13
 )
 
 // SoundFormat UB [4]
@@ -478,23 +542,38 @@ const (
 // AAC is supported in Flash Player 9,0,115,0 and higher.
 // Speex is supported in Flash Player 10 and higher.
 const (
-	// set to the max value to reserved, for array map.
-	SrsCodecAudioReserved1 = 16
+	// RtmpCodecAudioReserved1 set to the max value to reserved, for array map.
+	RtmpCodecAudioReserved1 = 16
 
-	SrsCodecAudioLinearPCMPlatformEndian         = 0
-	SrsCodecAudioADPCM                           = 1
-	SrsCodecAudioMP3                             = 2
-	SrsCodecAudioLinearPCMLittleEndian           = 3
-	SrsCodecAudioNellymoser16kHzMono             = 4
-	SrsCodecAudioNellymoser8kHzMono              = 5
-	SrsCodecAudioNellymoser                      = 6
-	SrsCodecAudioReservedG711AlawLogarithmicPCM  = 7
-	SrsCodecAudioReservedG711MuLawLogarithmicPCM = 8
-	SrsCodecAudioReserved                        = 9
-	SrsCodecAudioAAC                             = 10
-	SrsCodecAudioSpeex                           = 11
-	SrsCodecAudioReservedMP3_8kHz                = 14
-	SrsCodecAudioReservedDeviceSpecificSound     = 15
+	// RtmpCodecAudioLinearPCMPlatformEndian .
+	RtmpCodecAudioLinearPCMPlatformEndian = 0
+	// RtmpCodecAudioADPCM .
+	RtmpCodecAudioADPCM = 1
+	// RtmpCodecAudioMP3 .
+	RtmpCodecAudioMP3 = 2
+	// RtmpCodecAudioLinearPCMLittleEndian .
+	RtmpCodecAudioLinearPCMLittleEndian = 3
+	// RtmpCodecAudioNellymoser16kHzMono .
+	RtmpCodecAudioNellymoser16kHzMono = 4
+	// RtmpCodecAudioNellymoser8kHzMono .
+	RtmpCodecAudioNellymoser8kHzMono = 5
+	// RtmpCodecAudioNellymoser .
+	RtmpCodecAudioNellymoser = 6
+	// RtmpCodecAudioReservedG711AlawLogarithmicPCM .
+	RtmpCodecAudioReservedG711AlawLogarithmicPCM = 7
+	// RtmpCodecAudioReservedG711MuLawLogarithmicPCM .
+	RtmpCodecAudioReservedG711MuLawLogarithmicPCM = 8
+	// RtmpCodecAudioReserved .
+	RtmpCodecAudioReserved = 9
+	// RtmpCodecAudioAAC .
+	RtmpCodecAudioAAC = 10
+	// RtmpCodecAudioSpeex .
+	RtmpCodecAudioSpeex = 11
+	// RtmpCodecAudioReservedMP3Of8kHz .
+	RtmpCodecAudioReservedMP3Of8kHz = 14
+	// RtmpCodecAudioReservedDeviceSpecificSound .
+	RtmpCodecAudioReservedDeviceSpecificSound = 15
 )
 
+// TokenStr token for auth
 const TokenStr = "?token="
