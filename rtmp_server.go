@@ -34,12 +34,10 @@ func (rs *rtmpServer) Start() {
 			break
 		} else {
 			log.Println("one rtmp connection come in, remote=", netConn.RemoteAddr())
-			rtmpConn := rs.NewRtmpConnection(netConn)
+			rtmpConn := co.NewRtmpConnection(netConn)
 			go rtmpConn.Cycle()
 		}
 	}
-}
 
-func (rs *rtmpServer) NewRtmpConnection(c net.Conn) *co.RtmpConn {
-	return co.NewRtmpConnection(c)
+	log.Println("rtmp server quit, err=", err)
 }

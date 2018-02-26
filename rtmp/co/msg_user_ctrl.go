@@ -2,7 +2,6 @@ package co
 
 import (
 	"log"
-	"seal/conf"
 	"seal/rtmp/pt"
 
 	"github.com/calabashdad/utiltools"
@@ -58,7 +57,7 @@ func (rc *RtmpConn) ctrlPingRequest(p *pt.UserControlPacket) (err error) {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCPingResponse
 		pp.EventData = p.EventData
-		if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&pp, 0); err != nil {
 			return
 		}
 

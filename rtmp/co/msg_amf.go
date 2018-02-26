@@ -160,18 +160,18 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 		return
 	}
 
-	rc.connectInfo.tcURL = p.GetObjectProperty("tcUrl").(string)
+	rc.connInfo.tcURL = p.GetObjectProperty("tcUrl").(string)
 	if o := p.GetObjectProperty("pageUrl"); o != nil {
-		rc.connectInfo.pageURL = o.(string)
+		rc.connInfo.pageURL = o.(string)
 	}
 	if o := p.GetObjectProperty("swfUrl"); o != nil {
-		rc.connectInfo.swfURL = o.(string)
+		rc.connInfo.swfURL = o.(string)
 	}
 	if o := p.GetObjectProperty("objectEncoding"); o != nil {
-		rc.connectInfo.objectEncoding = o.(float64)
+		rc.connInfo.objectEncoding = o.(float64)
 	}
 
-	log.Println("decode connect pkt success.", p, ", info=", rc.connectInfo)
+	log.Println("decode connect pkt success.", p, ", info=", rc.connInfo)
 
 	var pkt pt.ConnectResPacket
 
@@ -184,7 +184,7 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusLevel, pt.StatusLevelStatus, pt.RtmpAmf0String))
 	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeConnectSuccess, pt.RtmpAmf0String))
 	pkt.AddProsObj(pt.NewAmf0Object(pt.StatusDescription, "Connection succeeded", pt.RtmpAmf0String))
-	pkt.AddProsObj(pt.NewAmf0Object("objectEncoding", rc.connectInfo.objectEncoding, pt.RtmpAmf0Number))
+	pkt.AddProsObj(pt.NewAmf0Object("objectEncoding", rc.connInfo.objectEncoding, pt.RtmpAmf0Number))
 	pkt.AddProsObj(pt.NewAmf0Object("version", pt.RtmpSigFmsVersion, pt.RtmpAmf0String))
 	pkt.AddProsObj(pt.NewAmf0Object("seal_license", "The MIT License (MIT)", pt.RtmpAmf0String))
 	pkt.AddProsObj(pt.NewAmf0Object("seal_authors", "YangKai", pt.RtmpAmf0String))
@@ -192,7 +192,7 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	pkt.AddProsObj(pt.NewAmf0Object("seal_copyright", "Copyright (c) 2018 YangKai", pt.RtmpAmf0String))
 	pkt.AddProsObj(pt.NewAmf0Object("seal_sig", "seal", pt.RtmpAmf0String))
 
-	if err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pkt, 0); err != nil {
 		log.Println("response connect error.", err)
 		return
 	}
@@ -227,7 +227,7 @@ func (rc *RtmpConn) amf0CreateStream(msg *pt.Message) (err error) {
 	pkt.TransactionID = p.TransactionID
 	pkt.StreamID = rc.defaultStreamID
 
-	if err = rc.SendPacket(&pkt, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pkt, 0); err != nil {
 		log.Println("send createStream response failed. err=", err)
 		return
 	}
@@ -275,7 +275,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		var pp pt.UserControlPacket
 		pp.EventType = pt.SrcPCUCStreamBegin
 		pp.EventData = msg.Header.StreamID
-		err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000)
+		err = rc.sendPacket(&pp, 0)
 		if err != nil {
 			return
 		}
@@ -292,7 +292,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RtmpAmf0String))
 		pp.AddObj(pt.NewAmf0Object(pt.StatusClientID, pt.RtmpSigClientID, pt.RtmpAmf0String))
 
-		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&pp, uint32(rc.defaultStreamID)); err != nil {
 			return
 		}
 
@@ -310,7 +310,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		pp.AddObj(pt.NewAmf0Object(pt.StatusDetails, "stream", pt.RtmpAmf0String))
 		pp.AddObj(pt.NewAmf0Object(pt.StatusClientID, pt.RtmpSigClientID, pt.RtmpAmf0String))
 
-		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&pp, uint32(rc.defaultStreamID)); err != nil {
 			return
 		}
 
@@ -324,7 +324,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		pp.AudioSampleAccess = true
 		pp.VideoSampleAccess = true
 
-		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&pp, uint32(rc.defaultStreamID)); err != nil {
 			return
 		}
 
@@ -340,7 +340,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeDataStart, pt.RtmpAmf0String))
 		pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started playing stream data.", pt.RtmpAmf0String))
 
-		if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&pp, uint32(rc.defaultStreamID)); err != nil {
 			return
 		}
 
@@ -437,7 +437,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RtmpAmf0CommandResult
 	pp.TransactionID = p.TransactionID
-	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pp, 0); err != nil {
 		return
 	}
 	log.Println("send release stream response success.")
@@ -445,7 +445,7 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	//set chunk size to peer.
 	var pkt pt.SetChunkSizePacket
 	pkt.ChunkSize = conf.GlobalConfInfo.Rtmp.ChunkSize
-	if err = rc.SendPacket(&pkt, msg.Header.StreamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pkt, msg.Header.StreamID); err != nil {
 		return
 	}
 	log.Println("send request, set chunk size to ", pkt.ChunkSize)
@@ -474,7 +474,7 @@ func (rc *RtmpConn) amf0FcPublish(msg *pt.Message) (err error) {
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RtmpAmf0CommandResult
 	pp.TransactionID = p.TransactionID
-	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pp, 0); err != nil {
 		return
 	}
 	log.Println("send FcPublish response success.")
@@ -519,7 +519,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	pp.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodePublishStart, pt.RtmpAmf0String))
 	pp.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Started publishing stream.", pt.RtmpAmf0String))
 
-	if err = rc.SendPacket(&pp, uint32(rc.defaultStreamID), conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pp, uint32(rc.defaultStreamID)); err != nil {
 		return
 	}
 
@@ -549,7 +549,7 @@ func (rc *RtmpConn) amf0UnPublish(msg *pt.Message) (err error) {
 	var pp pt.FmleStartResPacket
 	pp.CommandName = pt.RtmpAmf0CommandResult
 	pp.TransactionID = p.TransactionID
-	if err = rc.SendPacket(&pp, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+	if err = rc.sendPacket(&pp, 0); err != nil {
 		return
 	}
 	log.Println("send unpublish response success.")

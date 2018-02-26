@@ -9,8 +9,8 @@ import (
 	"github.com/calabashdad/utiltools"
 )
 
-//RecvMsg recv whole msg and quit when got an entire msg, not handle it at all.
-func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload) (err error) {
+// recvMsg recv whole msg and quit when got an entire msg, not handle it at all.
+func (rc *RtmpConn) recvMsg(header *pt.MessageHeader, payload *pt.MessagePayload) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
@@ -18,7 +18,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 	}()
 
 	for {
-		//read basic header
+		// read basic header
 		var buf [3]uint8
 		if err = rc.tcpConn.ExpectBytesFull(buf[:1], 1); err != nil {
 			return
@@ -52,7 +52,7 @@ func (rc *RtmpConn) RecvMsg(header *pt.MessageHeader, payload *pt.MessagePayload
 		chunk.CsID = csid
 		chunk.MsgHeader.PerferCsid = csid
 
-		//read message header
+		// read message header
 		if 0 == chunk.MsgCount && chunk.Fmt != pt.RtmpFmtType0 {
 			if pt.RtmpCidProtocolControl == chunk.CsID && pt.RtmpFmtType1 == chunk.Fmt {
 				// for librtmp, if ping, it will send a fresh stream with fmt=1,

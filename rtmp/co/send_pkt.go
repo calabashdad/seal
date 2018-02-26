@@ -7,10 +7,8 @@ import (
 	"github.com/calabashdad/utiltools"
 )
 
-/**
-* SendPacket the function has call the message
- */
-func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32, timeOutUs uint32) (err error) {
+// sendPacket the function has call the message
+func (rc *RtmpConn) sendPacket(pkt pt.Packet, streamID uint32) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
@@ -32,7 +30,7 @@ func (rc *RtmpConn) SendPacket(pkt pt.Packet, streamID uint32, timeOutUs uint32)
 	msg.Header.PerferCsid = pkt.GetPreferCsID()
 	msg.Header.StreamID = streamID
 
-	if err = rc.SendMsg(&msg, timeOutUs); err != nil {
+	if err = rc.sendMsg(&msg); err != nil {
 		return
 	}
 

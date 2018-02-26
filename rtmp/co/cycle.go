@@ -15,7 +15,7 @@ type ackWindowSize struct {
 	hasAckedSize  uint64
 }
 
-type connectInfoS struct {
+type connectInfo struct {
 	tcURL          string
 	pageURL        string
 	swfURL         string
@@ -35,7 +35,7 @@ type RtmpConn struct {
 	tokenStr        string        //token str for authentication. it's optional.
 	duration        float64       //for player.used to specified the stop when exceed the duration.
 	defaultStreamID float64       //default stream id for request.
-	connectInfo     *connectInfoS //connect info.
+	connInfo        *connectInfo  //connect info.
 	source          *sourceStream //data source info.
 	consumer        *Consumer     //for consumer, like player.
 }
@@ -55,7 +55,7 @@ func NewRtmpConnection(c net.Conn) *RtmpConn {
 		cmdRequests:     make(map[float64]string),
 		role:            RtmpRoleUnknown,
 		defaultStreamID: 1.0,
-		connectInfo: &connectInfoS{
+		connInfo: &connectInfo{
 			objectEncoding: pt.RtmpSigAmf0Ver,
 		},
 	}
@@ -81,11 +81,11 @@ func (rc *RtmpConn) Cycle() {
 	log.Println("rtmp handshake success.")
 
 	for {
-		//notice that the payload has not alloced at init.
-		//one msg allock once, and do not copy.
+		// notice that the payload has not alloced at init.
+		// one msg alloc once, and do not copy to improve performance.
 		msg := &pt.Message{}
 
-		if err = rc.RecvMsg(&msg.Header, &msg.Payload); err != nil {
+		if err = rc.recvMsg(&msg.Header, &msg.Payload); err != nil {
 			break
 		}
 

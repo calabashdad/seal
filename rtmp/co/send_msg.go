@@ -8,7 +8,7 @@ import (
 	"github.com/calabashdad/utiltools"
 )
 
-func (rc *RtmpConn) SendMsg(msg *pt.Message, timeOutUs uint32) (err error) {
+func (rc *RtmpConn) sendMsg(msg *pt.Message) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())

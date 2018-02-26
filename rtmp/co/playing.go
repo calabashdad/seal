@@ -20,7 +20,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 			rc.tcpConn.SetRecvTimeout(timeOutUs)
 
 			var msg pt.Message
-			if localErr := rc.RecvMsg(&msg.Header, &msg.Payload); localErr != nil {
+			if localErr := rc.recvMsg(&msg.Header, &msg.Payload); localErr != nil {
 				// do nothing, it's ok
 			}
 			if len(msg.Payload.Payload) > 0 {
@@ -54,7 +54,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 				startTime = int64(msg.Header.Timestamp)
 			}
 
-			if err = rc.SendMsg(msg, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+			if err = rc.sendMsg(msg); err != nil {
 				log.Println("playing... send to remote failed.err=", err)
 				break
 			}
@@ -117,7 +117,7 @@ func (rc *RtmpConn) handlePlayUserControl(msg *pt.Message) (err error) {
 			pRes.CommandObjectMarker = pt.RtmpAMF0Null
 			pRes.ResponseMarker = pt.RtmpAMF0Null
 
-			if err = rc.SendPacket(&pRes, 0, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+			if err = rc.sendPacket(&pRes, 0); err != nil {
 				return
 			}
 		}
@@ -155,7 +155,7 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamPause, pt.RtmpAmf0String))
 		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "Paused stream.", pt.RtmpAmf0String))
 
-		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&p, streamID); err != nil {
 			return
 		}
 
@@ -165,7 +165,7 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 			p.EventType = pt.SrcPCUCStreamEOF
 			p.EventData = streamID
 
-			if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+			if err = rc.sendPacket(&p, streamID); err != nil {
 				log.Println("send PCUC(StreamEOF) message failed.")
 				return
 			}
@@ -180,7 +180,7 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 		p.AddObj(pt.NewAmf0Object(pt.StatusCode, pt.StatusCodeStreamUnpause, pt.RtmpAmf0String))
 		p.AddObj(pt.NewAmf0Object(pt.StatusDescription, "UnPaused stream.", pt.RtmpAmf0String))
 
-		if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+		if err = rc.sendPacket(&p, streamID); err != nil {
 			return
 		}
 
@@ -190,7 +190,7 @@ func (rc *RtmpConn) onPlayClientPause(streamID uint32, isPause bool) (err error)
 			p.EventType = pt.SrcPCUCStreamBegin
 			p.EventData = streamID
 
-			if err = rc.SendPacket(&p, streamID, conf.GlobalConfInfo.Rtmp.TimeOut*1000000); err != nil {
+			if err = rc.sendPacket(&p, streamID); err != nil {
 				log.Println("send PCUC(StreanBegin) message failed.")
 				return
 			}
