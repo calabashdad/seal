@@ -4,10 +4,13 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
 
 ## Usage
 * build
+
   download https://github.com/calabashdad/seal to ```go path```, run ```go build```
 * run console mode
+
   ```./seal -c seal.yaml```
 * run daemon mode
+
   ```nohup ./seal -c seal.yaml &```
 * mock stream publish
   
@@ -15,14 +18,14 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
         ffmpeg -re -i lindan.flv \
         -vcodec copy -acodec copy \
         -f flv -y rtmp://127.0.0.1/live/test; \
-	    sleep 3 \
-done</code></pre> 
+	    sleep 3       
+  done</code></pre> 
 
 * use vlc play 
 ```rtmp://127.0.0.1/live/test```
 
 ## support
-go is cross platform 
+  go is cross platform 
 * linux
 * mac
 * windows
