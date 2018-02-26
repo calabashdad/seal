@@ -24,16 +24,18 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
 * use vlc play 
 ```rtmp://127.0.0.1/live/test```
 
-## support
+## platform
   go is cross platform 
 * linux
 * mac
 * windows
 
 ## support
-* rtmp protocol
+* rtmp protocol (h264)
 
 ## plan to support
 * hls
-* http-flv
 * rtsp
+* http-flv
+* video encry
+* mini rtmp server in embed device
