@@ -1,6 +1,6 @@
 # Seal
 
-seal is rtmp server written by go language, main refer to rtmp server open source  ```https://github.com/ossrs/srs```
+seal is rtmp server written by go language, main refer to rtmp server open source https://github.com/ossrs/srs
 
 ## Usage
 * build
@@ -15,8 +15,7 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
         ffmpeg -re -i lindan.flv \
         -vcodec copy -acodec copy \
         -f flv -y rtmp://127.0.0.1/live/test; \
-
-	sleep 3
+	    sleep 3 \
 done</code></pre> 
 
 * use vlc play 
@@ -35,6 +34,3 @@ go is cross platform
 * hls
 * http-flv
 * rtsp
-
-  
-  
