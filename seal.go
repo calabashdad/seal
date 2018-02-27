@@ -51,7 +51,7 @@ func main() {
 		return
 	}
 
-	log.Println("load conf file success, conf=", conf.GlobalConfInfo)
+	log.Printf("load conf file success, conf=%+v\n", conf.GlobalConfInfo)
 
 	gGuards.Add(1)
 	if true {

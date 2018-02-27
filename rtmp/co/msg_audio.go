@@ -19,6 +19,9 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 		return
 	}
 
+	//copy to all consumers
+	rc.source.copyToAllConsumers(msg)
+
 	//cache the sequence.
 	// do not cache the sequence header to gop cache, return here
 	if flv.AudioIsSequenceHeader(msg.Payload.Payload) {
@@ -38,9 +41,6 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 			rc.source.cacheMetaData.Header.Timestamp = msg.Header.Timestamp
 		}
 	}
-
-	//copy to all consumers
-	rc.source.copyToAllConsumers(msg)
 
 	return
 }

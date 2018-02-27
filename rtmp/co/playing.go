@@ -71,8 +71,7 @@ func (rc *RtmpConn) handlePlayData(msg *pt.Message) (err error) {
 	}
 
 	if msg.Header.IsAmf0Data() || msg.Header.IsAmf3Data() {
-		log.Println("play data: has not handled play data amf data. ")
-		//todo.
+		log.Println("play data: recv handled play amf data")
 	} else {
 		//process user control
 		rc.handlePlayUserControl(msg)

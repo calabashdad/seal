@@ -29,6 +29,7 @@ func (rc *RtmpConn) msgSetChunk(msg *pt.Message) (err error) {
 		rc.inChunkSize = p.ChunkSize
 		log.Println("peer set chunk size to ", p.ChunkSize)
 	}
+	log.Println("remote set chunk size to ", rc.inChunkSize)
 
 	return
 }

@@ -45,8 +45,8 @@ func (t *confInfo) Loads(c string) (err error) {
 	if data, err = ioutil.ReadAll(f); err != nil {
 		log.Println("config file loads failed, ", err.Error())
 		return err
-	} 
-	
+	}
+
 	if err = yaml.Unmarshal(data, t); err != nil {
 		log.Println("error:", err.Error())
 		return err

@@ -7,6 +7,7 @@ import (
 
 // GopCache cache gop of video/audio to enable players fast start
 type GopCache struct {
+
 	// cachedVideoCount the video frame count, avoid cache for pure audio stream.
 	cachedVideoCount uint32
 	// when user disabled video when publishing, and gop cache enalbed,
@@ -81,6 +82,7 @@ func (g *GopCache) startTime() uint64 {
 }
 
 func (g *GopCache) dump(c *Consumer, atc bool, tba float64, tbv float64, timeJitter uint32) {
+
 	for _, v := range g.msgs {
 
 		if nil == v {
