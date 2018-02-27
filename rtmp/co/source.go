@@ -7,8 +7,9 @@ import (
 	"sync"
 )
 
+// stream data source hub
 type sourceHub struct {
-	//key: streamName
+	//key: app/streamName, e.g. rtmp://127.0.0.1/live/test, the key is [live/app]
 	hub  map[string]*sourceStream
 	lock sync.RWMutex
 }
@@ -17,7 +18,7 @@ var gSources = &sourceHub{
 	hub: make(map[string]*sourceStream),
 }
 
-// data source info.
+// stream data source
 type sourceStream struct {
 	// the sample rate of audio in metadata
 	sampleRate float64
@@ -27,21 +28,21 @@ type sourceStream struct {
 	// directly use msg time and donot adjust if atc is true,
 	// otherwise, adjust msg time to start from 0 to make flash happy.
 	atc bool
-	//time jitter algrithem
+	// time jitter algrithem
 	timeJitter uint32
-	//cached meta data
+	// cached meta data
 	cacheMetaData *pt.Message
-	//cached video sequence header
+	// cached video sequence header
 	cacheVideoSequenceHeader *pt.Message
-	//cached aideo sequence header
+	// cached aideo sequence header
 	cacheAudioSequenceHeader *pt.Message
 
-	//consumers
-	consumers map[*Consumer]*Consumer
-	//lock for consumers.
+	// consumers
+	consumers map[*Consumer]interface{}
+	// lock for consumers.
 	consumerLock sync.RWMutex
 
-	//gop cache
+	// gop cache
 	gopCache *GopCache
 }
 
@@ -54,7 +55,7 @@ func (s *sourceStream) CreateConsumer(c *Consumer) {
 	s.consumerLock.Lock()
 	defer s.consumerLock.Unlock()
 
-	s.consumers[c] = c
+	s.consumers[c] = struct{}{}
 	log.Println("a consumer created.consumer=", c)
 
 }
@@ -81,8 +82,9 @@ func (s *sourceStream) copyToAllConsumers(msg *pt.Message) {
 	s.consumerLock.Lock()
 	defer s.consumerLock.Unlock()
 
-	for _, v := range s.consumers {
-		v.enquene(msg, s.atc, s.sampleRate, s.frameRate, s.timeJitter)
+	for k, v := range s.consumers {
+		_ = v
+		k.enquene(msg, s.atc, s.sampleRate, s.frameRate, s.timeJitter)
 	}
 }
 
@@ -105,7 +107,7 @@ func (s *sourceHub) findSourceToPublish(k string) *sourceStream {
 	s.hub[k] = &sourceStream{
 		timeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
 		gopCache:   &GopCache{},
-		consumers:  make(map[*Consumer]*Consumer),
+		consumers:  make(map[*Consumer]interface{}),
 	}
 
 	return s.hub[k]

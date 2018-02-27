@@ -167,6 +167,9 @@ func (rc *RtmpConn) amf0Connect(msg *pt.Message) (err error) {
 	if o := p.GetObjectProperty("swfUrl"); o != nil {
 		rc.connInfo.swfURL = o.(string)
 	}
+	if o := p.GetObjectProperty("app"); o != nil {
+		rc.connInfo.app = o.(string)
+	}
 	if o := p.GetObjectProperty("objectEncoding"); o != nil {
 		rc.connInfo.objectEncoding = o.(float64)
 	}
@@ -258,13 +261,24 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 
 	rc.streamName = p.StreamName
 
-	source := gSources.findSourceToPlay(rc.streamName)
+	// set chunk size to peer.
+	var pkt pt.SetChunkSizePacket
+	pkt.ChunkSize = conf.GlobalConfInfo.Rtmp.ChunkSize
+	if err = rc.sendPacket(&pkt, msg.Header.StreamID); err != nil {
+		return
+	}
+	log.Println("player, send request, set chunk size to ", pkt.ChunkSize)
+
+	// after send set chunk size to remote success, set out chunk size
+	rc.outChunkSize = pkt.ChunkSize
+
+	srcKey := rc.connInfo.app + "/" + rc.streamName
+	source := gSources.findSourceToPlay(srcKey)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not play because has not published", rc.streamName)
 		return
 	}
-
-	log.Println("play success. stream name=", rc.streamName)
+	log.Println("play success. stream=", srcKey)
 
 	rc.source = source
 	rc.role = RtmpRolePlayer
@@ -442,13 +456,16 @@ func (rc *RtmpConn) amf0ReleaseStream(msg *pt.Message) (err error) {
 	}
 	log.Println("send release stream response success.")
 
-	//set chunk size to peer.
+	// set chunk size to peer.
 	var pkt pt.SetChunkSizePacket
 	pkt.ChunkSize = conf.GlobalConfInfo.Rtmp.ChunkSize
 	if err = rc.sendPacket(&pkt, msg.Header.StreamID); err != nil {
 		return
 	}
-	log.Println("send request, set chunk size to ", pkt.ChunkSize)
+	log.Println("publisher, send request, set chunk size to ", pkt.ChunkSize)
+
+	// after set chunk size success, set out chunk size
+	rc.outChunkSize = pkt.ChunkSize
 
 	return
 }
@@ -503,13 +520,14 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	log.Println("a new publisher come in, publish info=", p)
 
 	rc.streamName = p.StreamName
-	source := gSources.findSourceToPublish(rc.streamName)
+
+	srcKey := rc.connInfo.app + "/" + rc.streamName
+	source := gSources.findSourceToPublish(srcKey)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.streamName)
 		return
 	}
-
-	log.Println("stream=", rc.streamName, " published success.")
+	log.Println("published success, stream=", srcKey)
 
 	rc.source = source
 	rc.role = RtmpRoleFMLEPublisher
@@ -563,8 +581,6 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
-
-	log.Println("Amf0Meta")
 
 	if nil == msg {
 		return

@@ -24,7 +24,7 @@ func (rc *RtmpConn) sendMsg(msg *pt.Message) (err error) {
 		msg.Header.PerferCsid = pt.RtmpCidProtocolControl
 	}
 
-	//current position of payload send.
+	// current position of payload send.
 	var payloadOffset uint32
 
 	// always write the header event payload is empty.

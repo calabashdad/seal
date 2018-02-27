@@ -5,6 +5,7 @@ import (
 	"seal/rtmp/pt"
 )
 
+// GopCache cache gop of video/audio to enable players fast start
 type GopCache struct {
 	// cachedVideoCount the video frame count, avoid cache for pure audio stream.
 	cachedVideoCount uint32

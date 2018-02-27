@@ -42,7 +42,7 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 	}
 
 	select {
-	//incase block, and influence others.
+	// incase block, and influence others.
 	case <-time.After(time.Duration(3) * time.Millisecond):
 		break
 	case c.msgQuene <- msg:

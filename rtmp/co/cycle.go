@@ -19,6 +19,7 @@ type connectInfo struct {
 	tcURL          string
 	pageURL        string
 	swfURL         string
+	app            string
 	objectEncoding float64
 }
 
