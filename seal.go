@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"runtime"
 	"seal/conf"
 	"sync"
 	"time"
@@ -52,6 +53,15 @@ func main() {
 	}
 
 	log.Printf("load conf file success, conf=%+v\n", conf.GlobalConfInfo)
+
+	cpuNums := runtime.NumCPU()
+	if 0 == conf.GlobalConfInfo.System.CPUNums {
+		runtime.GOMAXPROCS(cpuNums)
+		log.Println("app run on auto cpu nums=", cpuNums)
+	} else {
+		runtime.GOMAXPROCS(int(conf.GlobalConfInfo.System.CPUNums))
+		log.Println("app run on cpu nums set by config, num=", conf.GlobalConfInfo.System.CPUNums)
+	}
 
 	gGuards.Add(1)
 	if true {

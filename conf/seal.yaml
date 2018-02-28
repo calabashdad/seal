@@ -1,4 +1,13 @@
 ---
+# system config
+system:
+  # set cpu nums of app run
+  # 0. auto, app will detect cpu nums by itself
+  # 1,2,3... app will run on cpuNums 
+  # recommand: 0
+  cpuNums: 0
+
+# rmtp protocol config
 rtmp:
   # rtmp server listen port.
   # recommand is 1935
@@ -31,3 +40,8 @@ rtmp:
   # limit the size in seconds, and drop the old msg if full.
   # recommand is 30
   consumerQueueSize: 30
+
+# hls protocol config
+hls:
+  # enable true is open hls, false close
+  enable: true

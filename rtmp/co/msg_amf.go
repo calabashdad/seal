@@ -621,6 +621,14 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	}
 	log.Println("meta data is ", p)
 
+	// hls
+	if nil != rc.source.hls {
+		if err = rc.source.hls.OnMetaData(&p); err != nil {
+			log.Println("hls process metadata failed, err=", err)
+			return
+		}
+	}
+
 	//cache meta data
 	if nil != rc.source {
 		rc.source.cacheMetaData = msg

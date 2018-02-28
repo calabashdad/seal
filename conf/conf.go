@@ -12,6 +12,10 @@ import (
 // GlobalConfInfo global config info
 var GlobalConfInfo confInfo
 
+type systemConfInfo struct {
+	CPUNums uint32 `yaml:"cpuNums"`
+}
+
 type rtmpConfInfo struct {
 	Listen            string `yaml:"listen"`
 	TimeOut           uint32 `yaml:"timeout"`
@@ -22,8 +26,14 @@ type rtmpConfInfo struct {
 	ConsumerQueueSize uint32 `yaml:"consumerQueueSize"`
 }
 
+type hlsConfInfo struct {
+	Enable string `yaml:"enable"`
+}
+
 type confInfo struct {
-	Rtmp rtmpConfInfo `yaml:"rtmp"`
+	System systemConfInfo `yaml:"system"`
+	Rtmp   rtmpConfInfo   `yaml:"rtmp"`
+	Hls    hlsConfInfo    `yaml:"hls"`
 }
 
 func (t *confInfo) Loads(c string) (err error) {

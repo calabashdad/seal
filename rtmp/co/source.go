@@ -3,6 +3,7 @@ package co
 import (
 	"log"
 	"seal/conf"
+	"seal/hls"
 	"seal/rtmp/pt"
 	"sync"
 )
@@ -44,6 +45,9 @@ type sourceStream struct {
 
 	// gop cache
 	gopCache *GopCache
+
+	// hls source
+	hls *hls.Source
 }
 
 func (s *sourceStream) CreateConsumer(c *Consumer) {
@@ -108,6 +112,11 @@ func (s *sourceHub) findSourceToPublish(k string) *sourceStream {
 		timeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
 		gopCache:   &GopCache{},
 		consumers:  make(map[*Consumer]interface{}),
+	}
+
+	if "true" == conf.GlobalConfInfo.Hls.Enable {
+		s.hub[k].hls = &hls.Source{}
+		s.hub[k].hls.InitSource()
 	}
 
 	return s.hub[k]

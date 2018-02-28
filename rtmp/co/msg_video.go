@@ -19,6 +19,14 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 		return
 	}
 
+	// hls
+	if nil != rc.source.hls {
+		if err = rc.source.hls.OnVideoData(msg); err != nil {
+			log.Println("hls process video data failed, err=", err)
+			return
+		}
+	}
+
 	//copy to all consumers
 	rc.source.copyToAllConsumers(msg)
 

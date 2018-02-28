@@ -19,6 +19,14 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 		return
 	}
 
+	// hls
+	if nil != rc.source.hls {
+		if err = rc.source.hls.OnAudioData(msg); err != nil {
+			log.Println("hls process audio data failed, err=", err)
+			return
+		}
+	}
+
 	//copy to all consumers
 	rc.source.copyToAllConsumers(msg)
 
