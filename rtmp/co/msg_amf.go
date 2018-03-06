@@ -281,7 +281,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	log.Println("play success. stream=", srcKey)
 
 	rc.source = source
-	rc.role = RtmpRolePlayer
+	rc.role = pt.RtmpRolePlayer
 
 	//response start play.
 	// StreamBegin
@@ -366,6 +366,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		avStartTime:    -1,
 		avEndTime:      -1,
 		msgQuene:       make(chan *pt.Message, 1024),
+		jitter:         &pt.TimeJitter{},
 	}
 
 	rc.source.CreateConsumer(rc.consumer)
@@ -530,7 +531,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	log.Println("published success, stream=", srcKey)
 
 	rc.source = source
-	rc.role = RtmpRoleFMLEPublisher
+	rc.role = pt.RtmpRoleFMLEPublisher
 
 	var pp pt.OnStatusCallPacket
 	pp.CommandName = pt.RtmpAmf0CommandOnStatus
@@ -542,6 +543,8 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	}
 
 	log.Println("send publish response success.")
+
+	//todo. on publish
 
 	return
 }
@@ -623,7 +626,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 
 	// hls
 	if nil != rc.source.hls {
-		if err = rc.source.hls.OnMetaData(&p); err != nil {
+		if err = rc.source.hls.onMeta(&p); err != nil {
 			log.Println("hls process metadata failed, err=", err)
 			return
 		}

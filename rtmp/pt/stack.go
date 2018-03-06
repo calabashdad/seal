@@ -575,5 +575,98 @@ const (
 	RtmpCodecAudioReservedDeviceSpecificSound = 15
 )
 
+// the FLV/RTMP supported audio sample rate.
+// Sampling rate. The following values are defined:
+// 0 = 5.5 kHz = 5512 Hz
+// 1 = 11 kHz = 11025 Hz
+// 2 = 22 kHz = 22050 Hz
+// 3 = 44 kHz = 44100 Hz
+const (
+	// RtmpCodecAudioSampleRateReserved set to the max value to reserved, for array map.
+	RtmpCodecAudioSampleRateReserved = 4
+
+	// RtmpCodecAudioSampleRate5512 .
+	RtmpCodecAudioSampleRate5512 = 0
+	// RtmpCodecAudioSampleRate11025 .
+	RtmpCodecAudioSampleRate11025 = 1
+	// RtmpCodecAudioSampleRate22050 .
+	RtmpCodecAudioSampleRate22050 = 2
+	// RtmpCodecAudioSampleRate44100 .
+	RtmpCodecAudioSampleRate44100 = 3
+)
+
+// the FLV/RTMP supported audio sample size.
+// Size of each audio sample. This parameter only pertains to
+// uncompressed formats. Compressed formats always decode
+// to 16 bits internally.
+// 0 = 8-bit samples
+// 1 = 16-bit samples
+const (
+	// RtmpCodecAudioSampleSizeReserved set to the max value to reserved, for array map.
+	RtmpCodecAudioSampleSizeReserved = 2
+
+	// RtmpCodecAudioSampleSize8bit .
+	RtmpCodecAudioSampleSize8bit = 0
+	// RtmpCodecAudioSampleSize16bit .
+	RtmpCodecAudioSampleSize16bit = 1
+)
+
+// the FLV/RTMP supported audio sound type/channel.
+// Mono or stereo sound
+// 0 = Mono sound
+// 1 = Stereo sound
+const (
+	// RtmpCodecAudioSoundTypeReserved set to the max value to reserved, for array map.
+	RtmpCodecAudioSoundTypeReserved = 2
+
+	// RtmpCodecAudioSoundTypeMono .
+	RtmpCodecAudioSoundTypeMono = 0
+	// RtmpCodecAudioSoundTypeStereo .
+	RtmpCodecAudioSoundTypeStereo = 1
+)
+
 // TokenStr token for auth
 const TokenStr = "?token="
+
+const (
+	// RtmpMaxFmt0HeaderSize is the max rtmp header size:
+	//   1bytes basic header,
+	//   11bytes message header,
+	//   4bytes timestamp header,
+	//   that is, 1+11+4=16bytes.
+	RtmpMaxFmt0HeaderSize = 16
+)
+
+//RtmpRole define
+const (
+	// RtmpRoleUnknown role undefined
+	RtmpRoleUnknown = 0
+	// RtmpRoleFMLEPublisher role fmle publisher
+	RtmpRoleFMLEPublisher = 1
+	// RtmpRoleFlashPublisher role flash publisher
+	RtmpRoleFlashPublisher = 2
+	// RtmpRolePlayer role player
+	RtmpRolePlayer = 3
+)
+
+const (
+	// RtmpTimeJitterFull time jitter full mode, to ensure stream start at zero, and ensure stream monotonically increasing.
+	RtmpTimeJitterFull = 0x01
+	// RtmpTimeJitterZero zero mode, only ensure sttream start at zero, ignore timestamp jitter.
+	RtmpTimeJitterZero = 0x02
+	// RtmpTimeJitterOff off mode, disable the time jitter algorithm, like atc.
+	RtmpTimeJitterOff = 0x03
+)
+
+const (
+	// PureAudioGuessCount for 26ms per audio packet,
+	// 115 packets is 3s.
+	PureAudioGuessCount = 115
+)
+
+const (
+	// MaxJitterMs max time delta, which is the between localtime and last packet time
+	MaxJitterMs = 500
+	// DefaultFrameTimeMs default time delta, which is the between localtime and last packet time
+	DefaultFrameTimeMs = 40
+)

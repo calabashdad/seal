@@ -54,7 +54,7 @@ func NewRtmpConnection(c net.Conn) *RtmpConn {
 			ackWindowSize: 250000,
 		},
 		cmdRequests:     make(map[float64]string),
-		role:            RtmpRoleUnknown,
+		role:            pt.RtmpRoleUnknown,
 		defaultStreamID: 1.0,
 		connInfo: &connectInfo{
 			objectEncoding: pt.RtmpSigAmf0Ver,
@@ -111,14 +111,14 @@ func (rc *RtmpConn) clean() {
 		log.Println("close socket err=", err)
 	}
 
-	if RtmpRoleFlashPublisher == rc.role || RtmpRoleFMLEPublisher == rc.role {
+	if pt.RtmpRoleFlashPublisher == rc.role || pt.RtmpRoleFMLEPublisher == rc.role {
 		if nil != rc.source {
 			rc.deletePublishStream(rc.streamName)
 			log.Println("delete publisher stream=", rc.streamName)
 		}
 	}
 
-	if RtmpRolePlayer == rc.role {
+	if pt.RtmpRolePlayer == rc.role {
 		if nil != rc.source {
 			rc.source.DestroyConsumer(rc.consumer)
 		}

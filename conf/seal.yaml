@@ -44,4 +44,4 @@ rtmp:
 # hls protocol config
 hls:
   # enable true is open hls, false close
-  enable: true
+  enable: false

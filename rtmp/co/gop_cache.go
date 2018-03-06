@@ -43,7 +43,7 @@ func (g *GopCache) cache(msg *pt.Message) {
 		g.audioAfterLastVideoCount++
 	}
 
-	if g.audioAfterLastVideoCount > PureAudioGuessCount {
+	if g.audioAfterLastVideoCount > pt.PureAudioGuessCount {
 		//clear the cache.
 		g.clear()
 
