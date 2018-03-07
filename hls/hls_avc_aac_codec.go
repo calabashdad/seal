@@ -1,7 +1,10 @@
 package hls
 
 import (
+	"log"
 	"seal/rtmp/pt"
+
+	"github.com/calabashdad/utiltools"
 )
 
 // the h264/avc and aac codec, for media stream.
@@ -71,7 +74,11 @@ func newAvcAacCodec() *avcAacCodec {
 // for instance, the width/height, sample rate.
 // @param metadata, the metadata amf0 object. assert not NULL.
 func (codec *avcAacCodec) metaDataDemux(meta *pt.OnMetaDataPacket) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
@@ -81,7 +88,11 @@ func (codec *avcAacCodec) metaDataDemux(meta *pt.OnMetaDataPacket) (err error) {
 // demux the aac specified data(aac_profile, ...) to codec from sequence header.
 // demux the aac raw to sample units.
 func (codec *avcAacCodec) audioAacDemux(data []byte, sample *codecSample) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
@@ -91,6 +102,10 @@ func (codec *avcAacCodec) audioAacDemux(data []byte, sample *codecSample) (err e
 // demux the h.264 sepcified data(avc_profile, ...) to codec from sequence header.
 // demux the h.264 NALUs to sampe units.
 func (codec *avcAacCodec) videoAvcDemux(data []byte, sample *codecSample) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }

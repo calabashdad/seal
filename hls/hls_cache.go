@@ -1,6 +1,11 @@
 package hls
 
-import "seal/conf"
+import (
+	"log"
+	"seal/conf"
+
+	"github.com/calabashdad/utiltools"
+)
 
 // hls stream cache,
 // use to cache hls stream and flush to hls muxer.
@@ -40,6 +45,11 @@ func newHlsCache() *hlsCache {
 
 // when publish stream
 func (hc *hlsCache) onPublish(muxer *hlsMuxer, app string, stream string, segmentStartDts int64) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 
 	hlsFragment := conf.GlobalConfInfo.Hls.HlsFragment
 	hlsWindow := conf.GlobalConfInfo.Hls.HlsWindow
@@ -59,7 +69,11 @@ func (hc *hlsCache) onPublish(muxer *hlsMuxer, app string, stream string, segmen
 
 // when unpublish stream
 func (hc *hlsCache) onUnPublish(muxer *hlsMuxer) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
@@ -68,18 +82,31 @@ func (hc *hlsCache) onUnPublish(muxer *hlsMuxer) (err error) {
 // @see: hls-m3u8-draft-pantos-http-live-streaming-12.txt
 // @see: 3.4.11.  EXT-X-DISCONTINUITY
 func (hc *hlsCache) onSequenceHeader(muxer *hlsMuxer) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
 // write audio to cache, if need to flush, flush to muxer
 func (hc *hlsCache) writeAudio(codec *avcAacCodec, muxer *hlsMuxer, pts int64, sample *codecSample) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
 // wirte video to muxer
 func (hc *hlsCache) writeVideo(codec *avcAacCodec, muxer *hlsMuxer, dts int64, sample *codecSample) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
@@ -88,16 +115,28 @@ func (hc *hlsCache) writeVideo(codec *avcAacCodec, muxer *hlsMuxer, dts int64, s
 // then write the key frame to the new segment.
 // so, user must reap_segment then flush_video to hls muxer.
 func (hc *hlsCache) reapSegment(logDesc string, muxer *hlsMuxer, segmentStartDts int64) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
 func (hc *hlsCache) cacheAudio(codec *avcAacCodec, sample *codecSample) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
 func (hc *hlsCache) cacheVideo(codec *avcAacCodec, sample *codecSample) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }

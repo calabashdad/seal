@@ -1,7 +1,10 @@
 package hls
 
 import (
+	"log"
 	"seal/rtmp/pt"
+
+	"github.com/calabashdad/utiltools"
 )
 
 // SourceStream delivery RTMP stream to HLS(m3u8 and ts),
@@ -41,18 +44,33 @@ func NewSourceStream() *SourceStream {
 
 // OnMeta process metadata
 func (hls *SourceStream) OnMeta(pkt *pt.OnMetaDataPacket) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 
 	return
 }
 
 // OnAudio process on audio data, mux to ts
 func (hls *SourceStream) OnAudio(msg *pt.Message) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 
 	return
 }
 
 // OnVideo process on video data, mux to ts
 func (hls *SourceStream) OnVideo(msg *pt.Message) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 
 	return
 }
@@ -60,6 +78,12 @@ func (hls *SourceStream) OnVideo(msg *pt.Message) (err error) {
 // OnPublish publish stream event, continue to write the m3u8,
 // for the muxer object not destroyed.
 func (hls *SourceStream) OnPublish(app string, stream string) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
+
 	if err = hls.cache.onPublish(hls.muxer, app, stream, hls.streamDts); err != nil {
 		return
 	}
@@ -70,11 +94,19 @@ func (hls *SourceStream) OnPublish(app string, stream string) (err error) {
 // the unpublish event, only close the muxer, donot destroy the
 // muxer, for when we continue to publish, the m3u8 will continue.
 func (hls *SourceStream) onUnPublish() (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
 
 func (hls *SourceStream) hlsMux() {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }

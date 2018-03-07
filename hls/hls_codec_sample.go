@@ -1,7 +1,10 @@
 package hls
 
 import (
+	"log"
 	"seal/rtmp/pt"
+
+	"github.com/calabashdad/utiltools"
 )
 
 // the samples in the flv audio/video packet.
@@ -71,6 +74,10 @@ func (sample *codecSample) clear() (err error) {
 }
 
 func (sample *codecSample) addSampleUnit(data []byte) (err error) {
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
 	return
 }
