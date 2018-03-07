@@ -21,7 +21,7 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 
 	// hls
 	if nil != rc.source.hls {
-		if err = rc.source.hls.onVideo(msg); err != nil {
+		if err = rc.source.hls.OnVideo(msg); err != nil {
 			log.Println("hls process video data failed, err=", err)
 			return
 		}

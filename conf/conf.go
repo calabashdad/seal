@@ -27,7 +27,10 @@ type rtmpConfInfo struct {
 }
 
 type hlsConfInfo struct {
-	Enable string `yaml:"enable"`
+	Enable      string `yaml:"enable"`
+	HlsFragment int    `yaml:"hlsFragment"`
+	HlsWindow   int    `yaml:"hlsWindow"`
+	HlsPath     string `yaml:"hlsPath"`
 }
 
 type confInfo struct {

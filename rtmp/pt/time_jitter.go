@@ -1,10 +1,14 @@
 package pt
 
-
 // TimeJitter time jitter detect and correct to make sure the rtmp stream is monotonically
 type TimeJitter struct {
 	lastPktTime        int64
 	lastPktCorrectTime int64
+}
+
+// NewTimeJitter create a new time jitter
+func NewTimeJitter() *TimeJitter {
+	return &TimeJitter{}
 }
 
 // Correct  detect the time jitter and correct it.

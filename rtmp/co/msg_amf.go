@@ -544,7 +544,11 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 
 	log.Println("send publish response success.")
 
-	//todo. on publish
+	if nil != rc.source.hls {
+		if errLocal := rc.source.hls.OnPublish(rc.connInfo.app, rc.streamName); errLocal != nil {
+			log.Println("hls onpublish failed, err=", err)
+		}
+	}
 
 	return
 }
@@ -626,7 +630,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 
 	// hls
 	if nil != rc.source.hls {
-		if err = rc.source.hls.onMeta(&p); err != nil {
+		if err = rc.source.hls.OnMeta(&p); err != nil {
 			log.Println("hls process metadata failed, err=", err)
 			return
 		}

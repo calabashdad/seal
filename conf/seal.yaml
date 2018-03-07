@@ -44,4 +44,15 @@ rtmp:
 # hls protocol config
 hls:
   # enable true is open hls, false close
-  enable: false
+  enable: true
+
+  # hls fragement time, in seconds
+  # a fragment is a ts file.
+  hlsFragment: 10
+
+  # get the hls window time, in seconds
+  # a window is a set of ts collection in m3u8
+  hlsWindow: 60
+
+  # the ts/m3u8 file store path 
+  hlsPath: /Users/yangkai/tmp

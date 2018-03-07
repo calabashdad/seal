@@ -37,7 +37,7 @@ type RtmpConn struct {
 	duration        float64       //for player.used to specified the stop when exceed the duration.
 	defaultStreamID float64       //default stream id for request.
 	connInfo        *connectInfo  //connect info.
-	source          *sourceStream //data source info.
+	source          *SourceStream //data source info.
 	consumer        *Consumer     //for consumer, like player.
 }
 

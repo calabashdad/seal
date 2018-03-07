@@ -34,9 +34,13 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
 * rtmp protocol (h264)
 
 ## plan to support
-* hls
+* hls 
 * rtsp
 * http-flv
+* h265
+* transcode(audio to aac)
+* http stats query
+* video on demand
 * video encry
 * auth token dynamicly
 * mini rtmp server in embed device

@@ -21,7 +21,7 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 
 	// hls
 	if nil != rc.source.hls {
-		if err = rc.source.hls.onAudio(msg); err != nil {
+		if err = rc.source.hls.OnAudio(msg); err != nil {
 			log.Println("hls process audio data failed, err=", err)
 		}
 	}
