@@ -6,6 +6,9 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
 * build
 
   download https://github.com/calabashdad/seal to ```go path```, run ```go build```
+
+  you can also use cross platform build, like build a linux version if you are on mac, run ```cross_platform_linux```
+
 * run console mode
 
   ```./seal -c seal.yaml```

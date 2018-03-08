@@ -3,6 +3,7 @@ package hls
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/calabashdad/utiltools"
 )
@@ -64,6 +65,24 @@ func (hm *hlsMuxer) segmentOpen(segmentStartDts int64) (err error) {
 
 	// create dir for app
 	if err = hm.createDir(); err != nil {
+		return
+	}
+
+	// new segment
+	hm.current = newHlsSegment()
+	hm.current.sequenceNo = hm.sequenceNo
+	hm.sequenceNo++
+	hm.current.segmentStartDts = segmentStartDts
+
+	// generate filename
+	filename := hm.stream + "-" + strconv.Itoa(hm.current.sequenceNo) + ".ts"
+
+	hm.current.fullPath = hm.hlsPath + "/" + hm.app + "/" + filename
+	hm.current.uri = filename
+
+	tmpFile := hm.current.fullPath + ".tmp"
+	if err = hm.current.muxer.open(tmpFile); err != nil {
+		log.Println("open hls muxer failed, err=", err)
 		return
 	}
 

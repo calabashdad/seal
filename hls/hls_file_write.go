@@ -23,10 +23,38 @@ func (fw *fileWriter) open(file string) (err error) {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if nil != fw.f {
+		// already opened
+		return
+	}
+
+	fw.f, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	if err != nil {
+		log.Println("open file error, file=", file)
+		return
+	}
+
+	fw.file = file
+
 	return
 }
 
 func (fw *fileWriter) close() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utiltools.PanicTrace())
+		}
+	}()
+
+	if nil == fw.f {
+		return
+	}
+
+	fw.f.Close()
+
+	// after close, rest the file write to nil
+	fw.f = nil
 
 }
 
@@ -41,5 +69,11 @@ func (fw *fileWriter) write(buf []byte) (err error) {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if _, err = fw.f.Write(buf); err != nil {
+		log.Println("write to file failed, file=", fw.file, ",err=", err)
+		return
+	}
+
 	return
 }
