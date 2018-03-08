@@ -74,6 +74,16 @@ func (hc *hlsCache) onUnPublish(muxer *hlsMuxer) (err error) {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if err = muxer.flushAudio(hc.af, hc.ab); err != nil {
+		log.Println("m3u8 muxer flush audio failed, err=", err)
+		return
+	}
+
+	if err = muxer.segmentClose("unpublish"); err != nil {
+		return
+	}
+
 	return
 }
 

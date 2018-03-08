@@ -50,6 +50,14 @@ func (hls *SourceStream) OnMeta(pkt *pt.OnMetaDataPacket) (err error) {
 		}
 	}()
 
+	if nil == pkt {
+		return
+	}
+
+	if err = hls.codec.metaDataDemux(pkt); err != nil {
+		return
+	}
+
 	return
 }
 
@@ -91,14 +99,19 @@ func (hls *SourceStream) OnPublish(app string, stream string) (err error) {
 	return
 }
 
-// the unpublish event, only close the muxer, donot destroy the
+// OnUnPublish the unpublish event, only close the muxer, donot destroy the
 // muxer, for when we continue to publish, the m3u8 will continue.
-func (hls *SourceStream) onUnPublish() (err error) {
+func (hls *SourceStream) OnUnPublish() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if err = hls.cache.onUnPublish(hls.muxer); err != nil {
+		return
+	}
+
 	return
 }
 

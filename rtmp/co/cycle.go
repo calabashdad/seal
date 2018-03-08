@@ -103,6 +103,10 @@ func (rc *RtmpConn) Cycle() {
 	log.Println("rtmp clean finished, remote=", rc.tcpConn.Conn.RemoteAddr())
 }
 
+func (rc *RtmpConn) getSourceKey() string {
+	return rc.connInfo.app + "/" + rc.streamName
+}
+
 func (rc *RtmpConn) clean() {
 
 	log.Println("one publisher begin to quit, stream=", rc.streamName)
@@ -113,8 +117,9 @@ func (rc *RtmpConn) clean() {
 
 	if pt.RtmpRoleFlashPublisher == rc.role || pt.RtmpRoleFMLEPublisher == rc.role {
 		if nil != rc.source {
-			rc.deletePublishStream(rc.streamName)
-			log.Println("delete publisher stream=", rc.streamName)
+			key := rc.getSourceKey()
+			rc.deletePublishStream(key)
+			log.Println("delete publisher stream=", key)
 		}
 	}
 
@@ -125,6 +130,6 @@ func (rc *RtmpConn) clean() {
 	}
 }
 
-func (rc *RtmpConn) deletePublishStream(streamName string) {
-	gSources.deleteSource(streamName)
+func (rc *RtmpConn) deletePublishStream(key string) {
+	gSources.deleteSource(key)
 }

@@ -51,6 +51,8 @@ func (hm *hlsMuxer) updateConfig(app string, stream string, path string, fragmen
 	return
 }
 
+// open a new segment, a new ts file
+// segmentStartDts use to calc the segment duration, use 0 for the first segment of hls
 func (hm *hlsMuxer) segmentOpen(segmentStartDts int64) (err error) {
 	defer func() {
 		if err := recover(); err != nil {

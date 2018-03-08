@@ -73,12 +73,49 @@ func newAvcAacCodec() *avcAacCodec {
 // demux the metadata, to get the stream info,
 // for instance, the width/height, sample rate.
 // @param metadata, the metadata amf0 object. assert not NULL.
-func (codec *avcAacCodec) metaDataDemux(meta *pt.OnMetaDataPacket) (err error) {
+func (codec *avcAacCodec) metaDataDemux(pkt *pt.OnMetaDataPacket) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if nil == pkt {
+		return
+	}
+
+	if v := pkt.GetProperty("duration"); v != nil {
+		codec.duration = int(v.(float64))
+	}
+
+	if v := pkt.GetProperty("width"); v != nil {
+		codec.width = int(v.(float64))
+	}
+
+	if v := pkt.GetProperty("height"); v != nil {
+		codec.height = int(v.(float64))
+	}
+
+	if v := pkt.GetProperty("framerate"); v != nil {
+		codec.frameRate = int(v.(float64))
+	}
+
+	if v := pkt.GetProperty("videocodecid"); v != nil {
+		codec.videoCodecID = int(v.(float64))
+	}
+
+	if v := pkt.GetProperty("videodatarate"); v != nil {
+		codec.videoDataRate = int(1000 * v.(float64))
+	}
+
+	if v := pkt.GetProperty("audiocodecid"); v != nil {
+		codec.audioCodecID = int(v.(float64))
+	}
+
+	if v := pkt.GetProperty("audiodatarate"); v != nil {
+		codec.audioDataRate = int(1000 * v.(float64))
+	}
+
 	return
 }
 

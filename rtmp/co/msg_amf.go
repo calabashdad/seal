@@ -272,7 +272,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	// after send set chunk size to remote success, set out chunk size
 	rc.outChunkSize = pkt.ChunkSize
 
-	srcKey := rc.connInfo.app + "/" + rc.streamName
+	srcKey := rc.getSourceKey()
 	source := gSources.findSourceToPlay(srcKey)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not play because has not published", rc.streamName)
@@ -369,7 +369,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		jitter:         &pt.TimeJitter{},
 	}
 
-	rc.source.CreateConsumer(rc.consumer)
+	rc.source.createConsumer(rc.consumer)
 
 	if rc.source.atc && !rc.source.gopCache.empty() {
 		if nil != rc.source.cacheMetaData {
@@ -522,7 +522,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 
 	rc.streamName = p.StreamName
 
-	srcKey := rc.connInfo.app + "/" + rc.streamName
+	srcKey := rc.getSourceKey()
 	source := gSources.findSourceToPublish(srcKey)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.streamName)
@@ -545,8 +545,9 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	log.Println("send publish response success.")
 
 	if nil != rc.source.hls {
-		if errLocal := rc.source.hls.OnPublish(rc.connInfo.app, rc.streamName); errLocal != nil {
+		if err = rc.source.hls.OnPublish(rc.connInfo.app, rc.streamName); err != nil {
 			log.Println("hls onpublish failed, err=", err)
+			return
 		}
 	}
 

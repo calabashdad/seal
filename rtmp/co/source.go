@@ -50,7 +50,7 @@ type SourceStream struct {
 	hls *hls.SourceStream
 }
 
-func (s *SourceStream) CreateConsumer(c *Consumer) {
+func (s *SourceStream) createConsumer(c *Consumer) {
 	if nil == c {
 		log.Println("when registe consumer, nil == consumer")
 		return
@@ -137,9 +137,14 @@ func (s *sourceHub) findSourceToPlay(k string) *SourceStream {
 	return nil
 }
 
-func (s *sourceHub) deleteSource(streamName string) {
+func (s *sourceHub) deleteSource(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	delete(s.hub, streamName)
+	stream := s.hub[key]
+	if nil != stream {
+		stream.hls.OnUnPublish()
+	}
+
+	delete(s.hub, key)
 }
