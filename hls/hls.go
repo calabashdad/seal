@@ -69,6 +69,39 @@ func (hls *SourceStream) OnAudio(msg *pt.Message) (err error) {
 		}
 	}()
 
+	log.Println("hls audio come in, payload len=", len(msg.Payload.Payload),
+		"timestamp=", msg.Header.Timestamp)
+
+	hls.sample.clear()
+	if err = hls.codec.audioAacDemux(msg.Payload.Payload, hls.sample); err != nil {
+		log.Println("hls codec demux audio failed, err=", err)
+		return
+	}
+
+	if hls.codec.audioCodecID != pt.RtmpCodecAudioAAC {
+		log.Println("codec audio codec id is not aac, codeID=", hls.codec.audioCodecID)
+		return
+	}
+
+	// ignore sequence header
+	if pt.RtmpCodecAudioTypeSequenceHeader == hls.sample.aacPacketType {
+		return hls.cache.onSequenceHeader(hls.muxer)
+	}
+
+	// todo. need to judge atc?
+	hls.jitter.Correct(msg, 0, 0, pt.RtmpTimeJitterFull)
+
+	// the pts calc from rtmp/flv header
+	pts := int64(msg.Header.Timestamp * 90)
+
+	// for pure audio, update the stream dts also
+	hls.streamDts = pts
+
+	if err = hls.cache.writeAudio(hls.codec, hls.muxer, pts, hls.sample); err != nil {
+		log.Println("hls cache write audio failed, err=", err)
+		return
+	}
+
 	return
 }
 

@@ -35,7 +35,38 @@ func (ha *hlsAacJitter) onBufferStart(flvPts int64, sampleRate int, aacSampleRat
 		}
 	}()
 
-	return
+	// use sample rate in flv/RTMP.
+	flvSampleRate := flvSampleRates[sampleRate&0x03]
+
+	// override the sample rate by sequence header
+	if hlsAacSampleRateUnset != aacSampleRate {
+		flvSampleRate = aacSampleRates[aacSampleRate]
+	}
+
+	// sync time set to 0, donot adjust the aac timestamp.
+	if 0 == ha.syncMs {
+		return flvPts
+	}
+
+	// @see: ngx_rtmp_hls_audio
+	// drop the rtmp audio packet timestamp, re-calc it by sample rate.
+	//
+	// resample for the tbn of ts is 90000, flv is 1000,
+	// we will lost timestamp if use audio packet timestamp,
+	// so we must resample. or audio will corrupt in IOS.
+	estPts := ha.basePts + ha.nbSamples*int64(90000)*int64(hlsAacSampleSize)/int64(flvSampleRate)
+	dpts := estPts - flvPts
+
+	if (dpts <= int64(ha.syncMs)*90) && (dpts >= int64(ha.syncMs)*int64(-90)) {
+		ha.nbSamples++
+		return estPts
+	}
+
+	// resync
+	ha.basePts = flvPts
+	ha.nbSamples = 1
+
+	return flvPts
 }
 
 // when buffer continue, muxer donot write to file,
@@ -47,6 +78,8 @@ func (ha *hlsAacJitter) onBufferContinue() {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	ha.nbSamples++
 
 	return
 }

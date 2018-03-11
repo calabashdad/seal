@@ -40,6 +40,9 @@ func (tm *tsMuxer) open(path string) (err error) {
 		return
 	}
 
+	// todo
+	log.Println("write mpegts header success, mpegts header len=", len(mpegtsHeader))
+
 	return
 }
 
@@ -49,6 +52,15 @@ func (tm *tsMuxer) writeAudio(af *mpegTsFrame, ab []byte) (err error) {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if err = mpegtsWriteFrame(tm.writer, af, ab); err != nil {
+		log.Println("mpegts write frame faile, err=", err)
+		return
+	}
+
+	// todo
+	log.Println("mpegts write frame success, frame len=", len(ab))
+
 	return
 }
 

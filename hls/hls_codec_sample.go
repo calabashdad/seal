@@ -1,6 +1,7 @@
 package hls
 
 import (
+	"fmt"
 	"log"
 	"seal/rtmp/pt"
 
@@ -61,7 +62,9 @@ func newCodecSample() *codecSample {
 func (sample *codecSample) clear() (err error) {
 
 	sample.isVideo = false
+	sample.nbSampleUnits = 0
 
+	sample.cts = 0
 	sample.frameType = pt.RtmpCodecVideoAVCFrameReserved
 	sample.avcPacketType = pt.RtmpCodecVideoAVCTypeReserved
 
@@ -79,5 +82,14 @@ func (sample *codecSample) addSampleUnit(data []byte) (err error) {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if sample.nbSampleUnits >= hlsMaxCodecSample {
+		err = fmt.Errorf("hls decode samples error, exceed the max count, nbSampleUnits=%d", sample.nbSampleUnits)
+		return
+	}
+
+	sample.sampleUnits[sample.nbSampleUnits].payload = data
+	sample.nbSampleUnits++
+
 	return
 }

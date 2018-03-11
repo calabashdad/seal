@@ -5,6 +5,5 @@ package hls
 // for aac raw audio packet, a NALU is the entire aac raw data.
 // for sequence header, it's not a sample unit.
 type codecSampleUnit struct {
-	payloadSize int
-	payload     []byte
+	payload []byte
 }

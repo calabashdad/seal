@@ -1,6 +1,7 @@
 package hls
 
 import (
+	"fmt"
 	"log"
 	"seal/rtmp/pt"
 
@@ -130,6 +131,119 @@ func (codec *avcAacCodec) audioAacDemux(data []byte, sample *codecSample) (err e
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	sample.isVideo = false
+
+	dataLen := len(data)
+	if dataLen <= 0 {
+		return
+	}
+
+	var offset int
+
+	if dataLen-offset < 1 {
+		return
+	}
+
+	// @see: E.4.2 Audio Tags, video_file_format_spec_v10_1.pdf, page 76
+	soundFormat := data[offset]
+	offset++
+
+	soundType := soundFormat & 0x01
+	soundSize := (soundFormat >> 1) & 0x01
+	soundRate := (soundFormat >> 2) & 0x03
+	soundFormat = (soundFormat >> 4) & 0x0f
+
+	codec.audioCodecID = int(soundFormat)
+	sample.soundType = int(soundType)
+	sample.soundRate = int(soundRate)
+	sample.soundSize = int(soundSize)
+
+	// only support for aac
+	if pt.RtmpCodecAudioAAC != codec.audioCodecID {
+		log.Println("hls only support audio aac, actual is ", codec.audioCodecID)
+		return
+	}
+
+	if dataLen-offset < 1 {
+		return
+	}
+
+	aacPacketType := data[offset]
+	offset++
+	sample.aacPacketType = int(aacPacketType)
+
+	if pt.RtmpCodecAudioTypeSequenceHeader == aacPacketType {
+		// AudioSpecificConfig
+		// 1.6.2.1 AudioSpecificConfig, in aac-mp4a-format-ISO_IEC_14496-3+2001.pdf, page 33.
+		codec.aacExtraSize = dataLen - offset
+		if codec.aacExtraSize > 0 {
+			codec.aacExtraData = make([]byte, codec.aacExtraSize)
+			copy(codec.aacExtraData, data[offset:])
+		}
+
+		// only need to decode the first 2bytes:
+		// audioObjectType, aac_profile, 5bits.
+		// samplingFrequencyIndex, aac_sample_rate, 4bits.
+		// channelConfiguration, aac_channels, 4bits
+		if dataLen-offset < 2 {
+			return
+		}
+
+		codec.aacProfile = data[offset]
+		offset++
+		codec.aacSampleRate = data[offset]
+		offset++
+
+		codec.aacChannels = (codec.aacSampleRate >> 3) & 0x0f
+		codec.aacSampleRate = ((codec.aacProfile << 1) & 0x0e) | ((codec.aacSampleRate >> 7) & 0x01)
+		codec.aacProfile = (codec.aacProfile >> 3) & 0x1f
+
+		if 0 == codec.aacProfile || 0x1f == codec.aacProfile {
+			err = fmt.Errorf("hls decdoe audio aac sequence header failed, aac profile=%d", codec.aacProfile)
+			return
+		}
+
+		// the profile = object_id + 1
+		// @see aac-mp4a-format-ISO_IEC_14496-3+2001.pdf, page 78,
+		//      Table 1. A.9 MPEG-2 Audio profiles and MPEG-4 Audio object types
+		// so the aac_profile should plus 1, not minus 1, and nginx-rtmp used it to
+		// downcast aac SSR to LC.
+		codec.aacProfile--
+
+	} else if pt.RtmpCodecAudioTypeRawData == aacPacketType {
+		// ensure the sequence header demuxed
+		if 0 == len(codec.aacExtraData) {
+			return
+		}
+
+		// Raw AAC frame data in UI8 []
+		// 6.3 Raw Data, aac-iso-13818-7.pdf, page 28
+		if err = sample.addSampleUnit(data[offset:]); err != nil {
+			return
+		}
+	}
+
+	// reset the sample rate by sequence header
+	if codec.aacSampleRate != hlsAacSampleRateUnset {
+		var aacSampleRates = []int{
+			96000, 88200, 64000, 48000,
+			44100, 32000, 24000, 22050,
+			16000, 12000, 11025, 8000,
+			7350, 0, 0, 0,
+		}
+
+		switch aacSampleRates[codec.aacSampleRate] {
+		case 11025:
+			sample.soundRate = pt.RtmpCodecAudioSampleRate11025
+		case 22050:
+			sample.soundRate = pt.RtmpCodecAudioSampleRate22050
+		case 44100:
+			sample.soundRate = pt.RtmpCodecAudioSampleRate44100
+		default:
+		}
+	}
+
 	return
 }
 
@@ -144,5 +258,6 @@ func (codec *avcAacCodec) videoAvcDemux(data []byte, sample *codecSample) (err e
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
 	return
 }
