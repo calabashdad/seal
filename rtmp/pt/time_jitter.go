@@ -90,6 +90,6 @@ func (tj *TimeJitter) Correct(msg *Message, tba float64, tbv float64, timeJitter
 	}
 
 	msg.Header.Timestamp = uint64(tj.lastPktCorrectTime)
-	tj.lastPktCorrectTime = int64(timeLocal)
+	tj.lastPktTime = int64(timeLocal)
 
 }

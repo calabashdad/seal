@@ -69,9 +69,6 @@ func (hls *SourceStream) OnAudio(msg *pt.Message) (err error) {
 		}
 	}()
 
-	log.Println("hls audio come in, payload len=", len(msg.Payload.Payload),
-		"timestamp=", msg.Header.Timestamp)
-
 	hls.sample.clear()
 	if err = hls.codec.audioAacDemux(msg.Payload.Payload, hls.sample); err != nil {
 		log.Println("hls codec demux audio failed, err=", err)
@@ -85,10 +82,14 @@ func (hls *SourceStream) OnAudio(msg *pt.Message) (err error) {
 
 	// ignore sequence header
 	if pt.RtmpCodecAudioTypeSequenceHeader == hls.sample.aacPacketType {
-		return hls.cache.onSequenceHeader(hls.muxer)
+		if err = hls.cache.onSequenceHeader(hls.muxer); err != nil {
+			log.Println("hls cache on sequence header failed, err=", err)
+			return
+		}
+
+		return
 	}
 
-	// todo. need to judge atc?
 	hls.jitter.Correct(msg, 0, 0, pt.RtmpTimeJitterFull)
 
 	// the pts calc from rtmp/flv header

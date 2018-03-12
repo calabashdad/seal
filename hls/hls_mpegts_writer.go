@@ -86,6 +86,10 @@ func mpegtsWriteHeader(writer *fileWriter) (err error) {
 		log.Println("write ts file header failed, err=", err)
 		return
 	}
+
+	//todo
+	log.Println("mpegts write header success")
+
 	return
 }
 
@@ -226,11 +230,11 @@ func mpegtsWriteFrame(writer *fileWriter, frame *mpegTsFrame, buffer []byte) (er
 		inSize := last - pos
 
 		if bodySize <= inSize {
-			copy(pkt[p:], buffer[:bodySize])
+			copy(pkt[p:], buffer[pos:pos+bodySize])
 			pos += bodySize
 		} else {
 			fillStuff(&pkt, &p, bodySize, inSize)
-			copy(pkt[p:], buffer[:inSize])
+			copy(pkt[p:], buffer[pos:pos+inSize])
 			pos = last
 		}
 

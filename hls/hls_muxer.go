@@ -128,7 +128,9 @@ func (hm *hlsMuxer) isSegmentAbsolutelyOverflow() bool {
 		}
 	}()
 
-	return hm.current.duration >= float64(2*hm.hlsFragment)
+	res := hm.current.duration >= float64(2*hm.hlsFragment)
+
+	return res
 }
 
 func (hm *hlsMuxer) flushAudio(af *mpegTsFrame, ab *[]byte) (err error) {

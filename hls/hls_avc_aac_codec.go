@@ -219,6 +219,8 @@ func (codec *avcAacCodec) audioAacDemux(data []byte, sample *codecSample) (err e
 
 		// Raw AAC frame data in UI8 []
 		// 6.3 Raw Data, aac-iso-13818-7.pdf, page 28
+		//todo
+		log.Println("before add unit, len=", len(data[offset:]))
 		if err = sample.addSampleUnit(data[offset:]); err != nil {
 			return
 		}

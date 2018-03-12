@@ -100,7 +100,11 @@ func (hc *hlsCache) onSequenceHeader(muxer *hlsMuxer) (err error) {
 		}
 	}()
 
-	return muxer.onSequenceHeader()
+	if err = muxer.onSequenceHeader(); err != nil {
+		return
+	}
+
+	return
 }
 
 // write audio to cache, if need to flush, flush to muxer
@@ -141,7 +145,7 @@ func (hc *hlsCache) writeAudio(codec *avcAacCodec, muxer *hlsMuxer, pts int64, s
 	//in ms, audio delay to flush the audios.
 	var audioDelay = int64(hlsAacDelay)
 	// flush if audio delay exceed
-	if pts-hc.audioBufferStartPts > (audioDelay * 90) {
+	if pts-hc.audioBufferStartPts > audioDelay*90 {
 		if err = muxer.flushAudio(hc.af, &hc.ab); err != nil {
 			return
 		}
@@ -158,6 +162,7 @@ func (hc *hlsCache) writeAudio(codec *avcAacCodec, muxer *hlsMuxer, pts int64, s
 			log.Println("reap segment failed, err=", err)
 			return
 		}
+		log.Println("reap segment success")
 	}
 
 	return
@@ -257,6 +262,9 @@ func (hc *hlsCache) cacheAudio(codec *avcAacCodec, sample *codecSample) (err err
 		// copy to audio buffer
 		hc.ab = append(hc.ab, adtsHeader[:]...)
 		hc.ab = append(hc.ab, sampleUnit.payload[:]...)
+
+		//todo
+		log.Println("len ab= ", len(hc.ab))
 	}
 
 	return
