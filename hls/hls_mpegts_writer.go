@@ -87,9 +87,6 @@ func mpegtsWriteHeader(writer *fileWriter) (err error) {
 		return
 	}
 
-	//todo
-	log.Println("mpegts write header success")
-
 	return
 }
 

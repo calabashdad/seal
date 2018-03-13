@@ -194,6 +194,19 @@ func (hc *hlsCache) reapSegment(logDesc string, muxer *hlsMuxer, segmentStartDts
 		return
 	}
 
+	if err = muxer.segmentOpen(segmentStartDts); err != nil {
+		log.Println("m3u8 muxer open segment failed, err=", err)
+		return
+	}
+
+	// segment open, flush the audio.
+	// @see: ngx_rtmp_hls_open_fragment
+	/* start fragment with audio to make iPhone happy */
+	if err = muxer.flushAudio(hc.af, &hc.ab); err != nil {
+		log.Println("m3u8 muxer flush audio failed, err=", err)
+		return
+	}
+
 	return
 }
 
@@ -263,8 +276,6 @@ func (hc *hlsCache) cacheAudio(codec *avcAacCodec, sample *codecSample) (err err
 		hc.ab = append(hc.ab, adtsHeader[:]...)
 		hc.ab = append(hc.ab, sampleUnit.payload[:]...)
 
-		//todo
-		log.Println("len ab= ", len(hc.ab))
 	}
 
 	return

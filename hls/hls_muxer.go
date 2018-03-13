@@ -128,6 +128,11 @@ func (hm *hlsMuxer) isSegmentAbsolutelyOverflow() bool {
 		}
 	}()
 
+	if nil == hm.current {
+		log.Println("current is null is impossible, there must be a mistake")
+		return true
+	}
+
 	res := hm.current.duration >= float64(2*hm.hlsFragment)
 
 	return res
@@ -182,6 +187,7 @@ func (hm *hlsMuxer) segmentClose(logDesc string) (err error) {
 	}()
 
 	if nil == hm.current {
+		log.Println("ignore the segment close, for segment is not open.")
 		return
 	}
 
@@ -196,6 +202,7 @@ func (hm *hlsMuxer) segmentClose(logDesc string) (err error) {
 		// rename from tmp to real path
 		tmpFile := fullPath + ".tmp"
 		if err = os.Rename(tmpFile, fullPath); err != nil {
+			log.Println("rename file failed, err=", err)
 			return
 		}
 	} else {
@@ -225,19 +232,29 @@ func (hm *hlsMuxer) segmentClose(logDesc string) (err error) {
 		}
 	}
 
-	for i := 0; i < removeIndex; i++ {
+	for i := 0; i < removeIndex && len(hm.segments) > 0; i++ {
+
 		segmentToRemove = append(segmentToRemove, hm.segments[i])
+
+		if len(hm.segments) > 1 {
+			hm.segments = hm.segments[1:]
+		} else if 1 == len(hm.segments) {
+			hm.segments = nil
+		}
+
 	}
-	hm.segments = hm.segments[removeIndex+1:]
 
 	// refresh the m3u8, do not contains the removed ts
-	hm.refreshM3u8()
+	if err = hm.refreshM3u8(); err != nil {
+		log.Println("refresh m3u8 failed, err=", err)
+	}
 
 	// remove the ts file
 	for i := 0; i < len(segmentToRemove); i++ {
 		s := segmentToRemove[i]
 		syscall.Unlink(s.fullPath)
 	}
+	segmentToRemove = nil
 
 	return
 }

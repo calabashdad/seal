@@ -27,15 +27,14 @@ func newHlsSegment() *hlsSegment {
 }
 
 func (hs *hlsSegment) updateDuration(currentFrameDts int64) {
+
 	// we use video/audio to update segment duration,
 	// so when reap segment, some previous audio frame will
 	// update the segment duration, which is nagetive,
 	// just ignore it.
-
 	if currentFrameDts < hs.segmentStartDts {
 		return
 	}
 
 	hs.duration = float64(currentFrameDts-hs.segmentStartDts) / 90000.0
-
 }

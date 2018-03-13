@@ -48,12 +48,12 @@ hls:
 
   # hls fragement time, in seconds
   # a fragment is a ts file.
-  hlsFragment: 5
+  hlsFragment: 4
 
   # get the hls window time, in seconds
   # a window is a set of ts collection in m3u8
   # tsNums * hlsFragment
-  hlsWindow: 30
+  hlsWindow: 20
 
   # the ts/m3u8 file store path 
   hlsPath: /Users/yangkai/tmp
