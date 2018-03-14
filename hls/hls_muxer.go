@@ -247,16 +247,10 @@ func (hm *hlsMuxer) segmentClose(logDesc string) (err error) {
 	}
 
 	for i := 0; i < removeIndex && len(hm.segments) > 0; i++ {
-
 		segmentToRemove = append(segmentToRemove, hm.segments[i])
-
-		if len(hm.segments) > 1 {
-			hm.segments = hm.segments[1:]
-		} else if 1 == len(hm.segments) {
-			hm.segments = nil
-		}
-
 	}
+
+	hm.segments = hm.segments[removeIndex:]
 
 	// refresh the m3u8, do not contains the removed ts
 	if err = hm.refreshM3u8(); err != nil {
