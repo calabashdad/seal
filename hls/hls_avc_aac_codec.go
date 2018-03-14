@@ -5,6 +5,7 @@ import (
 	"log"
 	"seal/rtmp/pt"
 
+	"encoding/binary"
 	"github.com/calabashdad/utiltools"
 )
 
@@ -258,6 +259,204 @@ func (codec *avcAacCodec) videoAvcDemux(data []byte, sample *codecSample) (err e
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	sample.isVideo = true
+
+	maxLen := len(data)
+
+	if maxLen <= 0 {
+		return
+	}
+
+	var offset int
+
+	// video decode
+	if maxLen-offset < 1 {
+		return
+	}
+
+	// @see: E.4.3 Video Tags, video_file_format_spec_v10_1.pdf, page 78
+	frameType := data[offset]
+	offset++
+
+	codecID := frameType & 0x0f
+	frameType = (frameType >> 4) & 0x0f
+
+	sample.frameType = int(frameType)
+
+	// ignore info frame without error
+	if pt.RtmpCodecVideoAVCFrameVideoInfoFrame == sample.frameType {
+		return
+	}
+
+	// only support h.264/avc
+	if pt.RtmpCodecVideoAVC != codecID {
+		return
+	}
+	codec.videoCodecID = int(codecID)
+
+	if maxLen-offset < 4 {
+		return
+	}
+
+	avcPacketType := data[offset]
+	offset++
+
+	// 3bytes,
+	compositionTime := int(data[offset])<<16 + int(data[offset+1])<<8 + int(data[offset+2])
+	offset += 3
+
+	// pts = dts + cts
+	sample.cts = compositionTime
+	sample.avcPacketType = int(avcPacketType)
+
+	if pt.RtmpCodecVideoAVCTypeSequenceHeader == avcPacketType {
+		// AVCDecoderConfigurationRecord
+		// 5.2.4.1.1 Syntax, H.264-AVC-ISO_IEC_14496-15.pdf, page 16
+		codec.avcExtraSize = maxLen - offset
+		if codec.avcExtraSize > 0 {
+			codec.avcExtraData = make([]byte, codec.avcExtraSize)
+			copy(codec.avcExtraData, data[offset:offset+codec.avcExtraSize])
+		}
+
+		if maxLen-offset < 6 {
+			return
+		}
+
+		// configurationVersion
+		offset++
+
+		// AVCProfileIndication
+		codec.avcProfile = data[offset]
+		offset++
+
+		// profile_compatibility
+		offset++
+
+		// AVCLevelIndication
+		codec.avcLevel = data[offset]
+		offset++
+
+		// parse the NALU size.
+		lengthSizeMinusOne := data[offset]
+		offset++
+
+		lengthSizeMinusOne &= 0x03
+		codec.nalUnitLength = int8(lengthSizeMinusOne)
+
+		// 1 sps
+		if maxLen-offset < 1 {
+			return
+		}
+
+		numOfSequenceParameterSets := data[offset]
+		offset++
+		numOfSequenceParameterSets &= 0x1f
+		if numOfSequenceParameterSets != 1 {
+			err = fmt.Errorf("hsl decode avc sequence header size failed")
+			return
+		}
+
+		if maxLen-offset < 2 {
+			return
+		}
+
+		codec.sequenceParameterSetLength = binary.BigEndian.Uint16(data[offset : offset+2])
+		offset += 2
+
+		if maxLen-offset < int(codec.sequenceParameterSetLength) {
+			err = fmt.Errorf("hsl decode avc sequence header data failed")
+			return
+		}
+
+		if codec.sequenceParameterSetLength > 0 {
+			codec.sequenceParameterSetNALUnit = make([]byte, codec.sequenceParameterSetLength)
+			copy(codec.sequenceParameterSetNALUnit, data[offset:offset+int(codec.sequenceParameterSetLength)])
+			offset += int(codec.sequenceParameterSetLength)
+		}
+
+		// 1 pps
+		if maxLen-offset < 1 {
+			return
+		}
+
+		numOfPictureParameterSets := data[offset]
+		offset++
+
+		if numOfPictureParameterSets != 1 {
+			err = fmt.Errorf("hls decode video avc sequence header pps failed")
+			return
+		}
+
+		if maxLen-offset < 2 {
+			return
+		}
+
+		codec.pictureParameterSetLength = binary.BigEndian.Uint16(data[offset : offset+2])
+		offset += 2
+
+		if maxLen-offset < int(codec.pictureParameterSetLength) {
+			return
+		}
+
+		if codec.pictureParameterSetLength > 0 {
+			codec.pictureParameterSetNALUnit = make([]byte, codec.pictureParameterSetLength)
+			copy(codec.pictureParameterSetNALUnit, data[offset:offset+int(codec.pictureParameterSetLength)])
+			offset += int(codec.pictureParameterSetLength)
+		}
+
+	} else if pt.RtmpCodecVideoAVCTypeNALU == avcPacketType {
+		// ensure the sequence header demuxed
+		if len(codec.pictureParameterSetNALUnit) <= 0 {
+			return
+		}
+
+		// One or more NALUs (Full frames are required)
+		// 5.3.4.2.1 Syntax, H.264-AVC-ISO_IEC_14496-15.pdf, page 20
+
+		pictureLength := maxLen - offset
+		for i := 0; i < pictureLength; {
+			if maxLen-offset < int(codec.nalUnitLength)+1 {
+				return
+			}
+
+			nalUnitLength := 0
+			switch codec.nalUnitLength {
+			case 3:
+				nalUnitLength = int(binary.BigEndian.Uint32(data[offset : offset+4]))
+				offset += 4
+			case 2:
+				nalUnitLength = int(data[offset])<<16 + int(data[offset+1])<<8 + int(data[offset+2])
+				offset += 3
+			case 1:
+				nalUnitLength = int(binary.BigEndian.Uint16(data[offset : offset+2]))
+				offset += 2
+			default:
+				nalUnitLength = int(data[offset])
+				offset++
+			}
+
+			// maybe stream is AnnexB format.
+			if nalUnitLength < 0 {
+				return
+			}
+
+			// NALUnit
+			if maxLen-offset < nalUnitLength {
+				return
+			}
+
+			// 7.3.1 NAL unit syntax, H.264-AVC-ISO_IEC_14496-10.pdf, page 44.
+			if err = sample.addSampleUnit(data[offset : offset+nalUnitLength]); err != nil {
+				err = fmt.Errorf("hls add video sample failed")
+				return
+			}
+			offset += nalUnitLength
+
+			i += int(codec.nalUnitLength) + 1 + nalUnitLength
+		}
+
+	}
 
 	return
 }

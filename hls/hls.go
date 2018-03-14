@@ -114,6 +114,37 @@ func (hls *SourceStream) OnVideo(msg *pt.Message) (err error) {
 		}
 	}()
 
+	hls.sample.clear()
+	if err = hls.codec.videoAvcDemux(msg.Payload.Payload, hls.sample); err != nil {
+		log.Println("hls codec demuxer video failed, err=", err)
+		return
+	}
+
+	// ignore info frame,
+	if pt.RtmpCodecVideoAVCFrameVideoInfoFrame == hls.sample.frameType {
+		return
+	}
+
+	if hls.codec.videoCodecID != pt.RtmpCodecVideoAVC {
+		return
+	}
+
+	// ignore sequence header
+	if pt.RtmpCodecVideoAVCFrameKeyFrame == hls.sample.frameType &&
+		pt.RtmpCodecVideoAVCTypeSequenceHeader == hls.sample.frameType {
+		return hls.cache.onSequenceHeader(hls.muxer)
+	}
+
+	hls.jitter.Correct(msg, 0, 0, pt.RtmpTimeJitterFull)
+
+	dts := msg.Header.Timestamp * 90
+	hls.streamDts = int64(dts)
+
+	if err = hls.cache.writeVideo(hls.codec, hls.muxer, int64(dts), hls.sample); err != nil {
+		log.Println("hls cache write video failed")
+		return
+	}
+
 	return
 }
 

@@ -58,12 +58,17 @@ func (tm *tsMuxer) writeAudio(af *mpegTsFrame, ab []byte) (err error) {
 	return
 }
 
-func (tm *tsMuxer) writeVideo(vf *mpegTsFrame, vb []byte) (err error) {
+func (tm *tsMuxer) writeVideo(vf *mpegTsFrame, vb *[]byte) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if err = mpegtsWriteFrame(tm.writer, vf, *vb); err != nil {
+		return
+	}
+
 	return
 }
 

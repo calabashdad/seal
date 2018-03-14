@@ -6,6 +6,7 @@ import (
 	"seal/conf"
 
 	"github.com/calabashdad/utiltools"
+	"seal/rtmp/pt"
 )
 
 // hls stream cache,
@@ -27,7 +28,7 @@ type hlsCache struct {
 	// current frame and buffer
 	af *mpegTsFrame
 	ab []byte
-	vc *mpegTsFrame
+	vf *mpegTsFrame
 	vb []byte
 
 	// the audio cache buffer start pts, to flush audio if full
@@ -39,7 +40,7 @@ type hlsCache struct {
 func newHlsCache() *hlsCache {
 	return &hlsCache{
 		af:        newMpegTsFrame(),
-		vc:        newMpegTsFrame(),
+		vf:        newMpegTsFrame(),
 		aacJitter: newHlsAacJitter(),
 	}
 }
@@ -175,6 +176,32 @@ func (hc *hlsCache) writeVideo(codec *avcAacCodec, muxer *hlsMuxer, dts int64, s
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if err = hc.cacheVideo(codec, sample); err != nil {
+		return
+	}
+
+	hc.vf.dts = dts
+	hc.vf.pts = hc.vf.dts + int64(sample.cts)*int64(90)
+	hc.vf.pid = tsVideoPid
+	hc.vf.sid = tsVideoAvc
+	hc.vf.key = sample.frameType == pt.RtmpCodecVideoAVCFrameKeyFrame
+
+	// new segment when:
+	// 1. base on gop.
+	// 2. some gops duration overflow.
+	if hc.vf.key && muxer.isSegmentOverflow() {
+		if err = hc.reapSegment("video", muxer, hc.vf.dts); err != nil {
+			return
+		}
+	}
+
+	// flush video when got one
+	if err = muxer.flushVideo(hc.af, hc.ab, hc.vf, &hc.vb); err != nil {
+		log.Println("m3u8 muxer flush video failed")
+		return
+	}
+
 	return
 }
 
@@ -287,5 +314,98 @@ func (hc *hlsCache) cacheVideo(codec *avcAacCodec, sample *codecSample) (err err
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	// for type1/5/6, insert aud packet.
+	audNal := []byte{0x00, 0x00, 0x00, 0x01, 0x09, 0xf0}
+
+	spsPpsSent := false
+	audSent := false
+
+	// a ts sample is format as:
+	// 00 00 00 01 // header
+	//       xxxxxxx // data bytes
+	// 00 00 01 // continue header
+	//       xxxxxxx // data bytes.
+	// so, for each sample, we append header in aud_nal, then appends the bytes in sample.
+	for i := 0; i < sample.nbSampleUnits; i++ {
+		sampleUnit := sample.sampleUnits[i]
+		size := len(sampleUnit.payload)
+
+		if size <= 0 {
+			return
+		}
+
+		// step 1:
+		// first, before each "real" sample,
+		// we add some packets according to the nal_unit_type,
+		// for example, when got nal_unit_type=5, insert SPS/PPS before sample.
+
+		// 5bits, 7.3.1 NAL unit syntax,
+		// H.264-AVC-ISO_IEC_14496-10.pdf, page 44.
+		var nalUnitType uint8
+		nalUnitType = sampleUnit.payload[0]
+		nalUnitType &= 0x1f
+
+		// @see: ngx_rtmp_hls_video
+		// Table 7-1 – NAL unit type codes, page 61
+		// 1: Coded slice
+		if 1 == nalUnitType {
+			spsPpsSent = false
+		}
+
+		// 6: Supplemental enhancement information (SEI) sei_rbsp( ), page 61
+		// @see: ngx_rtmp_hls_append_aud
+		if !audSent {
+			// @remark, when got type 9, we donot send aud_nal, but it will make ios unhappy, so we remove it.
+			if 1 == nalUnitType || 5 == nalUnitType || 6 == nalUnitType {
+				hc.vb = append(hc.vb, audNal...)
+				audSent = true
+			}
+		}
+
+		// 5: Coded slice of an IDR picture.
+		// insert sps/pps before IDR or key frame is ok.
+		if 5 == nalUnitType && !spsPpsSent {
+			spsPpsSent = true
+
+			// @see: ngx_rtmp_hls_append_sps_pps
+			if codec.sequenceParameterSetLength > 0 {
+				// AnnexB prefix, for sps always 4 bytes header
+				hc.vb = append(hc.vb, audNal[:4]...)
+				// sps
+				hc.vb = append(hc.vb, codec.sequenceParameterSetNALUnit[:codec.sequenceParameterSetLength]...)
+			}
+
+			if codec.pictureParameterSetLength > 0 {
+				// AnnexB prefix, for pps always 4 bytes header
+				hc.vb = append(hc.vb, audNal[:4]...)
+				// pps
+				hc.vb = append(hc.vb, codec.pictureParameterSetNALUnit[:codec.pictureParameterSetLength]...)
+			}
+		}
+
+		// 7-9, ignore, @see: ngx_rtmp_hls_video
+		if nalUnitType >= 7 && nalUnitType <= 9 {
+			continue
+		}
+
+		// step 2:
+		// output the "real" sample, in buf.
+		// when we output some special assist packets according to nal_unit_type
+
+		// sample start prefix, '00 00 00 01' or '00 00 01'
+		pAudnal := 0 + 1
+		endAudnal := pAudnal + 3
+
+		// first AnnexB prefix is long (4 bytes)
+		if 0 == len(hc.vb) {
+			pAudnal = 0
+		}
+		hc.vb = append(hc.vb, audNal[pAudnal:pAudnal+endAudnal-pAudnal]...)
+
+		// sample data
+		hc.vb = append(hc.vb, sampleUnit.payload...)
+	}
+
 	return
 }

@@ -109,14 +109,14 @@ func (hm *hlsMuxer) onSequenceHeader() (err error) {
 
 // whether segment overflow,
 // that is whether the current segment duration>=(the segment in config)
-func (hm *hlsMuxer) isSegmentOverflow() (err error) {
+func (hm *hlsMuxer) isSegmentOverflow() bool {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
 
-	return
+	return hm.current.duration >= float64(hm.hlsFragment)
 }
 
 // whether segment absolutely overflow, for pure audio to reap segment,
@@ -168,12 +168,26 @@ func (hm *hlsMuxer) flushAudio(af *mpegTsFrame, ab *[]byte) (err error) {
 	return
 }
 
-func (hm *hlsMuxer) flushVideo(af *mpegTsFrame, ab []byte, vf *mpegTsFrame, vb []byte) (err error) {
+func (hm *hlsMuxer) flushVideo(af *mpegTsFrame, ab []byte, vf *mpegTsFrame, vb *[]byte) (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
 		}
 	}()
+
+	if nil == hm.current {
+		return
+	}
+
+	// update the duration of segment.
+	hm.current.updateDuration(vf.dts)
+
+	if err = hm.current.muxer.writeVideo(vf, vb); err != nil {
+		return
+	}
+
+	*vb = nil
+
 	return
 }
 

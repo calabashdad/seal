@@ -34,7 +34,7 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
 * windows
 
 ## support
-* rtmp protocol (h264)
+* rtmp protocol (h264 aac)
 
 ## plan to support
 * hls 
