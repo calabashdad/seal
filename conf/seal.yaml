@@ -57,3 +57,8 @@ hls:
 
   # the ts/m3u8 file store path 
   hlsPath: /Users/yangkai/tmp
+
+  # http server for hls
+  # request format is http://ip:port/app/stream.m3u8
+  # e.g. http://127.0.0.1:35418/live/test.m3u8
+  httpListen: 35418

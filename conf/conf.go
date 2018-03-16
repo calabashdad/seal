@@ -31,6 +31,7 @@ type hlsConfInfo struct {
 	HlsFragment int    `yaml:"hlsFragment"`
 	HlsWindow   int    `yaml:"hlsWindow"`
 	HlsPath     string `yaml:"hlsPath"`
+	HttpListen  string `yaml:"httpListen"`
 }
 
 type confInfo struct {
