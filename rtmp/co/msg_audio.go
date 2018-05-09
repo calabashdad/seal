@@ -33,20 +33,20 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 	//cache the sequence.
 	// do not cache the sequence header to gop cache, return here
 	if flv.AudioIsSequenceHeader(msg.Payload.Payload) {
-		rc.source.cacheAudioSequenceHeader = msg
+		rc.source.CacheAudioSequenceHeader = msg
 		log.Println("cache audio data sequence")
 		return
 	}
 
-	rc.source.gopCache.cache(msg)
+	rc.source.GopCache.cache(msg)
 
-	if rc.source.atc {
-		if nil != rc.source.cacheAudioSequenceHeader {
-			rc.source.cacheAudioSequenceHeader.Header.Timestamp = msg.Header.Timestamp
+	if rc.source.Atc {
+		if nil != rc.source.CacheAudioSequenceHeader {
+			rc.source.CacheAudioSequenceHeader.Header.Timestamp = msg.Header.Timestamp
 		}
 
-		if nil != rc.source.cacheMetaData {
-			rc.source.cacheMetaData.Header.Timestamp = msg.Header.Timestamp
+		if nil != rc.source.CacheMetaData {
+			rc.source.CacheMetaData.Header.Timestamp = msg.Header.Timestamp
 		}
 	}
 

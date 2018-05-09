@@ -27,7 +27,7 @@ func (rc *RtmpConn) sendMsg(msg *pt.Message) (err error) {
 	// current position of payload send.
 	var payloadOffset uint32
 
-	// always write the header event payload is empty.
+	// always write the header event payload is Empty.
 	for {
 		if payloadOffset >= msg.Header.PayloadLength {
 			break

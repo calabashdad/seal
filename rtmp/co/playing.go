@@ -37,7 +37,7 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 		rc.tcpConn.SetRecvTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
 		rc.tcpConn.SetSendTimeout(conf.GlobalConfInfo.Rtmp.TimeOut * 1000 * 1000)
 
-		msg := rc.consumer.dump()
+		msg := rc.consumer.Dump()
 		if nil == msg {
 			// wait and try again.
 			continue

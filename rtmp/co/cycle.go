@@ -104,6 +104,8 @@ func (rc *RtmpConn) Cycle() {
 }
 
 func (rc *RtmpConn) getSourceKey() string {
+	// e.g. rtmp://127.0.0.1/live/test
+	// key is live/test
 	return rc.connInfo.app + "/" + rc.streamName
 }
 
@@ -131,5 +133,5 @@ func (rc *RtmpConn) clean() {
 }
 
 func (rc *RtmpConn) deletePublishStream(key string) {
-	gSources.deleteSource(key)
+	GlobalSources.deleteSource(key)
 }

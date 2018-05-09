@@ -2,6 +2,7 @@ package co
 
 import (
 	"log"
+	"seal/conf"
 	"seal/rtmp/pt"
 	"time"
 )
@@ -17,10 +18,20 @@ type Consumer struct {
 	duration       float64
 }
 
-// atc whether atc, donot use jitter correct if true
+func NewConsumer() *Consumer {
+	return &Consumer{
+		queueSizeMills: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
+		avStartTime:    -1,
+		avEndTime:      -1,
+		msgQuene:       make(chan *pt.Message, 1024),
+		jitter:         &pt.TimeJitter{},
+	}
+}
+
+// Atc whether Atc, donot use jitter correct if true
 // tba timebase of audio. used to calc the audio time delta if time-jitter detected.
 // tbv timebase of video. used to calc the video time delta if time-jitter detected.
-func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, timeJitter uint32) {
+func (c *Consumer) Enquene(msg *pt.Message, atc bool, tba float64, tbv float64, timeJitter uint32) {
 
 	if nil == msg {
 		return
@@ -47,7 +58,7 @@ func (c *Consumer) enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 	}
 }
 
-func (c *Consumer) dump() (msg *pt.Message) {
+func (c *Consumer) Dump() (msg *pt.Message) {
 
 	if c.paused {
 		log.Println("client paused now")

@@ -15,28 +15,28 @@ type sourceHub struct {
 	lock sync.RWMutex
 }
 
-var gSources = &sourceHub{
+var GlobalSources = &sourceHub{
 	hub: make(map[string]*SourceStream),
 }
 
 // SourceStream rtmp stream data source
 type SourceStream struct {
 	// the sample rate of audio in metadata
-	sampleRate float64
+	SampleRate float64
 	// the video frame rate in metadata
-	frameRate float64
-	// atc whether atc(use absolute time and donot adjust time),
-	// directly use msg time and donot adjust if atc is true,
+	FrameRate float64
+	// Atc whether Atc(use absolute time and donot adjust time),
+	// directly use msg time and donot adjust if Atc is true,
 	// otherwise, adjust msg time to start from 0 to make flash happy.
-	atc bool
+	Atc bool
 	// time jitter algrithem
-	timeJitter uint32
+	TimeJitter uint32
 	// cached meta data
-	cacheMetaData *pt.Message
+	CacheMetaData *pt.Message
 	// cached video sequence header
-	cacheVideoSequenceHeader *pt.Message
+	CacheVideoSequenceHeader *pt.Message
 	// cached aideo sequence header
-	cacheAudioSequenceHeader *pt.Message
+	CacheAudioSequenceHeader *pt.Message
 
 	// consumers
 	consumers map[*Consumer]interface{}
@@ -44,13 +44,13 @@ type SourceStream struct {
 	consumerLock sync.RWMutex
 
 	// gop cache
-	gopCache *GopCache
+	GopCache *GopCache
 
 	// hls stream
 	hls *hls.SourceStream
 }
 
-func (s *SourceStream) createConsumer(c *Consumer) {
+func (s *SourceStream) CreateConsumer(c *Consumer) {
 	if nil == c {
 		log.Println("when registe consumer, nil == consumer")
 		return
@@ -88,7 +88,7 @@ func (s *SourceStream) copyToAllConsumers(msg *pt.Message) {
 
 	for k, v := range s.consumers {
 		_ = v
-		k.enquene(msg, s.atc, s.sampleRate, s.frameRate, s.timeJitter)
+		k.Enquene(msg, s.Atc, s.SampleRate, s.FrameRate, s.TimeJitter)
 	}
 }
 
@@ -109,8 +109,8 @@ func (s *sourceHub) findSourceToPublish(k string) *SourceStream {
 
 	//can publish. new a source
 	s.hub[k] = &SourceStream{
-		timeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
-		gopCache:   &GopCache{},
+		TimeJitter: conf.GlobalConfInfo.Rtmp.TimeJitter,
+		GopCache:   &GopCache{},
 		consumers:  make(map[*Consumer]interface{}),
 	}
 
@@ -124,7 +124,7 @@ func (s *sourceHub) findSourceToPublish(k string) *SourceStream {
 	return s.hub[k]
 }
 
-func (s *sourceHub) findSourceToPlay(k string) *SourceStream {
+func (s *sourceHub) FindSourceToPlay(k string) *SourceStream {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 

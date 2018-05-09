@@ -69,11 +69,11 @@ func (g *GopCache) clear() {
 	g.msgs = nil
 }
 
-func (g *GopCache) empty() bool {
+func (g *GopCache) Empty() bool {
 	return nil == g.msgs
 }
 
-func (g *GopCache) startTime() uint64 {
+func (g *GopCache) StartTime() uint64 {
 	if nil != g.msgs && nil != g.msgs[0] {
 		return g.msgs[0].Header.Timestamp
 	}
@@ -81,7 +81,7 @@ func (g *GopCache) startTime() uint64 {
 	return 0
 }
 
-func (g *GopCache) dump(c *Consumer, atc bool, tba float64, tbv float64, timeJitter uint32) {
+func (g *GopCache) Dump(c *Consumer, atc bool, tba float64, tbv float64, timeJitter uint32) {
 
 	for _, v := range g.msgs {
 
@@ -89,6 +89,6 @@ func (g *GopCache) dump(c *Consumer, atc bool, tba float64, tbv float64, timeJit
 			continue
 		}
 
-		c.enquene(v, atc, tba, tbv, timeJitter)
+		c.Enquene(v, atc, tba, tbv, timeJitter)
 	}
 }

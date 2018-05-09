@@ -33,20 +33,20 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 	//cache the key frame
 	// do not cache the sequence header to gop cache, return here
 	if flv.VideoH264IsSequenceHeaderAndKeyFrame(msg.Payload.Payload) {
-		rc.source.cacheVideoSequenceHeader = msg
+		rc.source.CacheVideoSequenceHeader = msg
 		log.Println("cache video sequence")
 		return
 	}
 
-	rc.source.gopCache.cache(msg)
+	rc.source.GopCache.cache(msg)
 
-	if rc.source.atc {
-		if nil != rc.source.cacheVideoSequenceHeader {
-			rc.source.cacheVideoSequenceHeader.Header.Timestamp = msg.Header.Timestamp
+	if rc.source.Atc {
+		if nil != rc.source.CacheVideoSequenceHeader {
+			rc.source.CacheVideoSequenceHeader.Header.Timestamp = msg.Header.Timestamp
 		}
 
-		if nil != rc.source.cacheMetaData {
-			rc.source.cacheMetaData.Header.Timestamp = msg.Header.Timestamp
+		if nil != rc.source.CacheMetaData {
+			rc.source.CacheMetaData.Header.Timestamp = msg.Header.Timestamp
 		}
 	}
 

@@ -273,7 +273,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 	rc.outChunkSize = pkt.ChunkSize
 
 	srcKey := rc.getSourceKey()
-	source := gSources.findSourceToPlay(srcKey)
+	source := GlobalSources.FindSourceToPlay(srcKey)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not play because has not published", rc.streamName)
 		return
@@ -369,37 +369,37 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		jitter:         &pt.TimeJitter{},
 	}
 
-	rc.source.createConsumer(rc.consumer)
+	rc.source.CreateConsumer(rc.consumer)
 
-	if rc.source.atc && !rc.source.gopCache.empty() {
-		if nil != rc.source.cacheMetaData {
-			rc.source.cacheMetaData.Header.Timestamp = rc.source.gopCache.startTime()
+	if rc.source.Atc && !rc.source.GopCache.Empty() {
+		if nil != rc.source.CacheMetaData {
+			rc.source.CacheMetaData.Header.Timestamp = rc.source.GopCache.StartTime()
 		}
-		if nil != rc.source.cacheVideoSequenceHeader {
-			rc.source.cacheVideoSequenceHeader.Header.Timestamp = rc.source.gopCache.startTime()
+		if nil != rc.source.CacheVideoSequenceHeader {
+			rc.source.CacheVideoSequenceHeader.Header.Timestamp = rc.source.GopCache.StartTime()
 		}
-		if nil != rc.source.cacheAudioSequenceHeader {
-			rc.source.cacheAudioSequenceHeader.Header.Timestamp = rc.source.gopCache.startTime()
+		if nil != rc.source.CacheAudioSequenceHeader {
+			rc.source.CacheAudioSequenceHeader.Header.Timestamp = rc.source.GopCache.StartTime()
 		}
 	}
 
 	//cache meta data
-	if nil != rc.source.cacheMetaData {
-		rc.consumer.enquene(rc.source.cacheMetaData, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	if nil != rc.source.CacheMetaData {
+		rc.consumer.Enquene(rc.source.CacheMetaData, rc.source.Atc, rc.source.SampleRate, rc.source.FrameRate, rc.source.TimeJitter)
 	}
 
 	//cache video data
-	if nil != rc.source.cacheVideoSequenceHeader {
-		rc.consumer.enquene(rc.source.cacheVideoSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	if nil != rc.source.CacheVideoSequenceHeader {
+		rc.consumer.Enquene(rc.source.CacheVideoSequenceHeader, rc.source.Atc, rc.source.SampleRate, rc.source.FrameRate, rc.source.TimeJitter)
 	}
 
 	//cache audio data
-	if nil != rc.source.cacheAudioSequenceHeader {
-		rc.consumer.enquene(rc.source.cacheAudioSequenceHeader, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	if nil != rc.source.CacheAudioSequenceHeader {
+		rc.consumer.Enquene(rc.source.CacheAudioSequenceHeader, rc.source.Atc, rc.source.SampleRate, rc.source.FrameRate, rc.source.TimeJitter)
 	}
 
-	//dump gop cache to client.
-	rc.source.gopCache.dump(rc.consumer, rc.source.atc, rc.source.sampleRate, rc.source.frameRate, rc.source.timeJitter)
+	//Dump gop cache to client.
+	rc.source.GopCache.Dump(rc.consumer, rc.source.Atc, rc.source.SampleRate, rc.source.FrameRate, rc.source.TimeJitter)
 
 	log.Println("now playing, stream=", rc.streamName)
 
@@ -523,7 +523,7 @@ func (rc *RtmpConn) amf0Publish(msg *pt.Message) (err error) {
 	rc.streamName = p.StreamName
 
 	srcKey := rc.getSourceKey()
-	source := gSources.findSourceToPublish(srcKey)
+	source := GlobalSources.findSourceToPublish(srcKey)
 	if nil == source {
 		err = fmt.Errorf("stream=%s can not publish, find source is nil", rc.streamName)
 		return
@@ -606,17 +606,17 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 	p.AddObject(*pt.NewAmf0Object("author", "YangKai", pt.RtmpAmf0String))
 
 	if v := p.GetProperty("audiosamplerate"); v != nil {
-		rc.source.sampleRate = v.(float64)
+		rc.source.SampleRate = v.(float64)
 	}
 
 	if v := p.GetProperty("framerate"); v != nil {
-		rc.source.frameRate = v.(float64)
+		rc.source.FrameRate = v.(float64)
 	}
 
-	rc.source.atc = conf.GlobalConfInfo.Rtmp.Atc
+	rc.source.Atc = conf.GlobalConfInfo.Rtmp.Atc
 	if v := p.GetProperty("bravo_atc"); v != nil {
 		if conf.GlobalConfInfo.Rtmp.AtcAuto {
-			rc.source.atc = true
+			rc.source.Atc = true
 		}
 	}
 
@@ -639,7 +639,7 @@ func (rc *RtmpConn) amf0Meta(msg *pt.Message) (err error) {
 
 	//cache meta data
 	if nil != rc.source {
-		rc.source.cacheMetaData = msg
+		rc.source.CacheMetaData = msg
 		log.Println("cache metadata")
 	}
 
