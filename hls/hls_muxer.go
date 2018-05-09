@@ -250,8 +250,6 @@ func (hm *hlsMuxer) segmentClose(logDesc string) (err error) {
 		segmentToRemove = append(segmentToRemove, hm.segments[i])
 	}
 
-	hm.segments = hm.segments[removeIndex:]
-
 	// refresh the m3u8, do not contains the removed ts
 	if err = hm.refreshM3u8(); err != nil {
 		log.Println("refresh m3u8 failed, err=", err)
