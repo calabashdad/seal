@@ -29,6 +29,8 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
   rtmp ```rtmp://127.0.0.1/live/test```
 
   hls  ```http://127.0.0.1:35418/live/test.m3u8```
+  
+  http-flv ```http://127.0.0.1:35418/live/test.flv```
 
 ## platform
   go is cross platform 
@@ -38,12 +40,10 @@ seal is rtmp server written by go language, main refer to rtmp server open sourc
 
 ## support
 * rtmp protocol (h264 aac)
-* hls (include http server for hls)
+* hls (include http server)
+* http-flv (include http server)
 
 ## plan to support
-* recv rtsp and distribute rtsp
-* recv rtsp and distribute rtmp
-* http-flv
 * h265
 * transcode(audio to aac)
 * http stats query
