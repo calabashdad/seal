@@ -5,12 +5,15 @@ import (
 	"log"
 	"seal/conf"
 	"seal/rtmp/pt"
+	"time"
 )
 
 func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 
 	userSpecifiedDurationToStop := p.Duration > 0
 	var startTime int64 = -1
+
+	timeLast := time.Now().Unix()
 
 	for {
 		//read from client. use short time out.
@@ -40,8 +43,16 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 		msg := rc.consumer.Dump()
 		if nil == msg {
 			// wait and try again.
+			timeCurrent := time.Now().Unix()
+			if timeCurrent-timeLast > 30 {
+				log.Println("rtmp playing time out > 30, break. key=", rc.streamName)
+				break
+			}
+
 			continue
 		} else {
+			timeLast = time.Now().Unix()
+
 			//send to remote
 			// only when user specifies the duration,
 			// we start to collect the durations for each message.
