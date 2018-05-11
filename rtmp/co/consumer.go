@@ -9,6 +9,7 @@ import (
 
 //Consumer is the consumer of source
 type Consumer struct {
+	stream         string
 	queueSizeMills uint32
 	avStartTime    int64
 	avEndTime      int64
@@ -18,14 +19,19 @@ type Consumer struct {
 	duration       float64
 }
 
-func NewConsumer() *Consumer {
+func NewConsumer(key string) *Consumer {
 	return &Consumer{
+		stream:         key,
 		queueSizeMills: conf.GlobalConfInfo.Rtmp.ConsumerQueueSize * 1000,
 		avStartTime:    -1,
 		avEndTime:      -1,
 		msgQuene:       make(chan *pt.Message, 1024),
 		jitter:         &pt.TimeJitter{},
 	}
+}
+
+func (c *Consumer) Clean() {
+	close(c.msgQuene)
 }
 
 // Atc whether Atc, donot use jitter correct if true
@@ -52,6 +58,7 @@ func (c *Consumer) Enquene(msg *pt.Message, atc bool, tba float64, tbv float64, 
 	select {
 	// incase block, and influence others.
 	case <-time.After(time.Duration(3) * time.Millisecond):
+		log.Println("enquene to channel timeout, channel may be full, key=", c.stream)
 		break
 	case c.msgQuene <- msg:
 		break

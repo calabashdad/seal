@@ -172,7 +172,7 @@ func httpFlvStreamCycle(key string, w http.ResponseWriter) {
 		return
 	}
 
-	consumer := co.NewConsumer()
+	consumer := co.NewConsumer("http-flv/" + key)
 	source.CreateConsumer(consumer)
 
 	if source.Atc && !source.GopCache.Empty() {

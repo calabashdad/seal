@@ -361,7 +361,7 @@ func (rc *RtmpConn) amf0Play(msg *pt.Message) (err error) {
 		log.Println("send NetStream.Data.Start success.")
 	}
 
-	rc.consumer = NewConsumer()
+	rc.consumer = NewConsumer("rtmp/" + rc.streamName)
 
 	rc.source.CreateConsumer(rc.consumer)
 

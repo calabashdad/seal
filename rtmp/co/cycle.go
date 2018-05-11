@@ -111,8 +111,6 @@ func (rc *RtmpConn) getSourceKey() string {
 
 func (rc *RtmpConn) clean() {
 
-	log.Println("one publisher begin to quit, stream=", rc.streamName)
-
 	if err := rc.tcpConn.Close(); err != nil {
 		log.Println("close socket err=", err)
 	}
@@ -127,7 +125,9 @@ func (rc *RtmpConn) clean() {
 
 	if pt.RtmpRolePlayer == rc.role {
 		if nil != rc.source {
+			rc.consumer.Clean()
 			rc.source.DestroyConsumer(rc.consumer)
+			log.Println("player clean over")
 		}
 	}
 }
