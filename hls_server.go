@@ -12,6 +12,7 @@ import (
 	"seal/rtmp/co"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type hlsServer struct {
@@ -213,13 +214,24 @@ func httpFlvStreamCycle(key string, w http.ResponseWriter) {
 		return
 	}
 
+	timeLast := time.Now().Unix()
+
 	var previousTagLen uint32
 	for {
 		msg := consumer.Dump()
 		if nil == msg {
 			// wait and try again.
+
+			timeCurrent := time.Now().Unix()
+			if timeCurrent-timeLast > 30 {
+				log.Println("httpFlvStreamCycle time out > 30, break. key=", key)
+				break
+			}
+
 			continue
 		} else {
+
+			timeLast = time.Now().Unix()
 
 			// previous tag len c4B. 11 + payload data size
 			// type 1B
