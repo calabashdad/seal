@@ -100,7 +100,9 @@ func handleLive(w http.ResponseWriter, r *http.Request) {
 		key := paths[0] + "/" + paths[1]
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
-		httpFlvStreamCycle(key, w)
+		log.Println("http flv request, remote=", r.RemoteAddr)
+
+		httpFlvStreamCycle(key, r.RemoteAddr, w)
 	default:
 		log.Println("unknown hls request file, type=", ext)
 	}
@@ -156,7 +158,7 @@ func loadFile(filename string) (data []byte, err error) {
 	return
 }
 
-func httpFlvStreamCycle(key string, w http.ResponseWriter) {
+func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utiltools.PanicTrace())
@@ -205,7 +207,7 @@ func httpFlvStreamCycle(key string, w http.ResponseWriter) {
 	//dump gop cache to client.
 	source.GopCache.Dump(consumer, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
 
-	log.Println("httpFlvStreamCycle now playing, key=", key)
+	log.Printf("httpFlvStreamCycle now playing, key=%s, remote=%s", key, addr)
 
 	// send flv header
 	flvHeader := []byte{0x46, 0x4c, 0x56, 0x01, 0x05, 0x00, 0x00, 0x00, 0x09}
