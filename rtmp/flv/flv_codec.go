@@ -58,8 +58,9 @@ func VideoH264IsKeyframe(data []uint8) bool {
 	return frameType == pt.RtmpCodecVideoAVCFrameKeyFrame
 }
 
-// VideoH264IsSequenceHeaderAndKeyFrame judge video is h264 sequence header and key frame
-func VideoH264IsSequenceHeaderAndKeyFrame(data []uint8) bool {
+// VideoH264IsKeyFrameAndSequenceHeader judge video is h264 sequence header and key frame
+// payload: 0x17 0x00
+func VideoH264IsKeyFrameAndSequenceHeader(data []uint8) bool {
 	// sequence header only for h264
 	if !VideoIsH264(data) {
 		return false
@@ -78,28 +79,8 @@ func VideoH264IsSequenceHeaderAndKeyFrame(data []uint8) bool {
 	return frameType == pt.RtmpCodecVideoAVCFrameKeyFrame && avcPacketType == pt.RtmpCodecVideoAVCTypeSequenceHeader
 }
 
-// VideoH264IsSpspps judge video is spspps
-func VideoH264IsSpspps(data []uint8) bool {
-	// sequence header only for h264
-	if !VideoIsH264(data) {
-		return false
-	}
-
-	// 2bytes required.
-	if len(data) < 2 {
-		return false
-	}
-
-	frameType := data[0]
-	frameType = (frameType >> 4) & 0x0F
-
-	avcPacketType := data[1]
-
-	return avcPacketType == pt.RtmpCodecVideoAVCTypeSequenceHeader
-}
-
-//
-func VideoH264IsIFrame(data []uint8) bool {
+// payload: 0x17 0x01
+func VideoH264IsKeyFrameAndAvcNalu(data []uint8) bool {
 	if !VideoIsH264(data) {
 		return false
 	}

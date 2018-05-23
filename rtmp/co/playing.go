@@ -44,8 +44,8 @@ func (rc *RtmpConn) playing(p *pt.PlayPacket) (err error) {
 		if nil == msg {
 			// wait and try again.
 			timeCurrent := time.Now().Unix()
-			if timeCurrent-timeLast > 30 {
-				log.Println("rtmp playing time out > 30, break. key=", rc.streamName)
+			if timeCurrent-timeLast > 5 {
+				log.Println("rtmp playing time out > 5 seconds, break. key=", rc.streamName)
 				break
 			}
 

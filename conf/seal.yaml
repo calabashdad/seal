@@ -24,7 +24,7 @@ rtmp:
   # directly use msg time and donot adjust if atc is true,
   # otherwise, adjust msg time to start from 0 to make flash happy.
   # recommand is true.
-  atc: true
+  atc: false
 
   # atcAuto if bravo-atc find in metadata, open atc.
   # recommand is true.

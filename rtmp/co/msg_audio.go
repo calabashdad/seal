@@ -40,15 +40,15 @@ func (rc *RtmpConn) msgAudio(msg *pt.Message) (err error) {
 
 	rc.source.GopCache.cache(msg)
 
-	if rc.source.Atc {
-		if nil != rc.source.CacheAudioSequenceHeader {
-			rc.source.CacheAudioSequenceHeader.Header.Timestamp = msg.Header.Timestamp
-		}
-
-		if nil != rc.source.CacheMetaData {
-			rc.source.CacheMetaData.Header.Timestamp = msg.Header.Timestamp
-		}
-	}
+	//if rc.source.Atc {
+	//	if nil != rc.source.CacheAudioSequenceHeader {
+	//		rc.source.CacheAudioSequenceHeader.Header.Timestamp = msg.Header.Timestamp
+	//	}
+	//
+	//	if nil != rc.source.CacheMetaData {
+	//		rc.source.CacheMetaData.Header.Timestamp = msg.Header.Timestamp
+	//	}
+	//}
 
 	return
 }

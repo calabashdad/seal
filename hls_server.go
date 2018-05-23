@@ -10,6 +10,7 @@ import (
 	"path"
 	"seal/conf"
 	"seal/rtmp/co"
+	"seal/rtmp/flv"
 	"strconv"
 	"strings"
 	"time"
@@ -212,7 +213,6 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 
 	log.Printf("httpFlvStreamCycle now playing, key=%s, remote=%s", key, addr)
 
-	// todo
 	f, err := os.OpenFile("/Users/yangkai/go/src/seal/test.flv", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 
 	// send flv header
@@ -239,6 +239,11 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 
 			continue
 		} else {
+
+			if flv.VideoH264IsKeyframe(msg.Payload.Payload) {
+				log.Printf("-----dump i msg, type=%d, time=%d, len=%d\n", msg.Header.MessageType, msg.Header.Timestamp, msg.Header.PayloadLength)
+			}
+
 			timeLast = time.Now().Unix()
 
 			// previous tag len c4B. 11 + payload data size
@@ -287,7 +292,6 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 				log.Println("httpFlvStreamCycle: playing... send tag header to remote failed.err=", err)
 				break
 			}
-
 			f.Write(tagHeader[:])
 
 			if _, err = w.Write(msg.Payload.Payload); err != nil {

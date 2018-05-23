@@ -1,12 +1,15 @@
 package co
 
 import (
+	"log"
 	"seal/rtmp/flv"
 	"seal/rtmp/pt"
+	"sync"
 )
 
 // GopCache cache gop of video/audio to enable players fast start
 type GopCache struct {
+	mu sync.RWMutex
 
 	// cachedVideoCount the video frame count, avoid cache for pure audio stream.
 	cachedVideoCount uint32
@@ -30,6 +33,9 @@ func (g *GopCache) cache(msg *pt.Message) {
 		return
 	}
 
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	if msg.Header.IsVideo() {
 		g.cachedVideoCount++
 		g.audioAfterLastVideoCount = 0
@@ -44,9 +50,8 @@ func (g *GopCache) cache(msg *pt.Message) {
 	}
 
 	if g.audioAfterLastVideoCount > pt.PureAudioGuessCount {
-		//clear the cache.
 		g.clear()
-
+		log.Printf("gop cahce pure audio more than %d seconds, clear old caches.\n", pt.PureAudioGuessCount)
 		return
 	}
 
@@ -56,6 +61,9 @@ func (g *GopCache) cache(msg *pt.Message) {
 
 		// curent msg is video frame, so we set to 1.
 		g.cachedVideoCount = 1
+
+		log.Println("@@@@@gop cache recv a key frame, clear old caches.")
+
 	}
 
 	g.msgs = append(g.msgs, msg)
@@ -67,6 +75,8 @@ func (g *GopCache) pureAudio() bool {
 
 func (g *GopCache) clear() {
 	g.msgs = nil
+	g.cachedVideoCount = 0
+	g.audioAfterLastVideoCount = 0
 }
 
 func (g *GopCache) Empty() bool {
@@ -82,6 +92,9 @@ func (g *GopCache) StartTime() uint64 {
 }
 
 func (g *GopCache) Dump(c *Consumer, atc bool, tba float64, tbv float64, timeJitter uint32) {
+
+	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	for _, v := range g.msgs {
 
