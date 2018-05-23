@@ -3,6 +3,7 @@ package co
 import (
 	"log"
 	"seal/conf"
+	"seal/rtmp/flv"
 	"seal/rtmp/pt"
 	"time"
 )
@@ -72,12 +73,41 @@ func (c *Consumer) Dump() (msg *pt.Message) {
 		return
 	}
 
-	select {
-	case <-time.After(time.Duration(5) * time.Millisecond):
-		// in case block
-		break
-	case msg = <-c.msgQuene:
-		break
+	for {
+		var msgLocal *pt.Message
+
+		select {
+		case <-time.After(time.Duration(10) * time.Millisecond):
+			// in case block
+			return
+		case msgLocal = <-c.msgQuene:
+			break
+		}
+
+		c.avStartTime = int64(msgLocal.Header.Timestamp)
+
+		if uint32(msgLocal.Header.Timestamp-uint64(c.avStartTime)) > c.queueSizeMills {
+
+			// for metadata, sps, iframe, audio sequence header, we do not shrink it.
+			if msgLocal.Header.IsAmf0Data() ||
+				flv.VideoH264IsSequenceHeaderAndKeyFrame(msgLocal.Payload.Payload) ||
+				flv.VideoH264IsIFrame(msgLocal.Payload.Payload) ||
+				flv.AudioIsSequenceHeader(msgLocal.Payload.Payload) {
+
+				msg = msgLocal
+				log.Printf("key=%s dump a frame even it's timestamp is too old. msg type=%d, msg time=%d, avStatrtTime=%d, queue len=%d\n",
+					c.stream, msg.Header.MessageType, msgLocal.Header.Timestamp, c.avStartTime, c.queueSizeMills)
+
+				return
+			} else {
+				// msg is too old, drop it directly, we store the latest i frame into cache already
+				continue
+			}
+		} else {
+			msg = msgLocal
+			return
+		}
+
 	}
 
 	return

@@ -39,8 +39,7 @@ rtmp:
 
   # the message queue size for the consumer, like player.
   # limit the size in seconds, and drop the old msg if full.
-  # recommand is 30
-  consumerQueueSize: 30
+  consumerQueueSize: 5
 
 # hls protocol config
 hls:

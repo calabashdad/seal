@@ -97,3 +97,22 @@ func VideoH264IsSpspps(data []uint8) bool {
 
 	return avcPacketType == pt.RtmpCodecVideoAVCTypeSequenceHeader
 }
+
+//
+func VideoH264IsIFrame(data []uint8) bool {
+	if !VideoIsH264(data) {
+		return false
+	}
+
+	// 2bytes required.
+	if len(data) < 2 {
+		return false
+	}
+
+	frameType := data[0]
+	frameType = (frameType >> 4) & 0x0F
+
+	avcPacketType := data[1]
+
+	return frameType == pt.RtmpCodecVideoAVCFrameKeyFrame && avcPacketType == pt.RtmpCodecVideoAVCTypeNALU
+}

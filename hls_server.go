@@ -192,16 +192,19 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 	//cache meta data
 	if nil != source.CacheMetaData {
 		consumer.Enquene(source.CacheMetaData, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
+		log.Printf("http-flv,key=%s, cache metadata\n", key)
 	}
 
 	//cache video data
 	if nil != source.CacheVideoSequenceHeader {
 		consumer.Enquene(source.CacheVideoSequenceHeader, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
+		log.Printf("http-flv,key=%s, cache video sequence\n", key)
 	}
 
 	//cache audio data
 	if nil != source.CacheAudioSequenceHeader {
 		consumer.Enquene(source.CacheAudioSequenceHeader, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
+		log.Printf("http-flv,key=%s, cache audio sequence\n", key)
 	}
 
 	//dump gop cache to client.
@@ -209,12 +212,16 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 
 	log.Printf("httpFlvStreamCycle now playing, key=%s, remote=%s", key, addr)
 
+	// todo
+	f, err := os.OpenFile("/Users/yangkai/go/src/seal/test.flv", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+
 	// send flv header
 	flvHeader := []byte{0x46, 0x4c, 0x56, 0x01, 0x05, 0x00, 0x00, 0x00, 0x09}
 	if _, err = w.Write(flvHeader); err != nil {
 		log.Println("httpFlvStreamCycle send flv header to remote success.")
 		return
 	}
+	f.Write(flvHeader)
 
 	timeLast := time.Now().Unix()
 
@@ -232,7 +239,6 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 
 			continue
 		} else {
-
 			timeLast = time.Now().Unix()
 
 			// previous tag len c4B. 11 + payload data size
@@ -282,10 +288,13 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 				break
 			}
 
+			f.Write(tagHeader[:])
+
 			if _, err = w.Write(msg.Payload.Payload); err != nil {
 				log.Println("httpFlvStreamCycle: playing... send tag payload to remote failed.err=", err)
 				break
 			}
+			f.Write(msg.Payload.Payload)
 
 			previousTagLen = 11 + msg.Header.PayloadLength
 		}
