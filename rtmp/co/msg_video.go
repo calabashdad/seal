@@ -19,9 +19,9 @@ func (rc *RtmpConn) msgVideo(msg *pt.Message) (err error) {
 		return
 	}
 
-	if flv.VideoH264IsKeyframe(msg.Payload.Payload) {
-		log.Printf("+++++recv i frame msg, type=%d, time=%d, len=%d\n", msg.Header.MessageType, msg.Header.Timestamp, msg.Header.PayloadLength)
-	}
+	//if flv.VideoH264IsKeyframe(msg.Payload.Payload) {
+	//	log.Printf("+++++recv i frame msg, type=%d, time=%d, len=%d\n", msg.Header.MessageType, msg.Header.Timestamp, msg.Header.PayloadLength)
+	//}
 
 	// hls
 	if nil != rc.source.hls {

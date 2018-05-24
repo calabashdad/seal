@@ -162,7 +162,7 @@ func (codec *avcAacCodec) audioAacDemux(data []byte, sample *codecSample) (err e
 
 	// only support for aac
 	if pt.RtmpCodecAudioAAC != codec.audioCodecID {
-		log.Println("hls only support audio aac, actual is ", codec.audioCodecID)
+		//log.Println("hls only support audio aac, actual is ", codec.audioCodecID)
 		return
 	}
 

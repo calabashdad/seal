@@ -61,9 +61,6 @@ func (g *GopCache) cache(msg *pt.Message) {
 
 		// curent msg is video frame, so we set to 1.
 		g.cachedVideoCount = 1
-
-		log.Println("@@@@@gop cache recv a key frame, clear old caches.")
-
 	}
 
 	g.msgs = append(g.msgs, msg)

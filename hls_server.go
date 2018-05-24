@@ -10,7 +10,6 @@ import (
 	"path"
 	"seal/conf"
 	"seal/rtmp/co"
-	"seal/rtmp/flv"
 	"strconv"
 	"strings"
 	"time"
@@ -193,19 +192,19 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 	//cache meta data
 	if nil != source.CacheMetaData {
 		consumer.Enquene(source.CacheMetaData, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
-		log.Printf("http-flv,key=%s, cache metadata\n", key)
+		log.Printf("http-flv,key=%s, cache metadata, msg time=%d, payload size=%d\n", key, source.CacheMetaData.Header.Timestamp, source.CacheMetaData.Header.PayloadLength)
 	}
 
 	//cache video data
 	if nil != source.CacheVideoSequenceHeader {
 		consumer.Enquene(source.CacheVideoSequenceHeader, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
-		log.Printf("http-flv,key=%s, cache video sequence\n", key)
+		log.Printf("http-flv,key=%s, cache video sequence, msg time=%d, payload size=%d\n", key, source.CacheVideoSequenceHeader.Header.Timestamp, source.CacheVideoSequenceHeader.Header.PayloadLength)
 	}
 
 	//cache audio data
 	if nil != source.CacheAudioSequenceHeader {
 		consumer.Enquene(source.CacheAudioSequenceHeader, source.Atc, source.SampleRate, source.FrameRate, source.TimeJitter)
-		log.Printf("http-flv,key=%s, cache audio sequence\n", key)
+		log.Printf("http-flv,key=%s, cache audio sequence, msg time=%d, payload size=%d\n", key, source.CacheAudioSequenceHeader.Header.Timestamp, source.CacheAudioSequenceHeader.Header.PayloadLength)
 	}
 
 	//dump gop cache to client.
@@ -213,7 +212,7 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 
 	log.Printf("httpFlvStreamCycle now playing, key=%s, remote=%s", key, addr)
 
-	f, err := os.OpenFile("/Users/yangkai/go/src/seal/test.flv", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	//f, err := os.OpenFile("/Users/yangkai/go/src/seal/test.flv", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 
 	// send flv header
 	flvHeader := []byte{0x46, 0x4c, 0x56, 0x01, 0x05, 0x00, 0x00, 0x00, 0x09}
@@ -221,7 +220,8 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 		log.Println("httpFlvStreamCycle send flv header to remote success.")
 		return
 	}
-	f.Write(flvHeader)
+	//f.Write(flvHeader)
+	log.Printf("httpFlv,key=%s, send flv header to remote sucess\n", key)
 
 	timeLast := time.Now().Unix()
 
@@ -239,10 +239,6 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 
 			continue
 		} else {
-
-			if flv.VideoH264IsKeyframe(msg.Payload.Payload) {
-				log.Printf("-----dump i msg, type=%d, time=%d, len=%d\n", msg.Header.MessageType, msg.Header.Timestamp, msg.Header.PayloadLength)
-			}
 
 			timeLast = time.Now().Unix()
 
@@ -292,13 +288,13 @@ func httpFlvStreamCycle(key string, addr string, w http.ResponseWriter) {
 				log.Println("httpFlvStreamCycle: playing... send tag header to remote failed.err=", err)
 				break
 			}
-			f.Write(tagHeader[:])
+			//f.Write(tagHeader[:])
 
 			if _, err = w.Write(msg.Payload.Payload); err != nil {
 				log.Println("httpFlvStreamCycle: playing... send tag payload to remote failed.err=", err)
 				break
 			}
-			f.Write(msg.Payload.Payload)
+			//f.Write(msg.Payload.Payload)
 
 			previousTagLen = 11 + msg.Header.PayloadLength
 		}
