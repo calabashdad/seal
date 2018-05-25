@@ -76,7 +76,7 @@ func (hls *SourceStream) OnAudio(msg *pt.Message) (err error) {
 	}
 
 	if hls.codec.audioCodecID != pt.RtmpCodecAudioAAC {
-		log.Println("codec audio codec id is not aac, codeID=", hls.codec.audioCodecID)
+		//log.Println("codec audio codec id is not aac, codeID=", hls.codec.audioCodecID)
 		return
 	}
 

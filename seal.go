@@ -12,7 +12,7 @@ import (
 	"github.com/calabashdad/utiltools"
 )
 
-const sealVersion = "seal: 1.0.0 build-2018052301"
+const sealVersion = "seal: 1.0.0 build-2018052501"
 
 var (
 	configFile  = flag.String("c", "./seal.yaml", "configure filename")
