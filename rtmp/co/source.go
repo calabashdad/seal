@@ -142,7 +142,7 @@ func (s *sourceHub) deleteSource(key string) {
 	defer s.lock.Unlock()
 
 	stream := s.hub[key]
-	if nil != stream {
+	if nil != stream && nil != stream.hls {
 		stream.hls.OnUnPublish()
 	}
 
